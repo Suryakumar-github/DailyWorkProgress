@@ -13,7 +13,7 @@ class Car extends Vehicle {
         System.out.println("Car Started Moving");
     }
     public static void main(String[] args) {
-        Movable movable = new Car();
-        movable.move();
+        Car car = new Car();
+        car.move();
     }
 }
