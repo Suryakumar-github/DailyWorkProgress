@@ -21,7 +21,6 @@ public class TrainReservationApp {
                         System.out.println(e.getMessage());
                         System.exit(0);
                     }
-
                 case 2:
                     reservationSystem.cancelTicket();
                     break;

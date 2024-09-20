@@ -18,7 +18,6 @@ public class ChairCarTrain extends Train{
         }
     }
 
-
     public List<Seat> getSeats() {
         return seats;
     }
@@ -27,44 +26,4 @@ public class ChairCarTrain extends Train{
         return waitingListPassengers;
     }
 
-    public boolean addPassengerToWaitingList(Passenger passenger, String[] sourceAndDestination) {
-        if (waitingListPassengers.size() < 2) {
-            waitingListPassengers.put(passenger, sourceAndDestination);
-            return true;
-        }
-        return false;
-    }
-
-    public void allocateSeatFromWaitingList(String canceledSource, String canceledDestination) {
-        List<Seat> availableSeats = getSeats();
-
-        for (Seat seat : availableSeats) {
-            if (seat.isAvailableForRange(canceledSource, canceledDestination, routes)) {
-                for (Map.Entry<Passenger, String[]> entry : waitingListPassengers.entrySet()) {
-                    Passenger waitingPassenger = entry.getKey();
-                    String[] waitingPassengerRoute = entry.getValue();
-
-                    String waitingSource = waitingPassengerRoute[0];
-                    String waitingDestination = waitingPassengerRoute[1];
-
-                    if (isRangeWithin(canceledSource, canceledDestination, waitingSource, waitingDestination)) {
-                        System.out.println("Allocating seat " + seat.getSeatNumber() + " to waiting list passenger: " + waitingPassenger.getName());
-                        seat.occupySeatForRange(waitingSource, waitingDestination);
-
-                        waitingListPassengers.remove(waitingPassenger);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean isRangeWithin(String canceledSource, String canceledDestination, String waitingSource, String waitingDestination) {
-        int canceledSourceIndex = routes.indexOf(canceledSource);
-        int canceledDestinationIndex = routes.indexOf(canceledDestination);
-        int waitingSourceIndex = routes.indexOf(waitingSource);
-        int waitingDestinationIndex = routes.indexOf(waitingDestination);
-
-        return waitingSourceIndex >= canceledSourceIndex && waitingDestinationIndex <= canceledDestinationIndex;
-    }
 }

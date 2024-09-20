@@ -11,15 +11,12 @@ public class Seat {
         this.seatNumber = seatNumber;
         this.occupiedRanges = new ArrayList<>();
     }
-
     public int getSeatNumber() {
         return seatNumber;
     }
-
     public List<String[]> getOccupiedRanges() {
         return occupiedRanges;
     }
-
     public boolean isAvailableForRange(String source, String destination, List<String> route) {
         int sourceIndex = route.indexOf(source);
         int destinationIndex = route.indexOf(destination);
@@ -34,18 +31,17 @@ public class Seat {
         }
         return true;
     }
-
     public void occupySeatForRange(String source, String destination) {
         occupiedRanges.add(new String[]{source, destination});
-    }
-    public void addPassanger(Passenger passenger) {
-        this.passenger = passenger;
     }
     public String getPassangerName() {
         return this.passenger.getName();
     }
     public void setSeatUnOccupied() {
         occupiedRanges.clear();
+    }
+    public void addPassanger(Passenger passenger) {
+        this.passenger = passenger;
     }
 }
 

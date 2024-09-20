@@ -11,6 +11,10 @@ import java.util.Scanner;
 public class TrainView {
     private Scanner scanner = new Scanner(System.in);
 
+    public TrainView() {
+
+    }
+
     public int displayMenuAndGetChoice() {
         System.out.println("\n1. Book Ticket");
         System.out.println("2. Cancel Ticket");

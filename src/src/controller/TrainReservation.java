@@ -1,22 +1,22 @@
 package controller;
 
+import dao.TicketDAO;
+import dao.TicketDAOImpl;
+import dao.TrainDAO;
+import dao.TrainDAOImpl;
 import model.Passenger;
 import model.Seat;
 import model.Ticket;
 import model.ChairCarTrain;
 import service.ReservationSystem;
 import view.TrainView;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class TrainReservation implements ReservationSystem {
-    private ChairCarTrain train1 = new ChairCarTrain("Train 1", new String[]{"A", "B", "C", "D", "E"});
-    private ChairCarTrain train2 = new ChairCarTrain("Train 2", new String[]{"X", "Y", "C"});
-    private List<Ticket> bookedTickets = new ArrayList<>();
-    private List<ChairCarTrain> trains = addTrains(train1,train2);
-    private static Scanner scanner = new Scanner(System.in);
+
+    private TrainDAO trainDAO = new TrainDAOImpl();
+    private TicketDAO ticketDAO = new TicketDAOImpl();
     private TrainView trainView = new TrainView();
 
     @Override
@@ -32,8 +32,8 @@ public class TrainReservation implements ReservationSystem {
         if (selectedTrain == null) {
             String commonStation = findCommonStation();
             if (commonStation != null) {
-                if (!isSeatsAvailable(train2, source, commonStation, numberOfPassengers) ||
-                        !isSeatsAvailable(train1, commonStation, destination, numberOfPassengers)) {
+                if (!isSeatsAvailable(((TrainDAOImpl)trainDAO).getTrain2(), source, commonStation, numberOfPassengers) ||
+                        !isSeatsAvailable(((TrainDAOImpl)trainDAO).getTrain1(), commonStation, destination, numberOfPassengers)) {// downcasted to access child specific methods
                     throw new Exception("No seats available for the full journey.");
                 }
             } else {
@@ -49,41 +49,26 @@ public class TrainReservation implements ReservationSystem {
         }
 
         List<Passenger> passengers = trainView.getPassengers(numberOfPassengers);
-
-
         List<Seat> bookedSeats;
+
         try {
             List<Integer> trainNumbers = new ArrayList<>();
             if (selectedTrain != null) {
                 bookedSeats = allocateSeats(selectedTrain, source, destination, passengers);
                 trainNumbers.add(selectedTrain.getTrainName().hashCode());
             } else {
-                bookedSeats = allocateSeats(train2, source, findCommonStation(), passengers);
-                bookedSeats.addAll(allocateSeats(train1, findCommonStation(), destination, passengers));
-                trainNumbers.add(train2.getTrainName().hashCode());
-                trainNumbers.add(train1.getTrainName().hashCode());
+                bookedSeats = allocateSeats(((TrainDAOImpl)trainDAO).getTrain2(), source, findCommonStation(), passengers);
+                bookedSeats.addAll(allocateSeats(((TrainDAOImpl)trainDAO).getTrain1(), findCommonStation(), destination, passengers));
+                trainNumbers.add(((TrainDAOImpl)trainDAO).getTrain2().getTrainName().hashCode());
+                trainNumbers.add(((TrainDAOImpl)trainDAO).getTrain1().getTrainName().hashCode());
             }
 
             Ticket ticket = new Ticket(source, destination, trainNumbers, bookedSeats);
-            bookedTickets.add(ticket);
+            ticketDAO.addTicket(ticket);
             ticket.printTicket();
         } catch (Exception e) {
             trainView.displayMessage("Booking failed: " + e.getMessage());
         }
-    }
-
-    private boolean handleWaitingList(ChairCarTrain train, List<Passenger> passengers, String source, String destination) {
-        boolean addedToWaitingList = false;
-        for (Passenger passenger : passengers) {
-            if (train.addPassengerToWaitingList(passenger, new String[]{source, destination})) {
-                trainView.displayMessage("No seats available, " + passenger.getName() + " added to the waiting list.");
-                addedToWaitingList = true;
-            } else {
-               trainView.displayMessage("Waiting list is full for " + passenger.getName());
-                return false;
-            }
-        }
-        return addedToWaitingList;
     }
 
     private boolean isWaitingListFull(ChairCarTrain train, int passengerCount) {
@@ -92,7 +77,7 @@ public class TrainReservation implements ReservationSystem {
     }
 
     private ChairCarTrain findTrainForRoute(String source, String destination) {
-        for (ChairCarTrain train : trains) {
+        for (ChairCarTrain train : trainDAO.getAllTrains()) {
             if (isRouteValid(source, destination, train.getRoutes())) {
                 return train;
             }
@@ -114,28 +99,15 @@ public class TrainReservation implements ReservationSystem {
         }
         return availableSeatCount;
     }
-    private List<ChairCarTrain> addTrains(ChairCarTrain train1, ChairCarTrain train2) {
-        List<ChairCarTrain> trians = new ArrayList<>();
-        trians.add(train1);
-        trians.add(train2);
-        return trians;
-    }
 
     @Override
     public void cancelTicket() {
 
         int pnr = trainView.getPnrToCancel();
-        Ticket ticketToCancel = null;
-
-        for (Ticket ticket : bookedTickets) {
-            if (ticket.getPnr() == pnr) {
-                ticketToCancel = ticket;
-                break;
-            }
-        }
+        Ticket ticketToCancel = ticketDAO.getTicketByPNR(pnr);
 
         if (ticketToCancel != null) {
-            bookedTickets.remove(ticketToCancel);
+            ticketDAO.removeTicket(ticketToCancel);
             String canceledSource = ticketToCancel.getSource();
             String canceledDestination = ticketToCancel.getDestination();
             List<Integer> trainNumbers = ticketToCancel.getTrainNumbers();
@@ -157,13 +129,13 @@ public class TrainReservation implements ReservationSystem {
         for(int trainNumber : trainNumbers) {
             ChairCarTrain train = getTrainByTrainNumber(trainNumber);
             if(train != null) {
-                train.allocateSeatFromWaitingList(canceledSource, canceledDestination);
+                ((TrainDAOImpl)trainDAO).allocateSeatFromWaitingList(canceledSource, canceledDestination,trainNumber);
             }
         }
     }
 
     private ChairCarTrain getTrainByTrainNumber(int trainNumber) {
-        for(ChairCarTrain train : trains) {
+        for(ChairCarTrain train : trainDAO.getAllTrains()) {
             if(train.getTrainName().hashCode() == trainNumber) {
                 return train;
             }
@@ -173,16 +145,14 @@ public class TrainReservation implements ReservationSystem {
 
     @Override
     public void prepareOccupancyChart() {
-        trainView.displayMessage("Occupancy chart for " + train1.getTrainName() + ":");
-        trainView.printOccupancyChart(train1);
-
-        trainView.displayMessage("Occupancy chart for " + train2.getTrainName() + ":");
-        trainView.printOccupancyChart(train2);
+        for(ChairCarTrain train : trainDAO.getAllTrains()) {
+            trainView.printOccupancyChart(train);
+        }
     }
 
     private String findCommonStation() {
-        for (String station : train1.getRoutes()) {
-            if (train2.getRoutes().contains(station)) {
+        for (String station : ((TrainDAOImpl)trainDAO).getTrain1().getRoutes()) {
+            if (((TrainDAOImpl)trainDAO).getTrain2().getRoutes().contains(station)) {
                 return station;
             }
         }
@@ -202,9 +172,10 @@ public class TrainReservation implements ReservationSystem {
                     bookedSeats.add(seat);
                     break;
                 }
+
             }
             if (!seatFound) {
-                if(train.addPassengerToWaitingList(passenger,new String[] {source,destination})) {
+                if(((TrainDAOImpl)trainDAO).addPassengerToWaitingList(passenger,new String[] {source,destination},train.getTrainName().hashCode())) {
                     trainView.displayMessage("No seats available, " + passenger.getName() + " added to the waiting list.");
                 }else{
                     throw new Exception("Waiting list is full, can't add the Passengers to WaitingList");
@@ -212,16 +183,6 @@ public class TrainReservation implements ReservationSystem {
             }
         }
         return bookedSeats;
-    }
-
-    private boolean isSeatsAvailable(List<ChairCarTrain> trains, String source, String destination, int passengerCount) {
-        for(ChairCarTrain train : trains) {
-            List<Seat> seats = train.getSeats();
-            if(passengerCount < getAvailabeSeatCounts(source, destination, train.getRoutes(), seats)){
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean isRouteValid(String source, String destination, List<String> routes) {
