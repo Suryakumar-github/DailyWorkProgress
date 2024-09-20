@@ -1,6 +1,8 @@
 package view;
 
+import model.ChairCarTrain;
 import model.Passenger;
+import model.Seat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,11 +53,16 @@ public class TrainView {
         System.out.println(message);
     }
 
-    public void displayTicketDetails(String ticketDetails) {
-        System.out.println(ticketDetails);
-    }
-
-    public void displayOccupancyChart(String occupancyChart) {
-        System.out.println(occupancyChart);
+    public void printOccupancyChart(ChairCarTrain train) {
+        for (Seat seat : train.getSeats()) {
+            System.out.print("Seat " + seat.getSeatNumber() + ": ");
+            if (seat.getOccupiedRanges().isEmpty()) {
+                System.out.println("Available");
+            } else {
+                for (String[] range : seat.getOccupiedRanges()) {
+                    System.out.println("Occupied from " + range[0] + " to " + range[1]);
+                }
+            }
+        }
     }
 }

@@ -15,14 +15,12 @@ public class TrainReservation implements ReservationSystem {
     private ChairCarTrain train1 = new ChairCarTrain("Train 1", new String[]{"A", "B", "C", "D", "E"});
     private ChairCarTrain train2 = new ChairCarTrain("Train 2", new String[]{"X", "Y", "C"});
     private List<Ticket> bookedTickets = new ArrayList<>();
-    private List<ChairCarTrain> trains = new ArrayList<>();
-    private Scanner scanner = new Scanner(System.in);
+    private List<ChairCarTrain> trains = addTrains(train1,train2);
+    private static Scanner scanner = new Scanner(System.in);
     private TrainView trainView = new TrainView();
 
     @Override
     public void bookTicket() throws Exception {
-        trains.add(train1);
-        trains.add(train2);
 
         String source = trainView.getSource();
         String destination = trainView.getDestination();
@@ -53,7 +51,7 @@ public class TrainReservation implements ReservationSystem {
         List<Passenger> passengers = trainView.getPassengers(numberOfPassengers);
 
 
-        List<Seat> bookedSeats = new ArrayList<>();
+        List<Seat> bookedSeats;
         try {
             List<Integer> trainNumbers = new ArrayList<>();
             if (selectedTrain != null) {
@@ -78,7 +76,7 @@ public class TrainReservation implements ReservationSystem {
         boolean addedToWaitingList = false;
         for (Passenger passenger : passengers) {
             if (train.addPassengerToWaitingList(passenger, new String[]{source, destination})) {
-                System.out.println("No seats available, " + passenger.getName() + " added to the waiting list.");
+                trainView.displayMessage("No seats available, " + passenger.getName() + " added to the waiting list.");
                 addedToWaitingList = true;
             } else {
                trainView.displayMessage("Waiting list is full for " + passenger.getName());
@@ -115,6 +113,12 @@ public class TrainReservation implements ReservationSystem {
             }
         }
         return availableSeatCount;
+    }
+    private List<ChairCarTrain> addTrains(ChairCarTrain train1, ChairCarTrain train2) {
+        List<ChairCarTrain> trians = new ArrayList<>();
+        trians.add(train1);
+        trians.add(train2);
+        return trians;
     }
 
     @Override
@@ -170,23 +174,10 @@ public class TrainReservation implements ReservationSystem {
     @Override
     public void prepareOccupancyChart() {
         trainView.displayMessage("Occupancy chart for " + train1.getTrainName() + ":");
-        printOccupancyChart(train1);
+        trainView.printOccupancyChart(train1);
 
         trainView.displayMessage("Occupancy chart for " + train2.getTrainName() + ":");
-        printOccupancyChart(train2);
-    }
-
-    private void printOccupancyChart(ChairCarTrain train) {
-        for (Seat seat : train.getSeats()) {
-            System.out.print("Seat " + seat.getSeatNumber() + ": ");
-            if (seat.getOccupiedRanges().isEmpty()) {
-                System.out.println("Available");
-            } else {
-                for (String[] range : seat.getOccupiedRanges()) {
-                    System.out.println("Occupied from " + range[0] + " to " + range[1]);
-                }
-            }
-        }
+        trainView.printOccupancyChart(train2);
     }
 
     private String findCommonStation() {

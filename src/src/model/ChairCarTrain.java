@@ -1,33 +1,23 @@
 package model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class ChairCarTrain {
-    private String trainName;
+public class ChairCarTrain extends Train{
     private List<Seat> seats;
-    private List<String> routes;
     private Map<Passenger, String[]> waitingListPassengers;
 
     public ChairCarTrain(String trainName, String[] routes) {
-        this.trainName = trainName;
+        super(trainName,routes);
         this.seats = new ArrayList<>();
-        this.routes = new ArrayList<>();
         this.waitingListPassengers = new HashMap<>();
-        for (String route : routes) {
-            this.routes.add(route);
-        }
         for (int i = 0; i < 8; i++) {
             seats.add(new Seat(i + 1));
         }
     }
 
-    public String getTrainName() {
-        return trainName;
-    }
-
-    public List<String> getRoutes() {
-        return routes;
-    }
 
     public List<Seat> getSeats() {
         return seats;
