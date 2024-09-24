@@ -1,8 +1,5 @@
 package dependencyInversionPrinciple.good;
 
-import dependencyInversionPrinciple.bad.KeyBoard;
-import dependencyInversionPrinciple.bad.Monitor;
-
 public class Computer {
     private KeyBoard keyBoard ;
     private Monitor monitor ;
@@ -10,5 +7,11 @@ public class Computer {
     Computer(KeyBoard keyBoard, Monitor monitor) {
         this.keyBoard = keyBoard;
         this.monitor = monitor;
+    }
+    public void typing() {
+        keyBoard.type();
+    }
+    public void display() {
+        monitor.display();
     }
 }

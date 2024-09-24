@@ -8,4 +8,10 @@ public class Computer {
         keyBoard = new KeyBoard();
         monitor = new Monitor();
     }
+    public void typing() {
+        keyBoard.type();
+    }
+    public void powerOn() {
+        monitor.PowerOn();
+    }
 }
