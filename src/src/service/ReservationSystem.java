@@ -1,8 +1,11 @@
 package service;
 
+import model.ChairCarTrain;
+
+import java.util.List;
+
 public interface ReservationSystem {
-    void bookTicket() throws Exception;
-    void cancelTicket();
-    void prepareOccupancyChart();
+    void bookTicket(String source, String destination, int numberOfPassengers) throws Exception;
+    void cancelTicket(int pnr);
 }
 

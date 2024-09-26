@@ -34,15 +34,6 @@ public class Ticket {
         return trainNumbers;
     }
 
-    public void printTicket() {
-        System.out.println("PNR: " + pnr);
-        System.out.println("From: " + source + " To: " + destination);
-        System.out.println("Train Numbers: " + trainNumbers);
-        for(Seat seat : seats) {
-            System.out.println("Passaenger Name : "+ seat.getPassangerName() + ", Seat Number : "+seat.getSeatNumber());
-        }
-    }
-
     public List<Seat> getSeats() {
         return seats;
     }

@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Train {
-    String trainName;
-    List<Seat> seats;
-    List<String> routes;
+    private static int trainCounter = 100;
+    private int trainNumber;
+    private String trainName;
+    private List<String> routes;
 
     Train(String trainName, String[] routes) {
+        trainNumber = trainCounter++;
         this.trainName = trainName;
-        this.seats = new ArrayList<>();
         this.routes = new ArrayList<>();
         for (String route : routes) {
             this.routes.add(route);
@@ -21,11 +22,18 @@ public class Train {
         return trainName;
     }
 
-    public List<Seat> getSeats() {
-        return seats;
-    }
-
     public List<String> getRoutes() {
         return routes;
+    }
+    public int getTrainNumber() {
+        return this.trainNumber;
+    }
+
+    public String toString() {
+        return "Train{" +
+                "trainNumber=" + trainNumber +
+                ", trainName='" + trainName + '\'' +
+                ", routes=" + routes +
+                '}';
     }
 }

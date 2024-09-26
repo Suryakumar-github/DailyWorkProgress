@@ -26,4 +26,14 @@ public class ChairCarTrain extends Train{
         return waitingListPassengers;
     }
 
+    @Override
+    public String toString() {
+        return "ChairCarTrain{" +
+                "trainNumber=" + getTrainNumber() +
+                ", trainName='" + getTrainName() + '\'' +
+                ", seats=" + seats +
+                ", waitingListPassengers=" + waitingListPassengers +
+                '}';
+    }
+
 }

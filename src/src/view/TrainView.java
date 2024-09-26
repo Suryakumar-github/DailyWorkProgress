@@ -1,63 +1,75 @@
 package view;
 
-import model.ChairCarTrain;
-import model.Passenger;
-import model.Seat;
+import model.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class TrainView {
-    private Scanner scanner = new Scanner(System.in);
+import validation.Validation;
 
+public class TrainView {
+    private static final Scanner scanner = new Scanner(System.in);
+    private static final AdminView adminView = new AdminView();
+    private static final UserView userView = new UserView();
     public TrainView() {
 
     }
+    public void start() throws Exception {
+        while (true) {
+            int choice = displayMenuAndGetChoice();
 
+            switch (choice) {
+                case 1:
+                    adminView.displayMainMenu();
+                    break;
+                case 2:
+                    userView.displayMainMenu();
+                    break;
+                case 3:
+                    displayMessage("Exiting...");
+                    System.exit(0);
+                    break;
+                default:
+                    displayMessage("Invalid choice.");
+                    break;
+            }
+        }
+    }
     public int displayMenuAndGetChoice() {
-        System.out.println("\n1. Book Ticket");
-        System.out.println("2. Cancel Ticket");
-        System.out.println("3. Prepare Occupancy Chart");
-        System.out.println("4. Exit");
+        System.out.println("\n1. Admin");
+        System.out.println("2. User");
+        System.out.println("3. Exit");
         System.out.print("Choose an option: ");
-        return scanner.nextInt();
+        String option = scanner.nextLine().trim();
+        if(!Validation.validateNumbers(option)) {
+            return 0;
+        }
+        return Integer.parseInt(option);
     }
 
-    public String getSource() {
-        System.out.print("Enter Starting point: ");
-        return scanner.next();
-    }
-
-    public String getDestination() {
-        System.out.print("Enter Destination point: ");
-        return scanner.next();
-    }
-
-    public int getNumberOfPassengers() {
-        System.out.print("Enter number of passengers: ");
-        return scanner.nextInt();
-    }
 
     public List<Passenger> getPassengers(int numberOfPassengers) {
         List<Passenger> passengers = new ArrayList<>();
         for (int i = 0; i < numberOfPassengers; i++) {
             System.out.println("Enter Passenger " + (i + 1) + " name:");
-            passengers.add(new Passenger(scanner.next()));
+            String name = scanner.next();
+            if(!Validation.validateName(name)){
+                System.out.println("Enter the name only in Alphabets");
+                break;
+            }
+            passengers.add(new Passenger(name));
         }
         return passengers;
     }
 
-    public int getPnrToCancel() {
-        System.out.print("Enter PNR to cancel: ");
-        return scanner.nextInt();
-    }
 
     public void displayMessage(String message) {
         System.out.println(message);
     }
 
     public void printOccupancyChart(ChairCarTrain train) {
+        System.out.println("Train Name: " + train.getTrainName());
         for (Seat seat : train.getSeats()) {
             System.out.print("Seat " + seat.getSeatNumber() + ": ");
             if (seat.getOccupiedRanges().isEmpty()) {
@@ -68,5 +80,45 @@ public class TrainView {
                 }
             }
         }
+        System.out.println(".........................................");
+    }
+
+
+    public void displayTicketDetails(Ticket ticketToCancel) {
+        List<Seat> seats = ticketToCancel.getSeats();
+        for(Seat seat : seats) {
+            System.out.println("Passenger Name : "+seat.getPassangerName() +" Seat No : "+seat.getSeatNumber());
+        }
+    }
+
+    public List<Integer> getPassengersSerialNumber(Ticket ticket) {
+        System.out.println("Enter the No of tickets to be Cancelled");
+        String cancelCount = scanner.next();
+        if(!Validation.validateNumbers(cancelCount)) {
+            System.out.println("Enter tickets count only in Integer");
+
+        }
+        List<Integer> listOfPassengers = new ArrayList<>();
+        int serialNumber ;
+        for(int i = 0; i < Integer.parseInt(cancelCount); i++) {
+            System.out.println("Enter SerialNo : ");
+            if(!Validation.validateNumbers(cancelCount)) {
+                System.out.println("Enter tickets count only in Integer");
+                break;
+            }
+            serialNumber = scanner.nextInt();
+            listOfPassengers.add(serialNumber);
+        }
+        return listOfPassengers;
+    }
+
+    public void printTicket(Ticket ticket) {
+        System.out.println("PNR: " + ticket.getPnr());
+        System.out.println("From: " + ticket.getSource() + " To: " + ticket.getDestination());
+        System.out.println("Train Numbers: " + ticket.getTrainNumbers());
+        for(Seat seat : ticket.getSeats()) {
+            System.out.println("Passenger Name : "+ seat.getPassangerName() + ", Seat Number : "+seat.getSeatNumber());
+        }
     }
 }
+
