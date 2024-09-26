@@ -17,37 +17,44 @@ public class TrainView {
     }
     public void start() throws Exception {
         while (true) {
-            int choice = displayMenuAndGetChoice();
+            UserChoice choice = displayMenuAndGetChoice();
 
-            switch (choice) {
-                case 1:
-                    adminView.displayMainMenu();
-                    break;
-                case 2:
-                    userView.displayMainMenu();
-                    break;
-                case 3:
-                    displayMessage("Exiting...");
-                    System.exit(0);
-                    break;
-                default:
-                    displayMessage("Invalid choice.");
-                    break;
+            if (choice != null) {
+                switch (choice) {
+                    case ADMIN:
+                        adminView.displayMainMenu();
+                        break;
+                    case USER:
+                        userView.displayMainMenu();
+                        break;
+                    case EXIT:
+                        displayMessage("Exiting...");
+                        System.exit(0);
+                        break;
+                    default:
+                        displayMessage("Invalid choice.");
+                        break;
+                }
+            } else {
+                displayMessage("Invalid choice.");
             }
         }
     }
-    public int displayMenuAndGetChoice() {
+
+    public UserChoice displayMenuAndGetChoice() {
         System.out.println("\n1. Admin");
         System.out.println("2. User");
         System.out.println("3. Exit");
         System.out.print("Choose an option: ");
         String option = scanner.nextLine().trim();
-        if(!Validation.validateNumbers(option)) {
-            return 0;
-        }
-        return Integer.parseInt(option);
-    }
 
+        if (!Validation.validateNumbers(option)) {
+            return null;
+        }
+
+        int choice = Integer.parseInt(option);
+        return UserChoice.fromInt(choice);
+    }
 
     public List<Passenger> getPassengers(int numberOfPassengers) {
         List<Passenger> passengers = new ArrayList<>();

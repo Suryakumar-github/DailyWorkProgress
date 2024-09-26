@@ -5,6 +5,10 @@ import java.util.regex.Matcher;
 
 public class Validation {
 
+    private Validation() {
+        
+    }
+
     private static final String PASSWORD_REGEX = "^[a-zA-Z](?=.*[@#$%^&+=])(?=\\S+$).{5,9}$";
     private static final String NAME_REGEX = "^[a-zA-Z]+$";
     private static final String USERNAME_REGEX = "^[a-zA-Z][a-zA-Z0-9]*$";

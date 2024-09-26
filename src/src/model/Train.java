@@ -29,7 +29,7 @@ public class Train {
         return this.trainNumber;
     }
 
-    public String toString() {
+    public String display() {
         return "Train{" +
                 "trainNumber=" + trainNumber +
                 ", trainName='" + trainName + '\'' +

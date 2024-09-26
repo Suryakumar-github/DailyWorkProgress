@@ -34,7 +34,7 @@ public class AdminController implements AdminHandle {
         }
         return false;
     }
-    
+
     @Override
     public void allocateSeatFromWaitingList(String canceledSource, String canceledDestination, int trainNumber) {
         ChairCarTrain train = trainDAO.getTrainByNumber(trainNumber);

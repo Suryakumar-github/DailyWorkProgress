@@ -27,7 +27,7 @@ public class ChairCarTrain extends Train{
     }
 
     @Override
-    public String toString() {
+    public String display() {
         return "ChairCarTrain{" +
                 "trainNumber=" + getTrainNumber() +
                 ", trainName='" + getTrainName() + '\'' +

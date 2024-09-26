@@ -9,7 +9,6 @@ public class Admin extends Passenger{
     }
     public Admin() {
         super();
-
     }
     public String getUserName() {
         return userName;
