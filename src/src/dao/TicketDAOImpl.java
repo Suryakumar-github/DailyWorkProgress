@@ -1,5 +1,6 @@
 package dao;
 
+import fileHandler.TicketHandler;
 import model.Ticket;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class TicketDAOImpl implements TicketDAO {
 
     @Override
     public void addTicket(Ticket ticket) {
-        tickets.add(ticket);
+        TicketHandler.writeTicketToCSV(ticket);
     }
 
     @Override

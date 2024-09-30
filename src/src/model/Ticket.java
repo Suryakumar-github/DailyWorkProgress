@@ -9,13 +9,15 @@ public class Ticket {
     private String destination;
     private List<Integer> trainNumbers;
     private List<Seat> seats;
+    private float ticketPrice ;
 
-    public Ticket(String source, String destination, List<Integer> trainNumbers,List<Seat> seats) {
+    public Ticket(String source, String destination, List<Integer> trainNumbers,List<Seat> seats, float ticketPrice) {
         this.pnr = counter++;
         this.source = source;
         this.destination = destination;
         this.trainNumbers = trainNumbers;
         this.seats = seats;
+        this.ticketPrice = ticketPrice;
     }
 
     public int getPnr() {
@@ -37,6 +39,7 @@ public class Ticket {
     public List<Seat> getSeats() {
         return seats;
     }
+    public float getTicketPrice() {
+        return ticketPrice;
+    }
 }
-
-

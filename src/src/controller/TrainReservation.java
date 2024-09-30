@@ -2,6 +2,8 @@ package controller;
 import dao.TicketDAO;
 import dao.TicketDAOImpl;
 import dao.TrainDAOImpl;
+import dataLayer.DataLayer;
+import fileHandler.ChairCarTrainHandler;
 import model.*;
 import service.AdminHandle;
 import service.ReservationSystem;
@@ -16,9 +18,9 @@ public class TrainReservation implements ReservationSystem {
     private final TrainView trainView = new TrainView();
     private final AdminHandle adminHandle = new AdminController();
     private final SeatController seatController = new SeatController();
-
+    private static final DataLayer dataLayer = DataLayer.getInstance();
     @Override
-    public void bookTicket(String source, String destination, int numberOfPassengers) throws Exception {
+    public void bookTicket(String source, String destination, int numberOfPassengers)  {
 
         ChairCarTrain selectedTrain = findTrainForRoute(source, destination);
 
@@ -36,28 +38,51 @@ public class TrainReservation implements ReservationSystem {
 
     }
 
-    private void bookTicket(int numberOfPassengers, ChairCarTrain selectedTrain, String source, String destination) {
+    private void bookTicket(int numberOfPassengers, ChairCarTrain selectedTrain, String source, String destination)
+    {
         List<Passenger> passengers = trainView.getPassengers(numberOfPassengers);
         List<Seat> bookedSeats;
-
+        float ticketPrice = 0.0f;
         try {
             List<Integer> trainNumbers = new ArrayList<>();
             if (selectedTrain != null) {
                 bookedSeats = seatController.allocateSeats(selectedTrain, source, destination, passengers);
                 trainNumbers.add(selectedTrain.getTrainNumber());
-            } else {
+                ticketPrice = calculateTicketPrice(source, destination, selectedTrain.getRoutes()) * numberOfPassengers;
+                selectedTrain.setTotalEarning(ticketPrice);
+                Ticket ticket = new Ticket(source, destination, trainNumbers, bookedSeats, ticketPrice);
+                ticketDAO.addTicket(ticket);
+                trainView.printTicket(ticket);
+                System.out.println(selectedTrain.getTrainName() + selectedTrain.getTrainNumber());
+                ChairCarTrainHandler.updateChairCarTrain();
+            }
+            else
+            {
                 bookedSeats = seatController.allocateSeats(trainDAO.getTrain2(), source, findCommonStation(source, destination), passengers);
                 bookedSeats.addAll(seatController.allocateSeats(trainDAO.getTrain1(), findCommonStation(source, destination), destination, passengers));
                 trainNumbers.add(trainDAO.getTrain2().getTrainNumber());
                 trainNumbers.add(trainDAO.getTrain1().getTrainNumber());
+                float ticketPrice1 = calculateTicketPrice(source, findCommonStation(source, destination),trainDAO.getTrain2().getRoutes()) * numberOfPassengers;
+                trainDAO.getTrain2().setTotalEarning(ticketPrice1);
+                float ticketPrice2 =  calculateTicketPrice(findCommonStation(source, destination), destination,trainDAO.getTrain1().getRoutes()) * numberOfPassengers;
+                trainDAO.getTrain1().setTotalEarning(ticketPrice2);
+                ticketPrice = ticketPrice1 + ticketPrice2;
+                Ticket ticket = new Ticket(source, destination, trainNumbers, bookedSeats, ticketPrice);
+                ticketDAO.addTicket(ticket);
+                trainView.printTicket(ticket);
+                System.out.println(trainDAO.getTrain2().getTrainName() + trainDAO.getTrain1().getTrainName() );
+               ChairCarTrainHandler.updateChairCarTrain();
             }
 
-            Ticket ticket = new Ticket(source, destination, trainNumbers, bookedSeats);
-            ticketDAO.addTicket(ticket);
-            trainView.printTicket(ticket);
         } catch (Exception e) {
-            trainView.displayMessage("Booking failed: " + e.getMessage());
+            trainView.displayMessage("Booking failed: " );
+            e.printStackTrace();
         }
+    }
+
+    private float calculateTicketPrice(String source, String destination, List<String> routes) {
+        float ticketPrice = (float) (routes.indexOf(source) - routes.indexOf(destination));
+        return Math.abs(ticketPrice) * 50.0f;
     }
 
     private void findConnectingTrain(String source, String destination, int numberOfPassengers) {
@@ -67,13 +92,13 @@ public class TrainReservation implements ReservationSystem {
                     isRouteValid(commonStation, destination,(trainDAO).getTrain1().getRoutes())) {
                 if (seatController.isSeatsAvailable(( trainDAO).getTrain2(), source, commonStation, numberOfPassengers) ||
                         seatController.isSeatsAvailable(( trainDAO).getTrain1(), commonStation, destination, numberOfPassengers)) {// downcasted to access child specific methods
-                    System.out.println("No seats available for the full journey.");
+                    trainView.displayMessage("No seats available for the full journey.");
                 }
             }else{
-                System.out.println("No Train Available for the given Source and Destination");
+                trainView.displayMessage("No Train Available for the given Source and Destination");
             }
         } else {
-            System.out.println("No valid route found.");
+            trainView.displayMessage("No valid route found.");
             trainView.displayMenuAndGetChoice();
         }
     }
@@ -84,7 +109,7 @@ public class TrainReservation implements ReservationSystem {
     }
 
     private ChairCarTrain findTrainForRoute(String source, String destination) {
-        for (ChairCarTrain train : trainDAO.getAllTrains()) {
+        for (ChairCarTrain train : dataLayer.getAllTrains()) {
             if (isRouteValid(source, destination, train.getRoutes())) {
                 return train;
             }
@@ -168,7 +193,7 @@ public class TrainReservation implements ReservationSystem {
     }
 
     private ChairCarTrain getTrainByTrainNumber(int trainNumber) {
-        for(ChairCarTrain train : trainDAO.getAllTrains()) {
+        for(ChairCarTrain train : dataLayer.getAllTrains()) {
             if(train.getTrainNumber() == trainNumber) {
                 return train;
             }
@@ -192,7 +217,7 @@ public class TrainReservation implements ReservationSystem {
 
     public List<ChairCarTrain> getAllTrains(String startingPoint, String destination) {
         List<ChairCarTrain> trainsInLocation = new ArrayList<>();
-        List<ChairCarTrain> trains = trainDAO.getAllTrains();
+        List<ChairCarTrain> trains = dataLayer.getAllTrains();
         for(ChairCarTrain train : trains) {
             if(isRouteValid(startingPoint,destination, train.getRoutes())){
                 trainsInLocation.add(train);

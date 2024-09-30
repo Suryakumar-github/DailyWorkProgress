@@ -12,10 +12,16 @@ public class ChairCarTrain extends Train{
     public ChairCarTrain(String trainName, String[] routes) {
         super(trainName,routes);
         this.seats = new ArrayList<>();
-        this.waitingListPassengers = new HashMap<>();
+        waitingListPassengers = new HashMap<>();
         for (int i = 0; i < 8; i++) {
             seats.add(new Seat(i + 1));
         }
+    }
+
+    public ChairCarTrain(String trainName, int trainNumber, String[] routes, List<Seat> seats, Map<Passenger, String[] > waitingListPassengers,double totalEarning) {
+        super(trainName, routes, trainNumber,totalEarning);
+        this.seats = seats;
+        this.waitingListPassengers = waitingListPassengers;
     }
 
     public List<Seat> getSeats() {

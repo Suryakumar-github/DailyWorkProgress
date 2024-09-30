@@ -1,5 +1,6 @@
 package controller;
 
+import fileHandler.ChairCarTrainHandler;
 import model.ChairCarTrain;
 import model.Passenger;
 import model.Seat;
@@ -16,10 +17,14 @@ public class SeatController implements SeatHandler {
     private TrainView trainView = new TrainView();
 
     @Override
-    public void occupySeatForRange(String source, String destination, Seat seat) {
+    public void occupySeatForRange(String source, String destination, Seat seat)
+    {
+        System.out.println( " Name data "+seat.getPassangerName());
         String[] str = new String[]{source, destination};
         seat.getOccupiedRanges().add(str);
+        System.out.println( " stored data "+str);
     }
+
     @Override
     public void setSeatUnOccupied(String canceledSource, String canceledDestination, Seat seat) {
         Iterator<String[]> iterator = seat.getOccupiedRanges().iterator();
@@ -30,6 +35,7 @@ public class SeatController implements SeatHandler {
             }
         }
     }
+
     @Override
     public boolean isAvailableForRange(String source, String destination, List<String> route, Seat seat) {
         int sourceIndex = route.indexOf(source);
@@ -45,32 +51,39 @@ public class SeatController implements SeatHandler {
         }
         return true;
     }
+
     @Override
     public List<Seat> allocateSeats(ChairCarTrain train, String source, String destination, List<Passenger> passengers) throws Exception {
         List<Seat> seats = train.getSeats();
         List<Seat> bookedSeats = new ArrayList<>();
+        System.out.println(seats);
         for (Passenger passenger : passengers) {
-            boolean seatFound = false;
+            boolean flag =true;
             for (Seat seat : seats) {
-                if (isAvailableForRange(source, destination, train.getRoutes(),seat)) {
+                if (isAvailableForRange(source, destination, train.getRoutes(),seat))
+                {
+                    System.out.println(seat);
                     occupySeatForRange(source, destination, seat);
                     seat.addPassanger(passenger);
-                    seatFound = true;
                     bookedSeats.add(seat);
+                    flag =false;
                     break;
                 }
             }
 
-            if (!seatFound) {
+            if (flag==true)
+            {
                 if(adminHandle.addPassengerToWaitingList(passenger, new String[]{source, destination}, train.getTrainNumber())) {
                     trainView.displayMessage("No seats available, " + passenger.getName() + " added to the waiting list.");
-                } else {
+                }
+                else {
                     throw new Exception("Waiting list is full, can't add the passengers to the waiting list.");
                 }
             }
         }
         return bookedSeats;
     }
+
     @Override
     public boolean isSeatsAvailable(ChairCarTrain train, String source, String destination, int passengerCount) {
         int availableSeatCount = getAvailabeSeatCounts(source, destination, train.getRoutes(), train.getSeats());

@@ -1,20 +1,23 @@
 package view;
 
+import dao.UserDAOImpl;
 import model.*;
-
+import dao.UserDAO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 import validation.Validation;
-
 public class TrainView {
     private static final Scanner scanner = new Scanner(System.in);
     private static final AdminView adminView = new AdminView();
-    private static final UserView userView = new UserView();
+    private static UserDAO UserDAO = new UserDAOImpl();
+    private static final UserView userView = new UserView(UserDAO);
+
     public TrainView() {
 
     }
+
     public void start() throws Exception {
         while (true) {
             UserChoice choice = displayMenuAndGetChoice();
@@ -126,6 +129,7 @@ public class TrainView {
         for(Seat seat : ticket.getSeats()) {
             System.out.println("Passenger Name : "+ seat.getPassangerName() + ", Seat Number : "+seat.getSeatNumber());
         }
+        System.out.println("Total Ticket Price : " + ticket.getTicketPrice());
     }
 }
 
