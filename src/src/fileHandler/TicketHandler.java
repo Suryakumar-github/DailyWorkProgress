@@ -10,12 +10,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TicketHandler {
 
-    private static final String TICKET_CSV_FILE = "src/files/tickets.csv";
+    private static final String TICKET_CSV_FILE = Paths.get("src", "files", "tickets.csv").toString();
     private static final String HEADER = "PNR,Source,Destination,TrainNumbers,Seats,TicketPrice";
     private static final DataLayer dataLayer = DataLayer.getInstance();
 

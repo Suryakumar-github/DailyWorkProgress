@@ -6,12 +6,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserHandler {
 
-    private static final String USER_CSV_FILE = "src/files/users.csv";
+    private static final String USER_CSV_FILE = Paths.get("src", "files", "users.csv").toString();
     private static final String HEADER = "Name,Username,Password";
 
     public static void writeUserToCSV(User user) {

@@ -6,11 +6,12 @@ import model.Passenger;
 import model.Seat;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class ChairCarTrainHandler {
 
-    private static final String CHAIR_CAR_TRAIN_CSV_FILE = "src/files/chair_car_trains.csv";
+    private static final String CHAIR_CAR_TRAIN_CSV_FILE = Paths.get("src", "files", "chair_car_trains.csv").toString();
     private static DataLayer dataLayer = DataLayer.getInstance();
 
     public static void writeChairCarTrainToCSV(ChairCarTrain train) {
