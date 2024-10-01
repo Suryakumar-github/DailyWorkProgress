@@ -1,6 +1,5 @@
 package controller;
 
-import fileHandler.ChairCarTrainHandler;
 import model.ChairCarTrain;
 import model.Passenger;
 import model.Seat;
@@ -19,10 +18,8 @@ public class SeatController implements SeatHandler {
     @Override
     public void occupySeatForRange(String source, String destination, Seat seat)
     {
-        System.out.println( " Name data "+seat.getPassangerName());
         String[] str = new String[]{source, destination};
         seat.getOccupiedRanges().add(str);
-        System.out.println( " stored data "+str);
     }
 
     @Override
@@ -56,13 +53,11 @@ public class SeatController implements SeatHandler {
     public List<Seat> allocateSeats(ChairCarTrain train, String source, String destination, List<Passenger> passengers) throws Exception {
         List<Seat> seats = train.getSeats();
         List<Seat> bookedSeats = new ArrayList<>();
-        System.out.println(seats);
         for (Passenger passenger : passengers) {
             boolean flag =true;
             for (Seat seat : seats) {
                 if (isAvailableForRange(source, destination, train.getRoutes(),seat))
                 {
-                    System.out.println(seat);
                     occupySeatForRange(source, destination, seat);
                     seat.addPassanger(passenger);
                     bookedSeats.add(seat);
@@ -71,7 +66,7 @@ public class SeatController implements SeatHandler {
                 }
             }
 
-            if (flag==true)
+            if (flag)
             {
                 if(adminHandle.addPassengerToWaitingList(passenger, new String[]{source, destination}, train.getTrainNumber())) {
                     trainView.displayMessage("No seats available, " + passenger.getName() + " added to the waiting list.");

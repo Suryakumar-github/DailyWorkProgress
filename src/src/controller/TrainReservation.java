@@ -18,7 +18,8 @@ public class TrainReservation implements ReservationSystem {
     private final TrainView trainView = new TrainView();
     private final AdminHandle adminHandle = new AdminController();
     private final SeatController seatController = new SeatController();
-    private static final DataLayer dataLayer = DataLayer.getInstance();
+    private final DataLayer dataLayer = DataLayer.getInstance();
+
     @Override
     public void bookTicket(String source, String destination, int numberOfPassengers)  {
 
@@ -53,7 +54,6 @@ public class TrainReservation implements ReservationSystem {
                 Ticket ticket = new Ticket(source, destination, trainNumbers, bookedSeats, ticketPrice);
                 ticketDAO.addTicket(ticket);
                 trainView.printTicket(ticket);
-                System.out.println(selectedTrain.getTrainName() + selectedTrain.getTrainNumber());
                 ChairCarTrainHandler.updateChairCarTrain();
             }
             else
@@ -70,7 +70,6 @@ public class TrainReservation implements ReservationSystem {
                 Ticket ticket = new Ticket(source, destination, trainNumbers, bookedSeats, ticketPrice);
                 ticketDAO.addTicket(ticket);
                 trainView.printTicket(ticket);
-                System.out.println(trainDAO.getTrain2().getTrainName() + trainDAO.getTrain1().getTrainName() );
                ChairCarTrainHandler.updateChairCarTrain();
             }
 
@@ -147,6 +146,7 @@ public class TrainReservation implements ReservationSystem {
                 Seat seat = seats1.get(serialNo - 1);
                 seatController.setSeatUnOccupied(canceledSource, canceledDestination, seat);
             }
+            ChairCarTrainHandler.updateChairCarTrain();
 
         }
         trainView.displayMessage("Train Cancelled Successfully");
@@ -161,19 +161,24 @@ public class TrainReservation implements ReservationSystem {
     private void cancelTicket(Ticket ticket, List<Integer> trainNumbers, String canceledSource, String canceledDestination, List<Seat> seats, List<Integer> passengersSerialNo) {
 
         ChairCarTrain train = getTrainByTrainNumber(trainNumbers.get(0));
-        if(train != null) {
+        if(train != null)
+        {
             List<Seat> seats1 = train.getSeats();
             for(int i = 0; i < passengersSerialNo.size(); i++) {
                 seatController.setSeatUnOccupied(canceledSource, findCommonStation(canceledSource, canceledDestination), seats1.get(i));
             }
+            ChairCarTrainHandler.updateChairCarTrain();
         }
 
         ChairCarTrain train1 = getTrainByTrainNumber(trainNumbers.get(1));
-        if(train1 != null) {
+        if(train1 != null)
+        {
             List<Seat> seats1 = train1.getSeats();
-            for(int i = 0; i < passengersSerialNo.size(); i++) {
+            for(int i = 0; i < passengersSerialNo.size(); i++)
+            {
                 seatController.setSeatUnOccupied(findCommonStation(canceledSource, canceledDestination), canceledDestination, seats1.get(i));
             }
+            ChairCarTrainHandler.updateChairCarTrain();
         }
         trainView.displayMessage("Train Cancelled Successfully");
         if (passengersSerialNo.size() == seats.size()) {

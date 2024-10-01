@@ -1,4 +1,5 @@
 import fileHandler.ChairCarTrainHandler;
+import fileHandler.TicketHandler;
 import view.TrainView;
 
 public class TrainReservationApp {
@@ -10,7 +11,8 @@ public class TrainReservationApp {
 
     private static void loader()
     {
-         ChairCarTrainHandler.readChairCarTrainsFromCSV();
+        ChairCarTrainHandler.readChairCarTrainsFromCSV();
+        TicketHandler.readTicketsFromCSV();
     }
 }
 /* 100,sk,A;B;C;D;E,1;EMPTY|2;EMPTY|3;EMPTY|4;EMPTY|5;EMPTY|6;EMPTY|7;EMPTY|8;EMPTY|,,0.0

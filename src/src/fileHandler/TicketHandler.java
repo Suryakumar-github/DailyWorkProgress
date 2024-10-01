@@ -1,8 +1,10 @@
 package fileHandler;
 
+import dataLayer.DataLayer;
 import model.Passenger;
 import model.Seat;
 import model.Ticket;
+import validation.Validation;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -15,6 +17,7 @@ public class TicketHandler {
 
     private static final String TICKET_CSV_FILE = "src/files/tickets.csv";
     private static final String HEADER = "PNR,Source,Destination,TrainNumbers,Seats,TicketPrice";
+    private static final DataLayer dataLayer = DataLayer.getInstance();
 
     public static void writeTicketToCSV(Ticket ticket) {
         try (FileWriter fileWriter = new FileWriter(TICKET_CSV_FILE, true)) {
@@ -30,13 +33,12 @@ public class TicketHandler {
         }
     }
 
-    public static List<Ticket> readTicketsFromCSV() {
+    public static void readTicketsFromCSV() {
         List<Ticket> tickets = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(TICKET_CSV_FILE))) {
-            String line = br.readLine();
+            String line ;
             while ((line = br.readLine()) != null) {
                 String[] ticketData = line.split(",");
-                if (ticketData.length == 6) {
                     int pnr = Integer.parseInt(ticketData[0]);
                     String source = ticketData[1];
                     String destination = ticketData[2];
@@ -46,13 +48,12 @@ public class TicketHandler {
 
                     Ticket ticket = new Ticket(source, destination, trainNumbers, seats, ticketPrice);
                     tickets.add(ticket);
-                }
             }
-            System.out.println("Ticket details successfully read from CSV.");
+
         } catch (IOException e) {
             System.out.println("Error while reading Tickets from CSV: " + e.getMessage());
         }
-        return tickets;
+        dataLayer.setTickets(tickets);
     }
 
     public static void createTicketCSV() {
@@ -106,7 +107,14 @@ public class TicketHandler {
 
     private static Seat stringToSeat(String str) {
         String[] parts = str.split(":");
-        int seatNumber = Integer.parseInt(parts[0]);
+        int seatNumber = 0;
+        if(Validation.validateNumbers(parts[0])) {
+
+            seatNumber = Integer.parseInt(parts[0]);
+        }
+        else {
+            seatNumber = 0;
+        }
         Seat seat = new Seat(seatNumber);
         if (parts.length > 1 && !parts[1].isEmpty()) {
             Passenger passenger = new Passenger(parts[1]);

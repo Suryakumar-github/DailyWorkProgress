@@ -1,6 +1,7 @@
 package dataLayer;
 
 import model.ChairCarTrain;
+import model.Ticket;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 public class DataLayer {
     public static DataLayer instance;
     private List<ChairCarTrain> trains = new ArrayList<>();
-
+    private List<Ticket> tickets = new ArrayList<>();
     private DataLayer() {
 
     }
@@ -25,7 +26,15 @@ public class DataLayer {
     }
     public void setAllTrains(List<ChairCarTrain> trains)
     {
-       System.out.println(trains.size());
         this.trains = trains;
     }
+    public List<Ticket> getTickets()
+    {
+        return tickets;
+    }
+    public void setTickets(List<Ticket> tickets)
+    {
+        this.tickets = tickets;
+    }
+
 }

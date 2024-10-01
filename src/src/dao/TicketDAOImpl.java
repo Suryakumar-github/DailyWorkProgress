@@ -1,5 +1,6 @@
 package dao;
 
+import dataLayer.DataLayer;
 import fileHandler.TicketHandler;
 import model.Ticket;
 
@@ -8,18 +9,20 @@ import java.util.List;
 
 public class TicketDAOImpl implements TicketDAO {
     private List<Ticket> tickets = new ArrayList<>();
+    private DataLayer dataLayer = DataLayer.getInstance();
     public TicketDAOImpl() {
 
     }
 
     @Override
     public List<Ticket> getAllTickets() {
-        return tickets;
+        return dataLayer.getTickets();
     }
 
     @Override
     public Ticket getTicketByPNR(int pnr) {
-        for(Ticket ticket : tickets) {
+        for(Ticket ticket : dataLayer.getTickets()) {
+            System.out.println(pnr + " " + ticket.getPnr());
             if(ticket.getPnr() == pnr) {
                 return ticket;
             }

@@ -1,6 +1,5 @@
 package dao;
 
-
 import fileHandler.UserHandler;
 import model.User;
 
@@ -9,6 +8,7 @@ import java.util.List;
 public class UserDAOImpl implements UserDAO {
 
     public UserDAOImpl() {
+
     }
 
     @Override
@@ -25,11 +25,7 @@ public class UserDAOImpl implements UserDAO {
     public boolean isValidUser(String userName, String password) {
         List<User> users = getUser();
 
-        if(users.isEmpty()) {
-            System.out.println("......");
-        }
         for(User user : users) {
-            System.out.println("Comparing with User: " + user.getUserName() + " | Password: " + user.getPassword());
             if(user.getUserName().trim().equals(userName.trim()) && user.getPassword().trim().equals(password.trim())) {
                 return true;
             }

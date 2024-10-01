@@ -11,8 +11,8 @@ import java.util.*;
 public class ChairCarTrainHandler {
 
     private static final String CHAIR_CAR_TRAIN_CSV_FILE = "src/files/chair_car_trains.csv";
-    private static final String HEADER = "TrainNumber,TrainName,Routes,Seats,WaitingListPassengers,TotalEarning";
     private static DataLayer dataLayer = DataLayer.getInstance();
+
     public static void writeChairCarTrainToCSV(ChairCarTrain train) {
         try (FileWriter fileWriter = new FileWriter(CHAIR_CAR_TRAIN_CSV_FILE,true))
         {
@@ -154,7 +154,7 @@ public class ChairCarTrainHandler {
         }
     }
 
-    private static void removeFile() {
+    public static void removeFile() {
         try
         {
             FileWriter writer = new FileWriter(CHAIR_CAR_TRAIN_CSV_FILE);

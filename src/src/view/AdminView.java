@@ -23,8 +23,9 @@ public class AdminView {
     private static final TrainReservation reservation = new TrainReservation();
     private final SeatHandler seatController = new SeatController();
     private static final DataLayer dataLayer = DataLayer.getInstance();
+
     public void displayMainMenu() {
-        System.out.println("..Admin Menu ..");
+        System.out.println("..Admin Main Menu ..");
         System.out.println("\n1. Login");
         System.out.println("2. Exit");
         String option = scanner.nextLine().trim();
@@ -70,8 +71,7 @@ public class AdminView {
         }
         switch (option) {
             case "1":
-                adminController.prepareOccupancyChart();
-                displayAdminOption();
+                getTrainDetails();
                 break;
 
             case "2":
@@ -92,6 +92,23 @@ public class AdminView {
         }
     }
 
+    private void getTrainDetails() {
+        displayTrainDetails();
+        System.out.println("Enter the Train Number ");
+        int trainNumber = scanner.nextInt();
+        ChairCarTrain cTrain =trainDAO.getTrainByNumber(trainNumber);
+        if(cTrain != null )
+        {
+            adminController.prepareOccupancyChart(cTrain);
+            displayAdminOption();
+        }
+        else {
+            System.out.println("Invalid Train Number ");
+            getTrainDetails();
+        }
+
+    }
+
     private void addTrain() {
         System.out.println("Enter Train Name ");
         String trainName = scanner.nextLine().trim();
@@ -108,7 +125,7 @@ public class AdminView {
         String[] stations = new String[Integer.parseInt(stationsCount)];
         for(int i = 0; i < Integer.parseInt(stationsCount); i++) {
             System.out.println("Enter station "+(i+1) +" Name");
-            stations[i] = scanner.nextLine().trim();
+            stations[i] = scanner.nextLine().trim().toUpperCase();
         }
         ChairCarTrain train = new ChairCarTrain(trainName, stations);
         trainDAO.addTrain(train);
@@ -126,9 +143,8 @@ public class AdminView {
 
     public void displayTrainDetails() {
         List<ChairCarTrain> trains = dataLayer.getAllTrains();
-        System.out.println(trains);
         for(ChairCarTrain train : trains) {
-            System.out.println("Train Name : "+train.getTrainName() + " Route : "+train.getRoutes() );
+            System.out.println("Train Name : "+train.getTrainName() + " Route : "+train.getRoutes()+ " Train No : "+train.getTrainNumber() );
         }
     }
 

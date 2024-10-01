@@ -2,6 +2,7 @@ package controller;
 
 import dao.TrainDAOImpl;
 import dataLayer.DataLayer;
+import fileHandler.ChairCarTrainHandler;
 import model.ChairCarTrain;
 import model.Passenger;
 import model.Seat;
@@ -18,12 +19,10 @@ public class AdminController implements AdminHandle {
     private static final TrainDAOImpl trainDAO = new TrainDAOImpl();
     private static final TrainView trainView = new TrainView();
     private static final SeatHandler seatController = new SeatController();
-    private static final DataLayer dataLayer = DataLayer.getInstance();
+
     @Override
-    public void prepareOccupancyChart() {
-        for(ChairCarTrain train : dataLayer.getAllTrains()) {
-            trainView.printOccupancyChart(train);
-        }
+    public void prepareOccupancyChart(ChairCarTrain train) {
+        trainView.printOccupancyChart(train);
     }
 
     @Override
@@ -61,6 +60,7 @@ public class AdminController implements AdminHandle {
                     }
                 }
             }
+            ChairCarTrainHandler.updateChairCarTrain();
         }
     }
 
