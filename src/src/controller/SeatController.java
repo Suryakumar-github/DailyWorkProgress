@@ -5,15 +5,19 @@ import model.Passenger;
 import model.Seat;
 import service.AdminHandle;
 import service.SeatHandler;
-import view.TrainView;
+import view.AdminView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class SeatController implements SeatHandler {
-    private AdminHandle adminHandle = new AdminController();
-    private TrainView trainView = new TrainView();
+    private AdminHandle adminHandle ;
+    AdminView adminView = new AdminView();
+
+    public void setAdminHandle(AdminHandle adminHandle) {
+        this.adminHandle = adminHandle;
+    }
 
     @Override
     public void occupySeatForRange(String source, String destination, Seat seat)
@@ -69,7 +73,7 @@ public class SeatController implements SeatHandler {
             if (flag)
             {
                 if(adminHandle.addPassengerToWaitingList(passenger, new String[]{source, destination}, train.getTrainNumber())) {
-                    trainView.displayMessage("No seats available, " + passenger.getName() + " added to the waiting list.");
+                    adminView.displayMessage("No seats available, " + passenger.getName() + " added to the waiting list.");
                 }
                 else {
                     throw new Exception("Waiting list is full, can't add the passengers to the waiting list.");

@@ -1,11 +1,12 @@
 package model;
 
-public class User extends Passenger{
+public class User {
     String userName;
     String password;
+    String name;
 
     public User(String name, String userName, String password) {
-        super(name);
+        this.name = name;
         this.userName = userName;
         this.password = password;
     }
@@ -14,5 +15,8 @@ public class User extends Passenger{
     }
     public String getPassword() {
         return password;
+    }
+    public String getName() {
+        return name;
     }
 }

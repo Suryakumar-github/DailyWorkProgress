@@ -1,6 +1,6 @@
 package fileHandler;
 
-import dataLayer.DataLayer;
+import dao.TrainDAOImpl;
 import model.ChairCarTrain;
 import model.Passenger;
 import model.Seat;
@@ -9,12 +9,13 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class ChairCarTrainHandler {
+public class ChairCarTrainFileHandler implements TrainHandler{
 
     private static final String CHAIR_CAR_TRAIN_CSV_FILE = Paths.get("src", "files", "chair_car_trains.csv").toString();
-    private static DataLayer dataLayer = DataLayer.getInstance();
+    private TrainDAOImpl trainDAO = TrainDAOImpl.getInstance(this);
 
-    public static void writeChairCarTrainToCSV(ChairCarTrain train) {
+    @Override
+    public void addTrain(ChairCarTrain train) {
         try (FileWriter fileWriter = new FileWriter(CHAIR_CAR_TRAIN_CSV_FILE,true))
         {
             fileWriter.append(String.valueOf(train.getTrainNumber())).append(",");
@@ -37,7 +38,8 @@ public class ChairCarTrainHandler {
         }
     }
 
-    public static void readChairCarTrainsFromCSV()
+    @Override
+    public List<ChairCarTrain> getTrains()
     {
         List<ChairCarTrain> chairCarTrains = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(CHAIR_CAR_TRAIN_CSV_FILE))) {
@@ -57,7 +59,19 @@ public class ChairCarTrainHandler {
         } catch (IOException e) {
             System.out.println("Error while reading ChairCarTrains from CSV: " + e.getMessage());
         }
-        dataLayer.setAllTrains(chairCarTrains);
+        trainDAO.setTrains(chairCarTrains);
+        return chairCarTrains;
+    }
+
+    @Override
+    public void updateTrain() {
+        removeFile();
+        List<ChairCarTrain> trains = trainDAO.getTrains();
+        for(ChairCarTrain cTrain : trains)
+        {
+            System.out.println(cTrain.getTrainName());
+            addTrain(cTrain);
+        }
     }
 
     public static String seatsToString(List<Seat> seats) {
@@ -65,12 +79,14 @@ public class ChairCarTrainHandler {
         for (Seat seat : seats) {
             if (seat != null) {
                 seatString.append(seat.getSeatNumber()).append(";");
-                seatString.append(seat.getPassangerName() != null ? seat.getPassangerName() : "EMPTY");
+                seatString.append(seat.getPassangerName() != null && !seat.getOccupiedRanges().isEmpty() ? seat.getPassangerName() : "EMPTY");
 
-                if (!seat.getOccupiedRanges().isEmpty()) {
+                if (!seat.getOccupiedRanges().isEmpty())
+                {
                     seatString.append(":");
                     List<String> ranges = new ArrayList<>();
-                    for (String[] range : seat.getOccupiedRanges()) {
+                    for (String[] range : seat.getOccupiedRanges())
+                    {
                         ranges.add(String.join("-", range));
                     }
                     seatString.append(String.join(",", ranges));
@@ -143,16 +159,6 @@ public class ChairCarTrainHandler {
 
     private static String listToString(List<String> list) {
         return String.join(";", list);
-    }
-
-    public static void updateChairCarTrain() {
-        removeFile();
-        List<ChairCarTrain> trains = dataLayer.getAllTrains();
-        for(ChairCarTrain cTrain : trains)
-        {
-            System.out.println(cTrain.getTrainName());
-            writeChairCarTrainToCSV(cTrain);
-        }
     }
 
     public static void removeFile() {

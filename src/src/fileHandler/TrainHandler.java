@@ -1,16 +1,13 @@
-package dao;
+package fileHandler;
 
 import model.ChairCarTrain;
 
 import java.util.List;
 
-public interface TrainDAO {
+public interface TrainHandler {
 
-    ChairCarTrain getTrainByNumber(int trainNumber);
     void addTrain(ChairCarTrain train);
     List<ChairCarTrain> getTrains();
     void updateTrain();
 
-    void setTrains(List<ChairCarTrain> trains);
 }
-

@@ -1,93 +1,74 @@
 package view;
 
-import controller.TrainReservation;
-import dao.UserDAO;
+import model.Passenger;
+import model.Ticket;
 import model.User;
+import service.AdminHandle;
+import service.ReservationSystem;
 import validation.Validation;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+
 public class UserView {
-    private static final Scanner scanner = new Scanner(System.in);
-    private static final TrainView trainView = new TrainView();
-    private static final AdminView adminView = new AdminView();
-    private static final TrainReservation reservation = new TrainReservation();
-    private final UserDAO userDAO;
 
-    public UserView(UserDAO userDAO) {
-        this.userDAO = userDAO;
+    private ReservationSystem trainController;
+    private AdminHandle adminController;
+    private AdminView adminView;
+    private static Scanner scanner = new Scanner(System.in);
+
+    public UserView() {}
+
+    public void setReservationSystem(ReservationSystem reservationSystem) {
+        this.trainController = reservationSystem;
     }
 
-    public void displayMainMenu() throws Exception {
-        System.out.println("..User Menu ..");
-        System.out.println("\n1. Register");
-        System.out.println("2. Login");
-        System.out.println("3. Exit");
-        String option = scanner.nextLine().trim();
-        if (!Validation.validateNumbers(option)) {
-            return;
-        }
-        switch (option) {
-            case "1":
-                displayRegisterOption();
-                break;
-            case "2":
-                displayLoginOption();
-                break;
-            case "3":
-                trainView.displayMenuAndGetChoice();
-                break;
-            default:
-                System.out.println("Invalid Option");
-                break;
-        }
+    public void setAdminHandle(AdminHandle adminHandle) {
+        this.adminController = adminHandle;
     }
 
-    private void displayRegisterOption() throws Exception {
+    public void setAdminView(AdminView adminView) {
+        this.adminView = adminView;
+    }
+
+    public void displayRegisterOption() throws Exception {
         System.out.println("Enter the Name");
         String name = scanner.nextLine().trim();
-        if (!Validation.validateName(name)) {
+        if (!Validation.validateName(name))
+        {
             System.out.println("Please enter the name only in alphabets");
             return;
         }
         System.out.println("Enter the User Name");
         String userName = scanner.nextLine().trim();
-        if (!Validation.validateUsername(userName)) {
-            System.out.println("Please enter the Username using alphabets and integers");
+        if (!Validation.validateUsername(userName))
+        {
+            System.out.println("Please enter the Username using alphabets and numbers");
             return;
         }
 
         System.out.println("Enter the password");
         String password = scanner.nextLine().trim();
-        if (!Validation.validatePassword(password)) {
-            System.out.println("Please enter the password in correct format");
+        if (!Validation.validatePassword(password))
+        {
+            System.out.println("Please enter the password in correct format, at least that should contain one number and one special character");
             return;
         }
         User user = new User(name, userName, password);
-        userDAO.addUser(user);
+        adminController.addUser(user);
         displayUserOption();
     }
 
-    private void displayLoginOption() throws Exception {
-        System.out.println("Enter the User Name");
-        String userName = scanner.nextLine().trim();
-        System.out.println("Enter the Password");
-        String password = scanner.nextLine().trim();
-        if (userDAO.isValidUser(userName, password)) {
-            System.out.println("User logined successfully !");
-            displayUserOption();
-        }
-        else {
-                System.out.println("User name or Password is Incorrect");
-        }
-    }
-
-    private void displayUserOption() throws Exception {
+    public void displayUserOption() throws Exception {
         System.out.println("User Menu");
-        System.out.println("\n1. Book Ticket");
+        System.out.println("1. Book Ticket");
         System.out.println("2. Cancel Ticket");
         System.out.println("3. logOut");
         String option = scanner.nextLine().trim();
-        if (!Validation.validateNumbers(option)) {
-            return;
+        if (!Validation.validateNumbers(option))
+        {
+            System.out.println("Enter the number only in numbers");
         }
         switch (option) {
             case "1":
@@ -97,7 +78,6 @@ public class UserView {
                 cancelTicket();
                 break;
             case "3":
-                trainView.displayMenuAndGetChoice();
                 break;
             default:
                 System.out.println("Invalid Option");
@@ -108,35 +88,81 @@ public class UserView {
         adminView.displayTrainDetails();
         System.out.print("Enter Starting point: ");
         String startingPoint = scanner.nextLine().trim().toUpperCase();
-        if (!Validation.validateName(startingPoint)) {
+        if (!Validation.validateName(startingPoint))
+        {
             System.out.println("Enter location only in String");
             displayUserOption();
         }
+
         System.out.print("Enter Destination point: ");
         String destination = scanner.nextLine().trim().toUpperCase();
-        if (!Validation.validateName(destination)) {
+        if (!Validation.validateName(destination))
+        {
             System.out.println("Enter location only in String");
             displayUserOption();
         }
+
         adminView.displayTrainDetails(startingPoint, destination);
         System.out.print("Enter number of passengers: ");
         String numberOfPassengers = scanner.nextLine().trim();
-        if (!Validation.validateNumbers(numberOfPassengers)) {
-            System.out.println("Enter passenger Count only in integer");
+        if (!Validation.validateNumbers(numberOfPassengers))
+        {
+            System.out.println("Enter passenger Count only in numbers");
             displayUserOption();
         }
-        reservation.bookTicket(startingPoint, destination, Integer.parseInt(numberOfPassengers));
+        trainController.bookTicket(startingPoint, destination, Integer.parseInt(numberOfPassengers));
         displayUserOption();
     }
 
     public void cancelTicket() throws Exception {
         System.out.print("Enter PNR to cancel: ");
         String pnr = scanner.nextLine().trim();
-        if (!Validation.validateNumbers(pnr)) {
-            System.out.println("Enter passenger Count only in integer");
+        if (!Validation.validateNumbers(pnr))
+        {
+            System.out.println("Enter passenger Count only in numbers");
             return;
         }
-        reservation.cancelTicket(Integer.parseInt(pnr));
+        trainController.cancelTicket(Integer.parseInt(pnr));
         displayUserOption();
     }
+
+    public List<Integer> getPassengersSerialNumber(Ticket ticket) {
+        System.out.println("Enter the No of tickets to be Cancelled");
+        String cancelCount = scanner.next();
+        if(!Validation.validateNumbers(cancelCount)) {
+            System.out.println("Enter tickets count only in Integer");
+
+        }
+        List<Integer> listOfPassengers = new ArrayList<>();
+        int serialNumber ;
+        for(int i = 0; i < Integer.parseInt(cancelCount); i++) {
+            System.out.println("Enter SerialNo : ");
+            if(!Validation.validateNumbers(cancelCount))
+            {
+                System.out.println("Enter tickets count only in Integer");
+                break;
+            }
+            serialNumber = scanner.nextInt();
+            listOfPassengers.add(serialNumber);
+        }
+        return listOfPassengers;
+    }
+
+    public List<Passenger> getPassengers(int numberOfPassengers)
+    {
+        List<Passenger> passengers = new ArrayList<>();
+        for (int i = 0; i < numberOfPassengers; i++)
+        {
+            System.out.println("Enter Passenger " + (i + 1) + " name:");
+            String name = scanner.next();
+            if(!Validation.validateName(name))
+            {
+                System.out.println("Enter the name only in Alphabets");
+                break;
+            }
+            passengers.add(new Passenger(name));
+        }
+        return passengers;
+    }
+
 }

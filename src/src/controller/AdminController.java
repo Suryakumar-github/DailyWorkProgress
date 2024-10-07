@@ -1,14 +1,11 @@
 package controller;
 
-import dao.TrainDAOImpl;
-import dataLayer.DataLayer;
-import fileHandler.ChairCarTrainHandler;
-import model.ChairCarTrain;
-import model.Passenger;
-import model.Seat;
+import dao.TrainDAO;
+import dao.UserDAO;
+import model.*;
 import service.AdminHandle;
 import service.SeatHandler;
-import view.TrainView;
+import view.AdminView;
 
 import java.util.List;
 import java.util.Map;
@@ -16,13 +13,24 @@ import java.util.Map;
 
 public class AdminController implements AdminHandle {
 
-    private static final TrainDAOImpl trainDAO = new TrainDAOImpl();
-    private static final TrainView trainView = new TrainView();
-    private static final SeatHandler seatController = new SeatController();
+    private final TrainDAO trainDAO ;
+    private final SeatHandler seatController ;
+    private final UserDAO userDAO;
+    private AdminView adminView ;
+
+    public AdminController(TrainDAO trainDAO, UserDAO userDAO, SeatHandler seatHandler) {
+        this.trainDAO = trainDAO;
+        this.userDAO = userDAO;
+        this.seatController = seatHandler;
+
+    }
+    public void setAdminView(AdminView adminView) {
+        this.adminView = adminView;
+    }
 
     @Override
     public void prepareOccupancyChart(ChairCarTrain train) {
-        trainView.printOccupancyChart(train);
+        adminView.printOccupancyChart(train);
     }
 
     @Override
@@ -60,7 +68,7 @@ public class AdminController implements AdminHandle {
                     }
                 }
             }
-            ChairCarTrainHandler.updateChairCarTrain();
+            trainDAO.updateTrain();
         }
     }
 
@@ -72,6 +80,26 @@ public class AdminController implements AdminHandle {
 
         return waitingSourceIndex >= canceledSourceIndex && waitingDestinationIndex <= canceledDestinationIndex;
     }
+    @Override
+    public boolean isValidAdmin(String userName, String password) {
+        Admin admin = new Admin();
+        return userName.trim().equals(admin.getUserName().trim()) && password.trim().equals(admin.getPassword().trim());
+    }
+    @Override
+    public boolean isValidUser(String userName, String password) {
+        List<User> users = userDAO.getUser();
 
+        for(User user : users)
+        {
+            if(user.getUserName().trim().equals(userName) && user.getPassword().trim().equals(password)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    @Override
+    public void addUser(User user) {
+        userDAO.addUser(user);
+    }
 }

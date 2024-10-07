@@ -9,4 +9,6 @@ public interface TicketDAO {
     Ticket getTicketByPNR(int pnr);
     void addTicket(Ticket ticket);
     void removeTicket(Ticket ticket);
+
+    void setTickets(List<Ticket> tickets);
 }

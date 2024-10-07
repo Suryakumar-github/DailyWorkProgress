@@ -1,67 +1,39 @@
 package view;
 
-import controller.SeatController;
-import controller.TrainReservation;
-import dao.TrainDAO;
-import dao.TrainDAOImpl;
-import dataLayer.DataLayer;
 import model.ChairCarTrain;
+import model.Seat;
+import model.Ticket;
+import service.AdminHandle;
+import service.ReservationSystem;
 import service.SeatHandler;
 import validation.Validation;
-import model.Admin;
-import controller.AdminController;
 
 import java.util.List;
 import java.util.Scanner;
+
 public class AdminView {
 
-    private static final Scanner scanner = new Scanner(System.in);
-    private static final Admin admin = new Admin();
-    private static final AdminController adminController = new AdminController();
-    private static final TrainView trainView = new TrainView();
-    private static final TrainDAO trainDAO = new TrainDAOImpl();
-    private static final TrainReservation reservation = new TrainReservation();
-    private final SeatHandler seatController = new SeatController();
-    private static final DataLayer dataLayer = DataLayer.getInstance();
+    private AdminHandle adminController;
+    private SeatHandler seatController;
+    private ReservationSystem trainController;
+    private static Scanner scanner = new Scanner(System.in);
+    public AdminView() {}
 
-    public void displayMainMenu() {
-        System.out.println("..Admin Main Menu ..");
-        System.out.println("\n1. Login");
-        System.out.println("2. Exit");
-        String option = scanner.nextLine().trim();
-
-        if (!Validation.validateNumbers(option)) {
-            return;
-        }
-        switch (option) {
-            case "1":
-                displayLoginOption();
-                break;
-            case "2":
-                trainView.displayMenuAndGetChoice();
-                break;
-            default:
-                System.out.println("Invalid Option");
-        }
-
+    public void setAdminHandle(AdminHandle adminHandle) {
+        this.adminController = adminHandle;
     }
 
-    private void displayLoginOption() {
-        System.out.println("Enter the User Name");
-        String userName = scanner.nextLine().trim();
-        System.out.println("Enter the Password");
-        String password = scanner.nextLine().trim();
-        if (userName.equals(admin.getUserName()) && password.equals(admin.getPassword())) {
-            displayAdminOption();
-        } else {
-            System.out.println("User name or Password is Incorrect");
-        }
-        displayMainMenu();
+    public void setSeatHandler(SeatHandler seatHandler) {
+        this.seatController = seatHandler;
     }
 
-    private void displayAdminOption() {
+    public void setReservationSystem(ReservationSystem reservationSystem) {
+        this.trainController = reservationSystem;
+    }
+
+    public void displayAdminOption() {
         System.out.println("Admin Menu");
-        System.out.println("\n1. PrepareOccupancy Chart");
+        System.out.println("1. PrepareOccupancy Chart");
         System.out.println("2. Find Trains Total Earning's");
         System.out.println("3. Add Train");
         System.out.println("4. Logout");
@@ -83,7 +55,6 @@ public class AdminView {
                 break;
 
             case "4" :
-                displayMainMenu();
                 break;
 
             default:
@@ -96,44 +67,48 @@ public class AdminView {
         displayTrainDetails();
         System.out.println("Enter the Train Number ");
         int trainNumber = scanner.nextInt();
-        ChairCarTrain cTrain =trainDAO.getTrainByNumber(trainNumber);
+        ChairCarTrain cTrain = trainController.getTrainByNumber(trainNumber);
         if(cTrain != null )
         {
             adminController.prepareOccupancyChart(cTrain);
             displayAdminOption();
         }
-        else {
+        else
+        {
             System.out.println("Invalid Train Number ");
             getTrainDetails();
         }
-
     }
 
     private void addTrain() {
         System.out.println("Enter Train Name ");
         String trainName = scanner.nextLine().trim();
-        if(!Validation.validateName(trainName)) {
+
+        if(!Validation.validateName(trainName))
+        {
             System.out.println("Please Enter the Train Name only in Alphabets");
             displayAdminOption();
         }
         System.out.println("Enter no of Stations");
         String stationsCount = scanner.nextLine().trim();
-        if(!Validation.validateNumbers(stationsCount)) {
+        if(!Validation.validateNumbers(stationsCount))
+        {
             System.out.println("Enter the Stations count only in integers");
             displayAdminOption();
         }
         String[] stations = new String[Integer.parseInt(stationsCount)];
-        for(int i = 0; i < Integer.parseInt(stationsCount); i++) {
+        for(int i = 0; i < Integer.parseInt(stationsCount); i++)
+        {
             System.out.println("Enter station "+(i+1) +" Name");
             stations[i] = scanner.nextLine().trim().toUpperCase();
         }
         ChairCarTrain train = new ChairCarTrain(trainName, stations);
-        trainDAO.addTrain(train);
+        trainController.addTrain(train);
         displayAdminOption();
     }
 
     private void displayTotalEarnings() {
-        List<ChairCarTrain> trains = dataLayer.getAllTrains();
+        List<ChairCarTrain> trains = trainController.getTrains();
 
         for(ChairCarTrain train : trains) {
             System.out.println("Train Name : " + train.getTrainName() + " ,Total Earnings : "+train.getTotalEarning());
@@ -142,14 +117,14 @@ public class AdminView {
     }
 
     public void displayTrainDetails() {
-        List<ChairCarTrain> trains = dataLayer.getAllTrains();
+        List<ChairCarTrain> trains = trainController.getTrains();
         for(ChairCarTrain train : trains) {
             System.out.println("Train Name : "+train.getTrainName() + " Route : "+train.getRoutes()+ " Train No : "+train.getTrainNumber() );
         }
     }
 
     public void displayTrainDetails(String startingPoint, String destination) {
-        List<ChairCarTrain> trains = reservation.getAllTrains(startingPoint, destination);
+        List<ChairCarTrain> trains = trainController.getAllTrains(startingPoint, destination);
         if(!trains.isEmpty()) {
             for (ChairCarTrain train : trains) {
                 System.out.println("Available Seats from Source " + startingPoint + " to destination " + destination + " : " +
@@ -157,9 +132,9 @@ public class AdminView {
             }
         }
         else {
-            String commonStation = reservation.findCommonStation(startingPoint,destination);
-            List<ChairCarTrain> trains1 = reservation.getAllTrains(startingPoint, commonStation);
-            List<ChairCarTrain> trains2 = reservation.getAllTrains(commonStation,destination );
+            String commonStation = trainController.findCommonStation(startingPoint,destination);
+            List<ChairCarTrain> trains1 = trainController.getAllTrains(startingPoint, commonStation);
+            List<ChairCarTrain> trains2 = trainController.getAllTrains(commonStation,destination );
             for (ChairCarTrain train : trains1) {
                 System.out.println("Available Seats from Source " + startingPoint + " to destination " + commonStation + " : " +
                         seatController.getAvailabeSeatCounts(startingPoint, destination, train.getRoutes(), train.getSeats()) + " Seats");
@@ -169,5 +144,49 @@ public class AdminView {
                         seatController.getAvailabeSeatCounts(startingPoint, destination, train.getRoutes(), train.getSeats()) + " Seats");
             }
         }
+    }
+
+    public void printOccupancyChart(ChairCarTrain train) {
+        System.out.println(".........................................");
+        System.out.println("Train Name: " + train.getTrainName());
+        System.out.println(".........................................");
+        for (Seat seat : train.getSeats()) {
+            System.out.print("Seat " + seat.getSeatNumber() + ": ");
+            if (seat.getOccupiedRanges().isEmpty())
+            {
+                System.out.println("Available");
+            }
+            else
+            {
+                for (String[] range : seat.getOccupiedRanges())
+                {
+                    System.out.println("Occupied from " + range[0] + " to " + range[1]);
+                }
+            }
+        }
+        System.out.println(".........................................");
+    }
+
+    public void printTicket(Ticket ticket) {
+
+        System.out.println("PNR: " + ticket.getPnr());
+        System.out.println("From: " + ticket.getSource() + " To: " + ticket.getDestination());
+        System.out.println("Train Numbers: " + ticket.getTrainNumbers());
+        for(Seat seat : ticket.getSeats())
+        {
+            System.out.println("Passenger Name : "+ seat.getPassangerName() + ", Seat Number : "+seat.getSeatNumber());
+        }
+        System.out.println("Total Ticket Price : " + ticket.getTicketPrice());
+    }
+
+    public void displayTicketDetails(Ticket ticketToCancel) {
+        List<Seat> seats = ticketToCancel.getSeats();
+        for(Seat seat : seats) {
+            System.out.println("Passenger Name : "+seat.getPassangerName() +" Seat No : "+seat.getSeatNumber());
+        }
+    }
+
+    public void displayMessage(String message) {
+        System.out.println(message);
     }
 }
