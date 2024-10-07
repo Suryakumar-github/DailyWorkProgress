@@ -1,5 +1,4 @@
 package dao;
-import fileHandler.ChairCarTrainFileHandler;
 import fileHandler.TrainHandler;
 import model.ChairCarTrain;
 import java.util.ArrayList;
@@ -29,14 +28,6 @@ public class TrainDAOImpl implements TrainDAO {
         trainHandler.addTrain(train);
     }
 
-    public ChairCarTrain getTrain1() {
-        return trains.get(0);
-    }
-
-    public ChairCarTrain getTrain2() {
-        return trains.get(1);
-    }
-
     @Override
     public ChairCarTrain getTrainByNumber(int trainNumber) {
         for (ChairCarTrain train : trains) {
@@ -56,7 +47,6 @@ public class TrainDAOImpl implements TrainDAO {
         trainHandler.updateTrain();
     }
 
-    @Override
     public void setTrains(List<ChairCarTrain> trains)
     {
         this.trains = trains;

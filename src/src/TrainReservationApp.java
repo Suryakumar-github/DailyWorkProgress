@@ -1,58 +1,50 @@
-import controller.AdminController;
-import controller.SeatController;
-import controller.TrainController;
-import dao.*;
-import fileHandler.*;
-import service.AdminHandle;
-import service.ReservationSystem;
-import service.SeatHandler;
+import controller.*;
+import fileHandler.ChairCarTrainFileHandler;
+import fileHandler.TicketFileHandler;
+import fileHandler.UserFileHandler;
 import view.AdminView;
 import view.MainView;
 import view.UserView;
 
 public class TrainReservationApp {
-    private static UserHandler userHandler = new UserFileHandler();
-    private static TrainHandler trainHandler = new ChairCarTrainFileHandler();
-    private static  TicketHandler ticketHandler = new TicketFileHandler();
-    private static UserDAO userDAO = UserDAOImpl.getInstance(userHandler);
-    private static TicketDAO ticketDAO = TicketDAOImpl.getInstance(ticketHandler);
-    private static TrainDAO trainDAO = TrainDAOImpl.getInstance(trainHandler);
-    private static SeatHandler seatHandler = new SeatController();
-    private static AdminHandle adminHandle = new AdminController(trainDAO, userDAO, seatHandler);
+
+    private static SeatController seatController = new SeatControllerImpl();
+    private static AdminController adminController = new AdminControllerImpl(seatController);
 
     static {
-        ((SeatController) seatHandler).setAdminHandle(adminHandle);
+        ((SeatControllerImpl) seatController).setAdminHandle(adminController);
     }
 
     private static AdminView adminView = new AdminView();
     private static UserView userView = new UserView();
 
-    private static ReservationSystem reservationSystem = new TrainController(trainDAO, ticketDAO, adminHandle, seatHandler);
+    private static Traincontroller trainController = new TrainControllerImpl(adminController, seatController);
 
     static {
-        ((TrainController) reservationSystem).setAdminView(adminView);
-        ((TrainController) reservationSystem).setUserView(userView);
+        ((TrainControllerImpl) trainController).setAdminView(adminView);
+        ((TrainControllerImpl) trainController).setUserView(userView);
+        ((AdminControllerImpl) adminController).setAdminView(adminView);
 
-        adminView.setAdminHandle(adminHandle);
-        adminView.setSeatHandler(seatHandler);
-        adminView.setReservationSystem(reservationSystem);
+        adminView.setAdminController(adminController);
+        adminView.setSeatController(seatController);
+        adminView.setTrainController(trainController);
 
-        userView.setReservationSystem(reservationSystem);
-        userView.setAdminHandle(adminHandle);
+        userView.setTrainController(trainController);
+        userView.setAdminController(adminController);
         userView.setAdminView(adminView);
     }
 
     public static void main(String[] args) throws Exception {
         loader();
-        MainView mainView = new MainView(seatHandler, adminHandle, reservationSystem, userView, adminView);
+        MainView mainView = new MainView(adminController, userView, adminView);
         mainView.start();
     }
 
     private static void loader() {
-
-        trainDAO.setTrains(new ChairCarTrainFileHandler().getTrains());
-        ticketDAO.setTickets(new TicketFileHandler().getTickets());
-        userDAO.setUsers(new UserFileHandler().getUsers());
+        //new ChairCarTrainFileHandler().removeFile();
+        trainController.setTrains(new ChairCarTrainFileHandler().getTrains());
+        trainController.setTickets( new TicketFileHandler().getTickets());
+        adminController.setUser(new UserFileHandler().getUsers());
     }
 }
 

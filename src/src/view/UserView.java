@@ -1,10 +1,10 @@
 package view;
 
+import controller.AdminController;
+import controller.Traincontroller;
 import model.Passenger;
 import model.Ticket;
 import model.User;
-import service.AdminHandle;
-import service.ReservationSystem;
 import validation.Validation;
 
 import java.util.ArrayList;
@@ -13,19 +13,21 @@ import java.util.Scanner;
 
 public class UserView {
 
-    private ReservationSystem trainController;
-    private AdminHandle adminController;
+    private Traincontroller trainController;
+    private AdminController adminController;
     private AdminView adminView;
     private static Scanner scanner = new Scanner(System.in);
 
-    public UserView() {}
+    public UserView() {
 
-    public void setReservationSystem(ReservationSystem reservationSystem) {
-        this.trainController = reservationSystem;
     }
 
-    public void setAdminHandle(AdminHandle adminHandle) {
-        this.adminController = adminHandle;
+    public void setTrainController(Traincontroller trainController) {
+        this.trainController = trainController;
+    }
+
+    public void setAdminController(AdminController adminController) {
+        this.adminController = adminController;
     }
 
     public void setAdminView(AdminView adminView) {
@@ -69,6 +71,7 @@ public class UserView {
         if (!Validation.validateNumbers(option))
         {
             System.out.println("Enter the number only in numbers");
+            displayUserOption();
         }
         switch (option) {
             case "1":
@@ -81,6 +84,7 @@ public class UserView {
                 break;
             default:
                 System.out.println("Invalid Option");
+                displayUserOption();
         }
     }
 

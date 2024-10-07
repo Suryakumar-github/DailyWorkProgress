@@ -1,11 +1,12 @@
 package view;
 
+import controller.AdminController;
+import controller.SeatController;
+import controller.TrainControllerImpl;
+import controller.Traincontroller;
 import model.ChairCarTrain;
 import model.Seat;
 import model.Ticket;
-import service.AdminHandle;
-import service.ReservationSystem;
-import service.SeatHandler;
 import validation.Validation;
 
 import java.util.List;
@@ -13,22 +14,22 @@ import java.util.Scanner;
 
 public class AdminView {
 
-    private AdminHandle adminController;
-    private SeatHandler seatController;
-    private ReservationSystem trainController;
+    private AdminController adminController;
+    private SeatController seatController;
+    private Traincontroller trainController;
     private static Scanner scanner = new Scanner(System.in);
     public AdminView() {}
 
-    public void setAdminHandle(AdminHandle adminHandle) {
-        this.adminController = adminHandle;
+    public void setAdminController(AdminController adminController) {
+        this.adminController = adminController;
     }
 
-    public void setSeatHandler(SeatHandler seatHandler) {
-        this.seatController = seatHandler;
+    public void setSeatController(SeatController seatController) {
+        this.seatController = seatController;
     }
 
-    public void setReservationSystem(ReservationSystem reservationSystem) {
-        this.trainController = reservationSystem;
+    public void setTrainController(Traincontroller trainController) {
+        this.trainController = trainController;
     }
 
     public void displayAdminOption() {
@@ -55,11 +56,12 @@ public class AdminView {
                 break;
 
             case "4" :
+                System.exit(0);
                 break;
 
             default:
                 System.out.println("Invalid Option");
-                break;
+                displayAdminOption();
         }
     }
 
@@ -125,14 +127,19 @@ public class AdminView {
 
     public void displayTrainDetails(String startingPoint, String destination) {
         List<ChairCarTrain> trains = trainController.getAllTrains(startingPoint, destination);
-        if(!trains.isEmpty()) {
-            for (ChairCarTrain train : trains) {
+        if(!trains.isEmpty())
+        {
+            for (ChairCarTrain train : trains)
+            {
                 System.out.println("Available Seats from Source " + startingPoint + " to destination " + destination + " : " +
                         seatController.getAvailabeSeatCounts(startingPoint, destination, train.getRoutes(), train.getSeats()) + " Seats");
             }
         }
-        else {
-            String commonStation = trainController.findCommonStation(startingPoint,destination);
+        else
+        {
+            //String commonStation = trainController.findCommonStation(startingPoint,destination).getCommonStation();
+            TrainControllerImpl.ConnectingTrains connectingTrains = trainController.findCommonStation(startingPoint,destination);
+            String commonStation = connectingTrains.getCommonStation();
             List<ChairCarTrain> trains1 = trainController.getAllTrains(startingPoint, commonStation);
             List<ChairCarTrain> trains2 = trainController.getAllTrains(commonStation,destination );
             for (ChairCarTrain train : trains1) {

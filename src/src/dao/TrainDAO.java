@@ -10,7 +10,6 @@ public interface TrainDAO {
     void addTrain(ChairCarTrain train);
     List<ChairCarTrain> getTrains();
     void updateTrain();
-
     void setTrains(List<ChairCarTrain> trains);
 }
 

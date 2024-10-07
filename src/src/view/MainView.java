@@ -1,23 +1,17 @@
 package view;
 
-import service.AdminHandle;
-import service.ReservationSystem;
-import service.SeatHandler;
+import controller.AdminController;
 import validation.Validation;
 import java.util.Scanner;
 
 public class MainView {
     private static Scanner scanner = new Scanner(System.in);
-    private  AdminHandle adminController ;
-    private SeatHandler seatHandler;
-    private ReservationSystem reservationSystem ;
+    private AdminController adminController ;
     private UserView userView;
     private AdminView adminView;
 
-    public MainView(SeatHandler seatHandler, AdminHandle adminHandle, ReservationSystem reservationSystem, UserView userView, AdminView adminView) {
-        this.adminController = adminHandle;
-        this.seatHandler = seatHandler;
-        this.reservationSystem = reservationSystem;
+    public MainView(AdminController adminController, UserView userView, AdminView adminView) {
+        this.adminController = adminController;
         this.userView = userView;
         this.adminView = adminView;
     }
@@ -35,6 +29,13 @@ public class MainView {
                 displayLoginOption();
                 displayMenuAndGetChoice();
                 break;
+
+            case 3 :
+                System.exit(0);
+
+            default :
+                System.out.println("Invalid Option ");
+                displayMenuAndGetChoice();
         }
     }
     public int displayMenuAndGetChoice()

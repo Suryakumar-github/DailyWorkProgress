@@ -1,6 +1,6 @@
 package model;
 
-import controller.TrainController;
+import controller.TrainControllerImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,10 +12,10 @@ public class Train {
     private String trainName;
     private List<String> routes;
     private double totalEarning;
-    private TrainController trainController ;
+    private TrainControllerImpl trainController ;
 
     public Train(String trainName, String[] routes) {
-        trainNumber = trainController.getLastTrainNumber() + 1;
+        trainNumber = trainCounter++;
         this.trainName = trainName;
         this.routes = new ArrayList<>();
         for (String route : routes) {
