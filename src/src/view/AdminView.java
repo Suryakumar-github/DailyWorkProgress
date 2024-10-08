@@ -6,7 +6,6 @@ import controller.TrainControllerImpl;
 import controller.Traincontroller;
 import model.ChairCarTrain;
 import model.Seat;
-import model.Ticket;
 import validation.Validation;
 
 import java.util.List;
@@ -17,7 +16,7 @@ public class AdminView {
     private AdminController adminController;
     private SeatController seatController;
     private Traincontroller trainController;
-    private static Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
     public AdminView() {}
 
     public void setAdminController(AdminController adminController) {
@@ -62,6 +61,7 @@ public class AdminView {
             default:
                 System.out.println("Invalid Option");
                 displayAdminOption();
+                break;
         }
     }
 
@@ -137,7 +137,6 @@ public class AdminView {
         }
         else
         {
-            //String commonStation = trainController.findCommonStation(startingPoint,destination).getCommonStation();
             TrainControllerImpl.ConnectingTrains connectingTrains = trainController.findCommonStation(startingPoint,destination);
             String commonStation = connectingTrains.getCommonStation();
             List<ChairCarTrain> trains1 = trainController.getAllTrains(startingPoint, commonStation);
@@ -172,28 +171,7 @@ public class AdminView {
             }
         }
         System.out.println(".........................................");
+        scanner.nextLine();
     }
 
-    public void printTicket(Ticket ticket) {
-
-        System.out.println("PNR: " + ticket.getPnr());
-        System.out.println("From: " + ticket.getSource() + " To: " + ticket.getDestination());
-        System.out.println("Train Numbers: " + ticket.getTrainNumbers());
-        for(Seat seat : ticket.getSeats())
-        {
-            System.out.println("Passenger Name : "+ seat.getPassangerName() + ", Seat Number : "+seat.getSeatNumber());
-        }
-        System.out.println("Total Ticket Price : " + ticket.getTicketPrice());
-    }
-
-    public void displayTicketDetails(Ticket ticketToCancel) {
-        List<Seat> seats = ticketToCancel.getSeats();
-        for(Seat seat : seats) {
-            System.out.println("Passenger Name : "+seat.getPassangerName() +" Seat No : "+seat.getSeatNumber());
-        }
-    }
-
-    public void displayMessage(String message) {
-        System.out.println(message);
-    }
 }

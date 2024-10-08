@@ -1,5 +1,6 @@
 package dao;
 
+import fileHandler.TicketFileHandler;
 import fileHandler.TicketHandler;
 import model.Ticket;
 
@@ -11,15 +12,15 @@ public class TicketDAOImpl implements TicketDAO {
 
     private List<Ticket> tickets = new ArrayList<>();
     public static TicketDAOImpl instance;
-    TicketHandler ticketHandler ;
-    private TicketDAOImpl(TicketHandler ticketHandler) {
-        this.ticketHandler = ticketHandler;
+    TicketHandler ticketHandler  = new TicketFileHandler();
+
+    private TicketDAOImpl() {
     }
 
-    public static TicketDAOImpl getInstance(TicketHandler ticketHandler) {
+    public static TicketDAOImpl getInstance() {
         if(instance == null)
         {
-            instance = new TicketDAOImpl(ticketHandler);
+            instance = new TicketDAOImpl();
         }
         return instance;
     }

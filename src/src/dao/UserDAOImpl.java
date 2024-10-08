@@ -1,5 +1,6 @@
 package dao;
 
+import fileHandler.UserFileHandler;
 import fileHandler.UserHandler;
 import model.User;
 
@@ -7,19 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAOImpl implements UserDAO {
+
+    private final UserHandler userHandler = new UserFileHandler();
     private static UserDAOImpl instance;
-    private List<User> users;
-    UserHandler userHandler ;
+    private List<User> users = new ArrayList<>();;
 
-    private UserDAOImpl(UserHandler userHandler) {
-        this.userHandler = userHandler;
-        users = new ArrayList<>();
-    }
+    private UserDAOImpl() {}
 
-    public static UserDAOImpl getInstance(UserHandler userHandler) {
+    public static UserDAOImpl getInstance() {
         if(instance == null)
         {
-            instance = new UserDAOImpl(userHandler);
+            instance = new UserDAOImpl();
         }
         return instance;
     }
@@ -33,17 +32,6 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public List<User> getUser() {
        return users;
-    }
-
-    @Override
-    public boolean isValidUser(String userName, String password) {
-
-        for(User user : users ) {
-            if(user.getUserName().trim().equals(userName.trim()) && user.getPassword().trim().equals(password.trim())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

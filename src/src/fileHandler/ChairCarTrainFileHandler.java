@@ -12,7 +12,7 @@ import java.util.*;
 public class ChairCarTrainFileHandler implements TrainHandler{
 
     private static final String CHAIR_CAR_TRAIN_CSV_FILE = Paths.get("src", "files", "chair_car_trains.csv").toString();
-    private TrainDAOImpl trainDAO = TrainDAOImpl.getInstance(this);
+    private static TrainDAOImpl trainDAO = TrainDAOImpl.getInstance();
 
     @Override
     public void addTrain(ChairCarTrain train) {
@@ -69,7 +69,7 @@ public class ChairCarTrainFileHandler implements TrainHandler{
         List<ChairCarTrain> trains = trainDAO.getTrains();
         for(ChairCarTrain cTrain : trains)
         {
-            System.out.println(cTrain.getTrainName());
+           // System.out.println(cTrain.getTrainName());
             addTrain(cTrain);
         }
     }

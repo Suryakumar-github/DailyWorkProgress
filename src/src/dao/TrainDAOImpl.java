@@ -1,4 +1,5 @@
 package dao;
+import fileHandler.ChairCarTrainFileHandler;
 import fileHandler.TrainHandler;
 import model.ChairCarTrain;
 import java.util.ArrayList;
@@ -6,18 +7,17 @@ import java.util.List;
 
 public class TrainDAOImpl implements TrainDAO {
 
+    private final TrainHandler trainHandler = new ChairCarTrainFileHandler();
     private List<ChairCarTrain> trains = new ArrayList<>();
     private static TrainDAOImpl instance ;
-    TrainHandler trainHandler ;
-    private TrainDAOImpl(TrainHandler trainHandler) {
-        this.trainHandler = trainHandler;
+    private TrainDAOImpl() {
     }
 
-    public static TrainDAOImpl getInstance(TrainHandler trainHandler) {
+    public static TrainDAOImpl getInstance() {
 
         if(instance == null)
         {
-            instance = new TrainDAOImpl(trainHandler);
+            instance = new TrainDAOImpl();
         }
         return instance;
     }

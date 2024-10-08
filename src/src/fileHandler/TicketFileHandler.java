@@ -17,8 +17,7 @@ import java.util.List;
 public class TicketFileHandler implements TicketHandler{
 
     private static final String TICKET_CSV_FILE = Paths.get("src", "files", "tickets.csv").toString();
-    private static final String HEADER = "PNR,Source,Destination,TrainNumbers,Seats,TicketPrice";
-    private TicketDAOImpl ticketDAO = TicketDAOImpl.getInstance(this);
+    private static TicketDAOImpl ticketDAO = TicketDAOImpl.getInstance();
 
     @Override
     public void addTicket(Ticket ticket) {
@@ -58,16 +57,6 @@ public class TicketFileHandler implements TicketHandler{
         }
         ticketDAO.setTickets(tickets);
         return tickets;
-    }
-
-
-    public static void createTicketCSV() {
-        try (FileWriter fileWriter = new FileWriter(TICKET_CSV_FILE)) {
-            fileWriter.append(HEADER).append("\n");
-            System.out.println("Ticket CSV file created/reset with header.");
-        } catch (IOException e) {
-            System.out.println("Error while creating Ticket CSV: " + e.getMessage());
-        }
     }
 
     private static String listToString(List<Integer> list) {

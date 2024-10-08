@@ -3,7 +3,7 @@ package controller;
 import model.ChairCarTrain;
 import model.Passenger;
 import model.Seat;
-import view.AdminView;
+import view.UserView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class SeatControllerImpl implements SeatController {
     private AdminController adminController ;
-    AdminView adminView = new AdminView();
+    private final UserView userView = new UserView();
 
     public void setAdminHandle(AdminController adminController) {
         this.adminController = adminController;
@@ -71,7 +71,7 @@ public class SeatControllerImpl implements SeatController {
             if (flag)
             {
                 if(adminController.addPassengerToWaitingList(passenger, new String[]{source, destination}, train.getTrainNumber())) {
-                    adminView.displayMessage("No seats available, " + passenger.getName() + " added to the waiting list.");
+                    userView.displayMessage("No seats available, " + passenger.getName() + " added to the waiting list.");
                 }
                 else {
                     throw new Exception("Waiting list is full, can't add the passengers to the waiting list.");

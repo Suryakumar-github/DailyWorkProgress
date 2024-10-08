@@ -4,10 +4,6 @@ import dao.TrainDAO;
 import dao.TrainDAOImpl;
 import dao.UserDAO;
 import dao.UserDAOImpl;
-import fileHandler.ChairCarTrainFileHandler;
-import fileHandler.TrainHandler;
-import fileHandler.UserFileHandler;
-import fileHandler.UserHandler;
 import model.*;
 import view.AdminView;
 
@@ -16,19 +12,13 @@ import java.util.Map;
 
 
 public class AdminControllerImpl implements AdminController {
-    TrainHandler trainHandler = new ChairCarTrainFileHandler();
-    UserHandler userHandler = new UserFileHandler();
-    private final TrainDAO trainDAO = TrainDAOImpl.getInstance(trainHandler);
-    private final UserDAO userDAO = UserDAOImpl.getInstance(userHandler);
-
+    private final TrainDAO trainDAO = TrainDAOImpl.getInstance();
+    private final UserDAO userDAO = UserDAOImpl.getInstance();
     private final SeatController seatController ;
-    private AdminView adminView ;
+    private final AdminView adminView ;
 
-    public AdminControllerImpl(SeatController seatHandler) {
-        this.seatController = seatHandler;
-
-    }
-    public void setAdminView(AdminView adminView) {
+    public AdminControllerImpl(SeatController seatController, AdminView adminView) {
+        this.seatController = seatController;
         this.adminView = adminView;
     }
 
@@ -86,8 +76,9 @@ public class AdminControllerImpl implements AdminController {
     }
     @Override
     public boolean isValidAdmin(String userName, String password) {
-        Admin admin = new Admin();
-        return userName.trim().equals(admin.getUserName().trim()) && password.trim().equals(admin.getPassword().trim());
+        String adminUserName = "MainAdmin";
+        String adminPassword = "MainAdmin@123";
+        return userName.trim().equals(adminUserName.trim()) && password.trim().equals(adminPassword.trim());
     }
     @Override
     public boolean isValidUser(String userName, String password) {

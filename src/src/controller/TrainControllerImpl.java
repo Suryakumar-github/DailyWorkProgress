@@ -2,37 +2,22 @@ package controller;
 import dao.TicketDAO;
 import dao.TicketDAOImpl;
 import dao.TrainDAOImpl;
-import fileHandler.ChairCarTrainFileHandler;
-import fileHandler.TicketFileHandler;
-import fileHandler.TicketHandler;
-import fileHandler.TrainHandler;
 import model.*;
-import view.AdminView;
 import view.UserView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TrainControllerImpl implements Traincontroller {
-    TrainHandler trainHandler = new ChairCarTrainFileHandler();
-    TicketHandler ticketHandler = new TicketFileHandler();
-    private final TrainDAOImpl trainDAO = TrainDAOImpl.getInstance(trainHandler) ;
-    private final TicketDAO ticketDAO = TicketDAOImpl.getInstance(ticketHandler);
+    private final TrainDAOImpl trainDAO = TrainDAOImpl.getInstance() ;
+    private final TicketDAO ticketDAO = TicketDAOImpl.getInstance();
     private final AdminController adminHandle ;
     private final SeatController seatController;
-    private  UserView userView ;
-    private  AdminView adminView ;
+    private final UserView userView ;
 
-    public TrainControllerImpl(AdminController adminHandle, SeatController seatHandler) {
+    public TrainControllerImpl(AdminController adminHandle, SeatController seatHandler, UserView userView) {
         this.adminHandle = adminHandle;
         this.seatController = seatHandler;
-    }
-
-    public void setAdminView(AdminView adminView) {
-        this.adminView = adminView;
-    }
-
-    public void setUserView(UserView userView) {
         this.userView = userView;
     }
 
@@ -52,7 +37,7 @@ public class TrainControllerImpl implements Traincontroller {
             {
                 if (isWaitingListFull(selectedTrain, numberOfPassengers))
                 {
-                    adminView.displayMessage("No seats available and the waiting list is full. Unable to book the ticket.");
+                    userView.displayMessage("No seats available and the waiting list is full. Unable to book the ticket.");
                     return;
                 }
             }
@@ -79,7 +64,7 @@ public class TrainControllerImpl implements Traincontroller {
                 ticketPrice = ticketPrice1 + ticketPrice2;
                 Ticket ticket = new Ticket(source, destination, trainNumbers, bookedSeats, ticketPrice);
                 ticketDAO.addTicket(ticket);
-                adminView.printTicket(ticket);
+                userView.printTicket(ticket);
                 trainDAO.updateTrain();
             }
         }
@@ -104,13 +89,13 @@ public class TrainControllerImpl implements Traincontroller {
                 selectedTrain.setTotalEarning(ticketPrice);
                 Ticket ticket = new Ticket(source, destination, trainNumbers, bookedSeats, ticketPrice);
                 ticketDAO.addTicket(ticket);
-                adminView.printTicket(ticket);
+                userView.printTicket(ticket);
                 trainDAO.updateTrain();
             }
         }
         catch (Exception e)
         {
-            adminView.displayMessage("Booking failed: " );
+            userView.displayMessage("Booking failed: " );
             e.printStackTrace();
         }
     }
@@ -129,16 +114,16 @@ public class TrainControllerImpl implements Traincontroller {
                         isRouteValid(commonStation, destination, connectingTrains.getTrain2().getRoutes())) {
                     if (seatController.isSeatsAvailable(connectingTrains.getTrain1(), source, commonStation, numberOfPassengers) ||
                             seatController.isSeatsAvailable(connectingTrains.getTrain2(), commonStation, destination, numberOfPassengers)) {
-                        adminView.displayMessage("No seats available for the full journey.");
+                        userView.displayMessage("No seats available for the full journey.");
                     }
                 } else {
-                    adminView.displayMessage("No Train Available for the given Source and Destination");
+                    userView.displayMessage("No Train Available for the given Source and Destination");
                 }
             }
         }
         else
         {
-            adminView.displayMessage("No valid route found.");
+            userView.displayMessage("No valid route found.");
         }
         return connectingTrains;
     }
@@ -165,7 +150,7 @@ public class TrainControllerImpl implements Traincontroller {
 
         if (ticketToCancel != null)
         {
-            adminView.displayTicketDetails(ticketToCancel);
+            userView.displayTicketDetails(ticketToCancel);
             List<Integer> passengersSerialNo = userView.getPassengersSerialNumber(ticketToCancel);
             String canceledSource = ticketToCancel.getSource();
             String canceledDestination = ticketToCancel.getDestination();
@@ -181,7 +166,7 @@ public class TrainControllerImpl implements Traincontroller {
             }
         } else
         {
-            adminView.displayMessage("PNR not found.");
+            userView.displayMessage("PNR not found.");
         }
     }
 
@@ -198,7 +183,7 @@ public class TrainControllerImpl implements Traincontroller {
             trainDAO.updateTrain();
 
         }
-        adminView.displayMessage("Train Cancelled Successfully");
+        userView.displayMessage("Train Cancelled Successfully");
         if (passengersSerialNo.size() == seats.size())
         {
             ticketDAO.removeTicket(ticket);
@@ -231,7 +216,7 @@ public class TrainControllerImpl implements Traincontroller {
             }
             trainDAO.updateTrain();
         }
-        adminView.displayMessage("Train Cancelled Successfully");
+        userView.displayMessage("Train Cancelled Successfully");
         if (passengersSerialNo.size() == seats.size())
         {
             ticketDAO.removeTicket(ticket);
@@ -267,7 +252,10 @@ public class TrainControllerImpl implements Traincontroller {
         List<ChairCarTrain> trains = trainDAO.getTrains();
         for(ChairCarTrain train : trains) {
             if(train.getRoutes().contains(source) || train.getRoutes().contains(destination)) {
-                return findCommonStation(train, source, destination);
+                ConnectingTrains connectingTrain = findCommonStation(train, source, destination);
+                if(connectingTrain != null) {
+                    return connectingTrain;
+                }
             }
         }
         return null;
@@ -339,19 +327,14 @@ public class TrainControllerImpl implements Traincontroller {
             this.train2 = train2;
             this.commonStation = commonStation;
         }
-
         public ChairCarTrain getTrain1() {
             return train1;
         }
-
         public ChairCarTrain getTrain2() {
             return train2;
         }
-
         public String getCommonStation() {
             return commonStation;
         }
-
     }
-
 }

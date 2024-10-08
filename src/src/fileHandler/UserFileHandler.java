@@ -15,7 +15,7 @@ import java.util.List;
 public class UserFileHandler implements UserHandler{
 
     private final String USER_CSV_FILE = Paths.get("src", "files", "users.csv").toString();
-    private final UserDAO userDAO = UserDAOImpl.getInstance(this);
+    private static final UserDAO userDAO = UserDAOImpl.getInstance();
 
     @Override
     public void addUser(User user) {

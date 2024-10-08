@@ -3,6 +3,7 @@ package view;
 import controller.AdminController;
 import controller.Traincontroller;
 import model.Passenger;
+import model.Seat;
 import model.Ticket;
 import model.User;
 import validation.Validation;
@@ -16,7 +17,7 @@ public class UserView {
     private Traincontroller trainController;
     private AdminController adminController;
     private AdminView adminView;
-    private static Scanner scanner = new Scanner(System.in);
+    private Scanner scanner = new Scanner(System.in);
 
     public UserView() {
 
@@ -81,10 +82,12 @@ public class UserView {
                 cancelTicket();
                 break;
             case "3":
+                System.exit(0);
                 break;
             default:
                 System.out.println("Invalid Option");
                 displayUserOption();
+                break;
         }
     }
 
@@ -115,6 +118,7 @@ public class UserView {
             displayUserOption();
         }
         trainController.bookTicket(startingPoint, destination, Integer.parseInt(numberOfPassengers));
+        scanner.nextLine();
         displayUserOption();
     }
 
@@ -169,4 +173,25 @@ public class UserView {
         return passengers;
     }
 
+    public void printTicket(Ticket ticket) {
+
+        System.out.println("PNR: " + ticket.getPnr());
+        System.out.println("From: " + ticket.getSource() + " To: " + ticket.getDestination());
+        System.out.println("Train Numbers: " + ticket.getTrainNumbers());
+        for(Seat seat : ticket.getSeats())
+        {
+            System.out.println("Passenger Name : "+ seat.getPassangerName() + ", Seat Number : "+seat.getSeatNumber());
+        }
+        System.out.println("Total Ticket Price : " + ticket.getTicketPrice());
+    }
+
+    public void displayMessage(String message) {
+        System.out.println(message);
+    }
+    public void displayTicketDetails(Ticket ticketToCancel) {
+        List<Seat> seats = ticketToCancel.getSeats();
+        for(Seat seat : seats) {
+            System.out.println("Passenger Name : "+seat.getPassangerName() +" Seat No : "+seat.getSeatNumber());
+        }
+    }
 }

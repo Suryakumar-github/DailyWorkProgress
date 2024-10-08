@@ -5,10 +5,10 @@ import validation.Validation;
 import java.util.Scanner;
 
 public class MainView {
-    private static Scanner scanner = new Scanner(System.in);
-    private AdminController adminController ;
-    private UserView userView;
-    private AdminView adminView;
+    private final Scanner scanner = new Scanner(System.in);
+    private final AdminController adminController ;
+    private final UserView userView;
+    private final AdminView adminView;
 
     public MainView(AdminController adminController, UserView userView, AdminView adminView) {
         this.adminController = adminController;
@@ -32,10 +32,11 @@ public class MainView {
 
             case 3 :
                 System.exit(0);
-
+                break;
             default :
                 System.out.println("Invalid Option ");
                 displayMenuAndGetChoice();
+                break;
         }
     }
     public int displayMenuAndGetChoice()
