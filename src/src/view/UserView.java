@@ -1,11 +1,10 @@
 package view;
 
 import controller.AdminController;
+import controller.SeatController;
+import controller.TrainControllerImpl;
 import controller.Traincontroller;
-import model.Passenger;
-import model.Seat;
-import model.Ticket;
-import model.User;
+import model.*;
 import validation.Validation;
 
 import java.util.ArrayList;
@@ -16,7 +15,7 @@ public class UserView {
 
     private Traincontroller trainController;
     private AdminController adminController;
-    private AdminView adminView;
+    private SeatController seatController;
     private Scanner scanner = new Scanner(System.in);
 
     public UserView() {
@@ -31,8 +30,8 @@ public class UserView {
         this.adminController = adminController;
     }
 
-    public void setAdminView(AdminView adminView) {
-        this.adminView = adminView;
+    public void setSeatController(SeatController seatController) {
+        this.seatController = seatController;
     }
 
     public void displayRegisterOption() throws Exception {
@@ -92,7 +91,7 @@ public class UserView {
     }
 
     public void bookTicket() throws Exception {
-        adminView.displayTrainDetails();
+        displayTrainDetails();
         System.out.print("Enter Starting point: ");
         String startingPoint = scanner.nextLine().trim().toUpperCase();
         if (!Validation.validateName(startingPoint))
@@ -109,7 +108,7 @@ public class UserView {
             displayUserOption();
         }
 
-        adminView.displayTrainDetails(startingPoint, destination);
+        displayTrainDetails(startingPoint, destination);
         System.out.print("Enter number of passengers: ");
         String numberOfPassengers = scanner.nextLine().trim();
         if (!Validation.validateNumbers(numberOfPassengers))
@@ -194,4 +193,37 @@ public class UserView {
             System.out.println("Passenger Name : "+seat.getPassangerName() +" Seat No : "+seat.getSeatNumber());
         }
     }
+    public void displayTrainDetails() {
+        List<ChairCarTrain> trains = trainController.getTrains();
+        for(ChairCarTrain train : trains) {
+            System.out.println("Train Name : "+train.getTrainName() + " Route : "+train.getRoutes()+ " Train No : "+train.getTrainNumber() );
+        }
+    }
+    public void displayTrainDetails(String startingPoint, String destination) {
+        List<ChairCarTrain> trains = trainController.getAllTrains(startingPoint, destination);
+        if(!trains.isEmpty())
+        {
+            for (ChairCarTrain train : trains)
+            {
+                System.out.println("Available Seats from Source " + startingPoint + " to destination " + destination + " : " +
+                        seatController.getAvailabeSeatCounts(startingPoint, destination, train.getRoutes(), train.getSeats()) + " Seats");
+            }
+        }
+        else
+        {
+            TrainControllerImpl.ConnectingTrains connectingTrains = trainController.findCommonStation(startingPoint,destination);
+            String commonStation = connectingTrains.getCommonStation();
+            List<ChairCarTrain> trains1 = trainController.getAllTrains(startingPoint, commonStation);
+            List<ChairCarTrain> trains2 = trainController.getAllTrains(commonStation,destination );
+            for (ChairCarTrain train : trains1) {
+                System.out.println("Available Seats from Source " + startingPoint + " to destination " + commonStation + " : " +
+                        seatController.getAvailabeSeatCounts(startingPoint, destination, train.getRoutes(), train.getSeats()) + " Seats");
+            }
+            for (ChairCarTrain train : trains2) {
+                System.out.println("Available Seats from Source " + commonStation + " to destination " + destination + " : " +
+                        seatController.getAvailabeSeatCounts(startingPoint, destination, train.getRoutes(), train.getSeats()) + " Seats");
+            }
+        }
+    }
+
 }

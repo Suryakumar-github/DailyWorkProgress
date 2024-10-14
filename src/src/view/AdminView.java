@@ -1,8 +1,6 @@
 package view;
 
 import controller.AdminController;
-import controller.SeatController;
-import controller.TrainControllerImpl;
 import controller.Traincontroller;
 import model.ChairCarTrain;
 import model.Seat;
@@ -14,17 +12,12 @@ import java.util.Scanner;
 public class AdminView {
 
     private AdminController adminController;
-    private SeatController seatController;
     private Traincontroller trainController;
     private final Scanner scanner = new Scanner(System.in);
     public AdminView() {}
 
     public void setAdminController(AdminController adminController) {
         this.adminController = adminController;
-    }
-
-    public void setSeatController(SeatController seatController) {
-        this.seatController = seatController;
     }
 
     public void setTrainController(Traincontroller trainController) {
@@ -122,33 +115,6 @@ public class AdminView {
         List<ChairCarTrain> trains = trainController.getTrains();
         for(ChairCarTrain train : trains) {
             System.out.println("Train Name : "+train.getTrainName() + " Route : "+train.getRoutes()+ " Train No : "+train.getTrainNumber() );
-        }
-    }
-
-    public void displayTrainDetails(String startingPoint, String destination) {
-        List<ChairCarTrain> trains = trainController.getAllTrains(startingPoint, destination);
-        if(!trains.isEmpty())
-        {
-            for (ChairCarTrain train : trains)
-            {
-                System.out.println("Available Seats from Source " + startingPoint + " to destination " + destination + " : " +
-                        seatController.getAvailabeSeatCounts(startingPoint, destination, train.getRoutes(), train.getSeats()) + " Seats");
-            }
-        }
-        else
-        {
-            TrainControllerImpl.ConnectingTrains connectingTrains = trainController.findCommonStation(startingPoint,destination);
-            String commonStation = connectingTrains.getCommonStation();
-            List<ChairCarTrain> trains1 = trainController.getAllTrains(startingPoint, commonStation);
-            List<ChairCarTrain> trains2 = trainController.getAllTrains(commonStation,destination );
-            for (ChairCarTrain train : trains1) {
-                System.out.println("Available Seats from Source " + startingPoint + " to destination " + commonStation + " : " +
-                        seatController.getAvailabeSeatCounts(startingPoint, destination, train.getRoutes(), train.getSeats()) + " Seats");
-            }
-            for (ChairCarTrain train : trains2) {
-                System.out.println("Available Seats from Source " + commonStation + " to destination " + destination + " : " +
-                        seatController.getAvailabeSeatCounts(startingPoint, destination, train.getRoutes(), train.getSeats()) + " Seats");
-            }
         }
     }
 

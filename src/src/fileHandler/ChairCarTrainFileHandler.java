@@ -46,14 +46,14 @@ public class ChairCarTrainFileHandler implements TrainHandler{
             String line;
             while ((line = br.readLine()) != null && !line.isEmpty() && !line.equals("\\s")) {
                 String[] trainData = line.split(",");
-                    int trainNumber = Integer.parseInt(trainData[0]);
-                    String trainName = trainData[1];
-                    List<String> routes = stringToList(trainData[2]);
-                    List<Seat> seats = stringToSeats(trainData[3]);
-                    Map<Passenger, String[]> passengerMap = stringToWaitingList(trainData[4]);
-                    double totalEarning = Double.parseDouble(trainData[5]);
-                    ChairCarTrain chairCarTrain = new ChairCarTrain(trainName, trainNumber, routes.toArray(new String[0]), seats,passengerMap, totalEarning);
-                    chairCarTrains.add(chairCarTrain);
+                int trainNumber = Integer.parseInt(trainData[0]);
+                String trainName = trainData[1];
+                List<String> routes = stringToList(trainData[2]);
+                List<Seat> seats = stringToSeats(trainData[3]);
+                Map<Passenger, String[]> passengerMap = stringToWaitingList(trainData[4]);
+                double totalEarning = Double.parseDouble(trainData[5]);
+                ChairCarTrain chairCarTrain = new ChairCarTrain(trainName, trainNumber, routes.toArray(new String[0]), seats,passengerMap, totalEarning);
+                chairCarTrains.add(chairCarTrain);
 
             }
         } catch (IOException e) {
@@ -124,6 +124,7 @@ public class ChairCarTrainFileHandler implements TrainHandler{
         }
         return seats;
     }
+
 
     private static String waitingListToString(Map<Passenger, String[]> waitingList) {
         StringBuilder sb = new StringBuilder();

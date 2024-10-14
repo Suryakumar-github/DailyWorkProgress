@@ -11,14 +11,13 @@ import java.util.List;
 public class TrainControllerImpl implements Traincontroller {
     private final TrainDAOImpl trainDAO = TrainDAOImpl.getInstance() ;
     private final TicketDAO ticketDAO = TicketDAOImpl.getInstance();
-    private final AdminController adminHandle ;
+    private final AdminController adminController ;
     private final SeatController seatController;
-    private final UserView userView ;
+    private final UserView userView = new UserView();
 
-    public TrainControllerImpl(AdminController adminHandle, SeatController seatHandler, UserView userView) {
-        this.adminHandle = adminHandle;
+    public TrainControllerImpl(AdminController adminController, SeatController seatHandler) {
+        this.adminController = adminController;
         this.seatController = seatHandler;
-        this.userView = userView;
     }
 
     @Override
@@ -231,7 +230,7 @@ public class TrainControllerImpl implements Traincontroller {
         ChairCarTrain train = getTrainByTrainNumber(trainNumber);
         if(train != null)
         {
-            adminHandle.allocateSeatFromWaitingList(canceledSource, canceledDestination,trainNumber);
+            adminController.allocateSeatFromWaitingList(canceledSource, canceledDestination,trainNumber);
         }
     }
 

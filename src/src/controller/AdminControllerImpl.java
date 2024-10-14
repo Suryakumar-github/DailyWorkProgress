@@ -15,11 +15,10 @@ public class AdminControllerImpl implements AdminController {
     private final TrainDAO trainDAO = TrainDAOImpl.getInstance();
     private final UserDAO userDAO = UserDAOImpl.getInstance();
     private final SeatController seatController ;
-    private final AdminView adminView ;
+    private final AdminView adminView = new AdminView();
 
-    public AdminControllerImpl(SeatController seatController, AdminView adminView) {
+    public AdminControllerImpl(SeatController seatController) {
         this.seatController = seatController;
-        this.adminView = adminView;
     }
 
     @Override

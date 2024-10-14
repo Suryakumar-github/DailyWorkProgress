@@ -1,19 +1,30 @@
 package view;
 
 import controller.AdminController;
+import controller.SeatController;
+import controller.TrainControllerImpl;
+import controller.Traincontroller;
 import validation.Validation;
 import java.util.Scanner;
 
 public class MainView {
     private final Scanner scanner = new Scanner(System.in);
     private final AdminController adminController ;
-    private final UserView userView;
-    private final AdminView adminView;
+    private final UserView userView = new UserView();
+    private final AdminView adminView = new AdminView();
+    private final Traincontroller trainController;
 
-    public MainView(AdminController adminController, UserView userView, AdminView adminView) {
+    public MainView(AdminController adminController, SeatController seatController) {
         this.adminController = adminController;
-        this.userView = userView;
-        this.adminView = adminView;
+        this.trainController = new TrainControllerImpl(adminController, seatController);
+
+
+        userView.setTrainController(trainController);
+        userView.setAdminController(adminController);
+        userView.setSeatController(seatController);
+
+        adminView.setAdminController(adminController);
+        adminView.setTrainController(trainController);
     }
 
     public void start() throws Exception {
