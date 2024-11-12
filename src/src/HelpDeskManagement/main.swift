@@ -1,0 +1,74 @@
+import Foundation
+
+struct Main {
+    private var userController : UserController
+    
+    init() {
+        self.userController = UserControllerImpl()
+    }
+    
+    func loadAgents() {
+        let agent1 = Agent(name: "agent1",  department: "Software", userName: "Agent1", password: "Agent1@12")
+        let agent2 = Agent(name: "agent2",  department: "Hardware", userName: "Agent2", password: "Agent2@12")
+        let agent3 = Agent(name: "agent3", department: "Security", userName: "Agent3", password: "Agent3@12")
+        let agent4 = Agent(name: "agent4",  department: "Network", userName: "Agent4", password: "Agent4@12")
+        
+        var agents = DataStorage.allAgents
+        agents[agent1.getId] = agent1
+        agents[agent2.getId] = agent2
+        agents[agent3.getId] = agent3
+        agents[agent4.getId] = agent4
+        
+        DataStorage.allAgents = agents
+    }
+    
+    func loadKnowledgeBaseEntries() {
+        let entry1 = KnowledgeBase(
+            title: "Software Installation Issue",
+            issue: IssueType.softwareIssue,
+            solution: "Ensure you have the latest version of the installer. Run as administrator and follow the installation wizard. Restart your computer if issues persist.",
+            tags: ["installation", "software", "admin rights"],
+            createdDate: Date()
+        )
+        
+        let entry2 = KnowledgeBase(
+            title: "Printer Not Responding",
+            issue: IssueType.hardwareIssue,
+            solution: "Check if the printer is turned on and properly connected. Restart the printer and ensure drivers are up to date. If the issue continues, try a different USB port or network connection.",
+            tags: ["printer", "hardware", "connection"],
+            createdDate: Date()
+        )
+        
+        let entry3 = KnowledgeBase(
+            title: "Slow Network Connection",
+            issue: IssueType.networkIisue,
+            solution: "Check the router and modem connection. Restart them if necessary. Ensure there are no bandwidth-heavy applications running on your network. If the issue persists, contact the network administrator.",
+            tags: ["network", "connection", "speed"],
+            createdDate: Date()
+        )
+        
+        let entry4 = KnowledgeBase(
+            title: "Unauthorized Access Alert",
+            issue: IssueType.securityIssue,
+            solution: "Immediately change your password. Review recent login activities in the security settings. Enable two-factor authentication and ensure your antivirus is up to date.",
+            tags: ["security", "unauthorized access", "password"],
+            createdDate: Date()
+        )
+        
+        var knowledgeBaseEntries = DataStorage.knowledgeBaseEntry
+        knowledgeBaseEntries[entry1.getId] = entry1
+        knowledgeBaseEntries[entry2.getId] = entry2
+        knowledgeBaseEntries[entry3.getId] = entry3
+        knowledgeBaseEntries[entry4.getId] = entry4
+        
+        DataStorage.knowledgeBaseEntry = knowledgeBaseEntries
+    }
+
+  
+}
+let main = Main()
+main.loadAgents()
+main.loadKnowledgeBaseEntries()
+
+var mainView = MainView( userController: UserControllerImpl())
+mainView.showLoginScreen()
