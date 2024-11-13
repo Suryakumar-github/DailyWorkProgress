@@ -6,11 +6,12 @@
 //
 
 protocol UserController {
-    func register(name : String, userRole : UserRole, userName : String, password : String)
+    func register(name : String, userRole : UserRole, userName : String, password : String) -> Int
     func viewTicketStatus(ticketid : Int) -> TicketStatus
     func getUserById(userId : Int) -> User?
     func notifyUser(ticket: Int, description: String, user: inout User) -> Bool
     func authenticate(username: String, password: String, role: Role) -> Bool
     func setTicketController(ticketController : TicketController)
     func getAllTheCreatedTickets(user: User) -> [Ticket]
+    func getUserNotifications(userId : Int) -> [Int: String]
 }

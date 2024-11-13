@@ -9,6 +9,7 @@ import Foundation
 struct AgentView {
     private var ticketController : TicketController?
     private var knowledgeBase : KnowledgeBaseController?
+    private var agentController = AgentControllerImpl()
     //private lazy var mainView = MainView()
     
     mutating func setTicketController(ticketController : TicketControllerImpl) {
@@ -25,7 +26,8 @@ struct AgentView {
         print("2. Update Ticket Status")
         print("3. Search Knowledge Base")
         print("4. Add Entry In Knowledge Base")
-        print("5. Logout")
+        print("5. Update Agent Availability")
+        print("6. Logout")
         print("................................")
         print("Choose an Option ")
         let option = Int(readLine()!)
@@ -39,7 +41,9 @@ struct AgentView {
             searchKnowledgBase()
         case 4:
             addKnowledgeBaseEntry()
-        case 5:
+        case 5 :
+            updateAgentAvailability()
+        case 6:
             mainView.showLoginScreen()
             
         default :
@@ -47,14 +51,45 @@ struct AgentView {
         }
     }
     
+    func updateAgentAvailability() {
+        print("Enter the userId: ")
+        
+        guard let userIdString = readLine(), let userId = Int(userIdString) else {
+            print("Invalid input. Please enter a valid user ID.")
+            return
+        }
+        
+        print("Enter Agent's Status (available, busy, leave, offline):")
+        
+        guard let agentStatusString = readLine(),
+              let agentStatus = AgentStatus(rawValue: agentStatusString.lowercased()) else {
+            print("Invalid status. Please enter a valid status (available, busy, leave, offline).")
+            return
+        }
+        
+        if agentController.updateAgentAvailability(agentId: userId, status: agentStatus){
+            print("Agent status updated successfully ")
+        }
+        else {
+            print("Agent status not updated ")
+        }
+        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Agent Availablity is Updated", userId: userId)
+        DataStorage.allLogsEntry[userId] = logsEntry
+        agentMenu()
+    }
+
+    
     func viewAssignedTickets() {
         let tickets = ticketController?.fetchAssignedTickets(agentId: 1)
+        print("----------------------------------------------------------------")
         for index in 0..<tickets!.count {
+            print("----------------------------------------------------------------")
             print("Ticket Id : \(String(describing: tickets?[index].getTicketId))")
             print("Ticket Title : \(String(describing: tickets?[index].getTicketTitle))")
             print("Ticket Description : \(String(describing: tickets?[index].descriptionproperty))")
             print("Ticket Priority : \(String(describing: tickets?[index].priorityProperty))")
         }
+        print("----------------------------------------------------------------")
         agentMenu()
     }
     
@@ -78,7 +113,8 @@ struct AgentView {
         } else {
             print("Invalid status entered.")
         }
-        
+        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticlet Status is Updated", userId: ticketId)
+        DataStorage.allLogsEntry[ticketId] = logsEntry
         agentMenu()
     }
     
@@ -93,16 +129,17 @@ struct AgentView {
         let tag = readLine() ?? ""
         
         let knowledgeBaseEntry = knowledgeBase?.search(title: title, tag: tag)
+        print("----------------------------------------------------------------")
         print("Title : \(String(describing: knowledgeBaseEntry?.titleproperty))")
         print("Solution : \(String(describing: knowledgeBaseEntry?.solutionProperty)) ")
-        
+        print("----------------------------------------------------------------")
         agentMenu()
     }
     
 
     func addKnowledgeBaseEntry() {
         print("Enter the Title:")
-        guard let title = readLine(), !title.isEmpty else {
+        guard let title = readLine(), !title.isEmpty && Validation.validateName(title) else {
             print("Invalid Title")
             return
         }
@@ -135,7 +172,8 @@ struct AgentView {
             createdDate: Date(),
             lastUpdatedDate: Date()
         )
-        
+        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "One Entry Added In KnowledgeBase", userId: nil)
+        DataStorage.allLogsEntry[0] = logsEntry
         agentMenu()
     }
 }

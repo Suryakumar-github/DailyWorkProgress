@@ -32,11 +32,15 @@ class TicketControllerImpl: TicketController {
             print("Ticket Craetion is Failed ")
         }
         DataStorage.allTickets[ticket.getTicketId] = ticket
+        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Ticket Created with TicketId : \(ticket.getTicketId)", userId: ticket.getTicketId)
+        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
     }
     
     func updateTicketStatus(ticketId: Int, status: TicketStatus) -> Bool {
         if let ticket = getTicketById(ticketId: ticketId) {
             ticket.statusProperty = status
+            let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticket Status Update for tickedId : \(ticketId) as \(status)", userId: ticketId)
+            DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
             return true
         }
         return false
@@ -45,6 +49,8 @@ class TicketControllerImpl: TicketController {
     func closeTicket(ticketId: Int) -> Bool {
         let ticket = getTicketById(ticketId: ticketId)
         agentController?.resolveTicket(ticketId: ticketId, userId: ticket!.getUserId)
+        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticket Closed for ticketId : \(ticketId)", userId: ticketId)
+        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
         return true
     }
     
@@ -73,10 +79,14 @@ class TicketControllerImpl: TicketController {
        
     }
     
-    func reassignTicket(ticketId: Int, agentId : Int) -> Bool {
+    func reassignTicket(ticketId: Int, agentId : Int, oldAgentid : Int) -> Bool {
+        let oldAgent = agentController?.getAgentById(agentId: oldAgentid)
         let ticket = getTicketById(ticketId: ticketId)!
         let agent = agentController?.getAgentById(agentId: agentId)
         agent?.assignedTicketsProperty.append(ticket)
+        oldAgent?.assignedTicketsProperty.remove(at: ticketId)
+        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticket Reassigned From OldAgentId : \(oldAgentid) to NewAgentId : \(agentId)", userId: agentId)
+        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
         return true
     }
     

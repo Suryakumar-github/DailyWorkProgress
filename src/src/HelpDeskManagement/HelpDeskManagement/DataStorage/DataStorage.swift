@@ -13,19 +13,4 @@ struct DataStorage {
     static var allLogsEntry : [Int : LogsEntry] = [:]
     static var knowledgeBaseEntry : [Int : KnowledgeBase] = [:]
     
-//    static var getAllTickets : [Int : Ticket] {
-//        return allTickets
-//    }
-//    static var getAllAgents : [Int : Agent] {
-//        return allAgents
-//    }
-//    static var getAllUsers : [Int : User] {
-//        return allUsers
-//    }
-//    static var getAllLogsEntry : [Int : LogsEntry] {
-//        return allLogsEntry
-//    }
-//    static var getAllKnowledgeBaseEntry : [Int : KnowledgeBase] {
-//        return knowledgeBaseEntry
-//    }
 }

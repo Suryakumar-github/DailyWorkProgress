@@ -13,17 +13,16 @@ class LogsEntry {
     private var logType: LogType
     private var message: String
     private var userId: Int?
-    private var additionalInfo: [String: String]?
-    private var logCount = 0
+    private var additionalInfo: [String: String] = [:]
+    private static var logCount = 0
     
-    init(timestamp: Date, logType: LogType, message: String, userId: Int? = nil, additionalInfo: [String : String]? = nil) {
-        logCount += 1
-        self.id = logCount
+    init(timestamp: Date, logType: LogType, message: String, userId: Int? = nil) {
+        LogsEntry.logCount += 1
+        self.id = LogsEntry.logCount
         self.timestamp = timestamp
         self.logType = logType
         self.message = message
         self.userId = userId
-        self.additionalInfo = additionalInfo
     }
     
     var getId : Int {
@@ -60,15 +59,10 @@ class LogsEntry {
     }
     var additionalInfoProperty : [String : String]? {
         get {
-            if let newAdditionalInfo = additionalInfo {
-                return newAdditionalInfo
+            return additionalInfo
             }
-            else {
-                return nil
-            }
-        }
         set(newAdditionalInfo) {
-            additionalInfo = newAdditionalInfo
+            additionalInfo = newAdditionalInfo ?? [:]
         }
     }
     

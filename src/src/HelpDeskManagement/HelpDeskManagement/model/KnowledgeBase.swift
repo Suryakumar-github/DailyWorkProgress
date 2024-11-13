@@ -15,11 +15,11 @@ class KnowledgeBase {
     private var tags: [String]
     private let createdDate: Date
     private var lastUpdatedDate: Date?
-    private var idCount = 1
+    private static var idCount = 0
     
     init(title: String, issue: IssueType, solution: String, tags: [String], createdDate: Date, lastUpdatedDate: Date? = nil) {
-        idCount += 1
-        self.id = idCount
+        KnowledgeBase.idCount += 1
+        self.id = KnowledgeBase.idCount
         self.title = title
         self.issue = issue
         self.solution = solution

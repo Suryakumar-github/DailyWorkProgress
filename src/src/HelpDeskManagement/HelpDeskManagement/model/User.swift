@@ -10,7 +10,7 @@ struct User {
     private let id : Int
     private let name : String
     private var role : UserRole
-    private var userNotifications : [Int : String]? = [:]
+    private var userNotifications : [Int : String] = [:]
     private let userName : String
     private var password : String
     private static var userCount = 0

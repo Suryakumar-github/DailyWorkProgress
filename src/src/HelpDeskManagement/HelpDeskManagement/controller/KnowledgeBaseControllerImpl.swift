@@ -9,19 +9,14 @@ import Foundation
 class KnowledgeBaseControllerImpl : KnowledgeBaseController {
     
     func search(title: String, tag: String) -> KnowledgeBase? {
-        let knowledgeBaseEntries = DataStorage.knowledgeBaseEntry
-        
-        for index in 0..<knowledgeBaseEntries.count {
-            if knowledgeBaseEntries[index] != nil {
-                if knowledgeBaseEntries[index]?.titleproperty == title && ((knowledgeBaseEntries[index]?.tagsProperty.contains(tag)) != nil) {
-                    return knowledgeBaseEntries[index]
-                }
+        for entry in DataStorage.knowledgeBaseEntry.values {
+            if entry.tagsProperty.contains(tag) {
+                return entry
             }
         }
         return nil
     }
-
-    
+  
     func addEntry(title: String, issueType : IssueType, solution: String, tags: [String], createdDate: Date, lastUpdatedDate: Date?) {
         let knowledgeBase = KnowledgeBase( title: title, issue: issueType, solution: solution, tags: tags, createdDate: createdDate, lastUpdatedDate: nil)
         DataStorage.knowledgeBaseEntry[knowledgeBase.getId] = knowledgeBase
@@ -31,6 +26,8 @@ class KnowledgeBaseControllerImpl : KnowledgeBaseController {
         let knowledgeBase = getKnowledgeBaseEntryById(id: id)
         knowledgeBase.solutionProperty = solution
         knowledgeBase.lastUpdatedDateProperty = lastUpdatedDate
+        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Entry Updated For id : \(id)", userId: id)
+        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
     }
     
     func getKnowledgeBaseEntryById(id : Int) -> KnowledgeBase {
@@ -38,4 +35,3 @@ class KnowledgeBaseControllerImpl : KnowledgeBaseController {
         return knowledgeBaseEntries[id]!
     }
 }
-

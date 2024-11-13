@@ -36,6 +36,8 @@ class AgentControllerImpl : AgentController {
         for (_, agent) in agents {  
             if agent.statusProperty == AgentStatus.available {
                 agent.assignedTicketsProperty.append(ticket)
+                let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticket is Assigned To Agent, agentId : \(agent.getId)", userId: agent.getId)
+                DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
                 return true
             }
         }
@@ -46,6 +48,8 @@ class AgentControllerImpl : AgentController {
     func updateAgentAvailability(agentId: Int, status: AgentStatus) -> Bool {
         let agent = getAgentById(agentId : agentId)
         agent?.statusProperty = status
+        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Agent Availablity is Updated", userId: agentId)
+        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
         return true
     }
     
@@ -61,11 +65,12 @@ class AgentControllerImpl : AgentController {
             else if ((userController?.notifyUser(ticket: ticketId, description: ticket.descriptionproperty, user: &user)) != nil) {
                 ticket.statusProperty = TicketStatus.closed
                 knowledgeBaseController?.addEntry(title: ticket.getTicketTitle, issueType: IssueType.softwareIssue, solution: ticket.descriptionproperty, tags: [ticket.getTicketTitle], createdDate: Date(), lastUpdatedDate: nil)
-                // need to correct here in issue type
             }
         } else {
             print("Ticket or user not found.")
         }
+        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticket is solved ", userId: ticketId)
+        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
     }
     
     func trackAgentPerfomance(agentId: Int) -> AgentPerfomance? {
@@ -145,5 +150,7 @@ class AgentControllerImpl : AgentController {
     func addAgent(name : String, department : String, userName : String, password : String) {
         let agent = Agent(name: name, department: department, userName: userName, password: password)
         DataStorage.allAgents[agent.getId] = agent
+        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Agent Added", userId: agent.getId)
+        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
     }
 }

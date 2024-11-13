@@ -32,9 +32,6 @@ class MainView {
         setAdminViewControllers()
         setAgentViewControllers()
     }
-    init() {
-        
-    }
     
     func setTicketController() {
         userController?.setTicketController(ticketController: ticketController!)
@@ -77,6 +74,7 @@ class MainView {
         print("==== Welcome to Help Desk System ====")
         print("1. Register")
         print("2. Login")
+        print("3. Logout")
         print("Enter the choice")
         let userChoice = Int(readLine()!)
         
@@ -87,6 +85,9 @@ class MainView {
         case 2 :
             login()
             
+        case 3 :
+            exit(0)
+            
         default :
             print("Invalid Choice")
         }
@@ -96,32 +97,34 @@ class MainView {
         print("Enter Username:")
         guard let username = readLine(), !username.isEmpty else {
             print("Invalid Username")
+            login()
             return
         }
 
         print("Enter Password:")
         guard let password = readLine(), !password.isEmpty else {
             print("Invalid Password")
+            login()
             return
         }
 
         print("Enter Role (admin, agent, user):")
         if let roleString = readLine(), let role = Role(role: roleString.trimmingCharacters(in: .whitespacesAndNewlines)) {
-            
             print("Attempting login with role: \(role)")
-
-            if (userController?.authenticate(username: username, password: password, role: role)) != nil {
+            
+            if userController?.authenticate(username: username, password: password, role: role) == true {
                 print("Login successful for \(role) \(username)")
                 navigateToRoleView(role: role)
             } else {
                 print("Authentication failed. Please try again.")
+                login()
             }
         } else {
             print("Invalid role entered.")
+            login()
         }
     }
-
-
+    
     func navigateToRoleView(role: Role) {
         
         switch role {

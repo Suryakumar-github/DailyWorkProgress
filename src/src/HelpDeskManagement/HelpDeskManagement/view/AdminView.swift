@@ -35,21 +35,21 @@ struct AdminView {
         let option = Int(readLine()!)
         
         switch option {
-        case 1 :
-            viewAllAgents()
-        case 2 :
-            viewTicketStatus()
-        case 3 :
-            generateTicketReport()
-        case 4 :
-            generateAgentReport()
-        case 5 :
-            reassignTicket()
-        case 6 :
-            mainView.showLoginScreen()
-        case 7 :
-            addAgent()
             
+        case 1 :
+            addAgent()
+        case 2 :
+            viewAllAgents()
+        case 3 :
+            viewTicketStatus()
+        case 4 :
+            generateTicketReport()
+        case 5 :
+            generateAgentReport()
+        case 6 :
+            reassignTicket()
+        case 7 :
+            mainView.showLoginScreen()
         default :
             print("Invalid Option")
         }
@@ -58,23 +58,38 @@ struct AdminView {
     func viewAllAgents() {
         let allAgents = DataStorage.allAgents
         print(allAgents)
+        print("-------------------------------------------")
         for (_, agent) in allAgents {
+            print("-------------------------------------------")
                 print("Agent Id : \(String(describing: agent.getId))")
                 print("Agent Name : \(String(describing: agent.getName))")
                 print("Agent Department : \(String(describing: agent.departmentProperty))")
             }
+        print("-------------------------------------------")
         adminMenu()
     }
     
     func addAgent() {
         print("Enter the Agent's Name")
         let agentName = readLine()!
+        if !Validation.validateName(agentName) {
+            print("Plese Enter Valid Name")
+        }
         print("Enter Agent's Department")
         let agentDepartMent = readLine()!
+        if !Validation.validateName(agentDepartMent) {
+            print("Plese Enter Valid Department")
+        }
         print("Enter Agent's UserName")
         let agentUserName = readLine()!
+        if !Validation.validateUsername(agentUserName) {
+            print("Plese Enter Valid User Name")
+        }
         print("Enter Agent's Password")
         let agentPassword = readLine()!
+        if !Validation.validatePassword(agentPassword) {
+            print("Plese Enter Valid Password")
+        }
         
         agentController?.addAgent(name: agentName, department: agentDepartMent, userName: agentUserName, password: agentPassword)
         print("Agent Added successfully")
@@ -125,6 +140,12 @@ struct AdminView {
     }
     
     func reassignTicket() {
+        
+        print("Enter the Old Agent id ")
+        guard let oldAgentId = Int(readLine()!) else {
+            print("Invalid Agent ID.")
+            return
+        }
         print("Enter the ticket ID :")
         guard let ticketId = Int(readLine()!) else {
             print("Invalid ticket ID.")
@@ -133,16 +154,16 @@ struct AdminView {
         
         print("Enter the Agent ID:")
         guard let agentId = Int(readLine()!) else {
-            print("Invalid ticket ID.")
+            print("Invalid Agent ID.")
             return
         }
-        let result = (ticketController?.reassignTicket(ticketId: ticketId, agentId: agentId))!
+        let result = (ticketController?.reassignTicket(ticketId: ticketId, agentId: agentId, oldAgentid: oldAgentId))!
         if result {
             print("Ticket Successfully Reassigned")
+            adminMenu()
             return
         }
         print("Ticket Not Reassigned")
-        
         adminMenu()
     }
 }

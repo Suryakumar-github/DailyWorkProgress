@@ -11,8 +11,7 @@ struct UserView {
     private var ticketController : TicketController?
     private var userController : UserController?
     private var knowledgeBase : KnowledgeBaseController?
-    private var loginedUser = User(name: "sam", role: UserRole.vip, userName: "Sam12", password: "Sam@123")
-    private var mainView = MainView()
+    //private var mainView = MainView()
    
     mutating func setTicketController(ticketController : TicketControllerImpl) {
         self.ticketController = ticketController
@@ -56,7 +55,7 @@ struct UserView {
     
     func createTicket() {
         print("Enter the Ticket Title:")
-        guard let ticketTitle = readLine(), !ticketTitle.isEmpty else {
+        guard let ticketTitle = readLine(), !ticketTitle.isEmpty && Validation.validateName(ticketTitle) else {
             print("Invalid Title")
             return
         }
@@ -77,21 +76,63 @@ struct UserView {
     }
     
     func viewMyTicket() {
-        print("Enter the userId ")
-        let userId = Int(readLine()!)!
-        let user = (userController?.getUserById(userId: userId))!
-        let tickets = userController?.getAllTheCreatedTickets(user: user)
-        for ticket in tickets! {
+        print("Enter the userId: ")
+        
+        guard let userIdString = readLine(), let userId = Int(userIdString) else {
+            print("Invalid input. Please enter a valid user ID.")
+            userMenu()
+            return
+        }
+        
+        guard let userController = userController else {
+            print("User controller not available.")
+            userMenu()
+            return
+        }
+        
+        guard let user = userController.getUserById(userId: userId) else {
+            print("User with ID \(userId) not found.")
+            userMenu()
+            return
+        }
+        
+        let tickets = userController.getAllTheCreatedTickets(user: user)
+        if tickets.isEmpty {
+            print("No tickets found for user with ID \(userId).")
+            userMenu()
+            return
+        }
+        
+        for ticket in tickets {
             print("Ticket Id : \(ticket.getTicketId)")
             print("Ticket Title : \(ticket.getTicketTitle)")
             print("Ticket Status : \(ticket.statusProperty)")
         }
+        
         userMenu()
     }
+
+
     
     func checkNotifications() {
+        print("Enter the UserId: ")
         
+        guard let userIdString = readLine(), let userId = Int(userIdString) else {
+            print("Invalid input. Please enter a valid user ID.")
+            return
+        }
+        
+        guard let notifications = userController?.getUserNotifications(userId: userId), !notifications.isEmpty else {
+            print("No notifications found for user with ID \(userId).")
+            return
+        }
+        
+        for (_, notification) in notifications {
+            print("Message: \(notification)")
+        }
+        userMenu()
     }
+
     
     func searchKnowledgeBase() {
         print("Enter the Ticket Title:")
@@ -107,24 +148,48 @@ struct UserView {
         let knowledgeBaseEntry = knowledgeBase?.search(title: ticketTitle, tag: tag)
         print("Title : \(String(describing: knowledgeBaseEntry?.titleproperty))")
         print("Solution : \(String(describing: knowledgeBaseEntry?.solutionProperty)) ")
+        
+        userMenu()
     }
     
     func register() {
         print("Enter the name:")
         let name = readLine()!
         
+        if !Validation.validateName(name) {
+            print("Please Enter Valid Name")
+            register()
+        }
+        
         print("Enter the user role (admin, vip, standard, guest):")
         if let roleString = readLine(), let role = UserRole(role: roleString) {
             print("Enter the User Name:")
             let userName = readLine()!
             
+            if !Validation.validateUsername(userName) {
+                print("Please Enter Valid UserName")
+                register()
+            }
+            
             print("Enter the password:")
             let password = readLine()!
             
-            userController?.register(name: name, userRole: role, userName: userName, password: password)
+            if !Validation.validatePassword(password) {
+                print("Please Enter Valid Password")
+                register()
+            }
+            
+            if let userController = userController {
+                let userId = userController.register(name: name, userRole: role, userName: userName, password: password)
+                print("User Id : \(userId)") 
+            } else {
+                print("Error: userController is not initialized")
+            }
         } else {
             print("Invalid role entered. Please try again.")
         }
+        userMenu()
     }
+
 
 }

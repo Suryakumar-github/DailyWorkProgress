@@ -36,6 +36,18 @@ class Agent {
         return name
     }
     
+    var getUserName : String {
+        return userName
+    }
+    var passwordproperty : String {
+        get {
+            return password
+        }
+        set(newPassword) {
+            password = newPassword
+        }
+    }
+    
     var ticketResolvedProperty : Int {
         get{
             return ticketResolved

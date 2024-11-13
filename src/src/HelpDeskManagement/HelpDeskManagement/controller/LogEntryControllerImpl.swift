@@ -9,7 +9,7 @@ import Foundation
 class LogEntryControllerImpl : LogEntryController {
     
     func createLogEntry(logId: Int, timestamp: Date, logType: LogType, message: String, userId: Int?, additionalInfo: [String : String]?) {
-        let logEntry = LogsEntry(id: logId, timestamp: timestamp, logType: logType, message: message, userId: userId, additionalInfo: additionalInfo)
+        let logEntry = LogsEntry( timestamp: timestamp, logType: logType, message: message, userId: userId)
         DataStorage.allLogsEntry[logId] = logEntry
     }
     

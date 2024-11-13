@@ -12,7 +12,7 @@ protocol TicketController {
     func closeTicket (ticketId : Int) -> Bool
     func fetchAssignedTickets(agentId : Int) -> [Ticket]
     func prioritizeTicket(ticketId : Int, userId : Int)
-    func reassignTicket(ticketId : Int, agentId : Int) -> Bool
+    func reassignTicket(ticketId: Int, agentId : Int, oldAgentid : Int) -> Bool
     func getTicketById(ticketId: Int) -> Ticket?
     func setAgentController(agentController : AgentController)
     func setUserController(userController : UserController)
