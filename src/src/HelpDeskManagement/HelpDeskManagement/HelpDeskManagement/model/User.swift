@@ -5,23 +5,25 @@
 //  Created by incubation on 04/11/24.
 //
 
-struct User {
+class User {
     
     private let id : Int
     private let name : String
-    private var role : UserRole
+    private var userRole : UserRole
+    private var role : Role
     private var userNotifications : [Int : String] = [:]
     private let userName : String
     private var password : String
     private static var userCount = 0
     
-    init(name: String, role: UserRole, userName : String, password : String) {
+    init(name: String, userRole: UserRole, userName : String, password : String, role : Role) {
         User.userCount += 1
         self.id = User.userCount
         self.name = name
-        self.role = role
+        self.userRole = userRole
         self.password = password
         self.userName = userName
+        self.role = role
     }
     
     var getUserId : Int {
@@ -31,19 +33,30 @@ struct User {
     var getUserName : String {
         return name
     }
+    var getName : String {
+        return name
+    }
+    var passwordProperty : String {
+        get {
+            return password
+        }
+        set(newPassword) {
+            password = newPassword
+        }
+    }
     
     var userRoleProperty : UserRole {
         get {
-            return role
+            return userRole
         }
         set(newRole) {
-            role = newRole
+            userRole = newRole
         }
     }
     
     var userNotificationsProperty : [Int : String] {
         get {
-            return userNotifications ?? [:]
+            return userNotifications
         }
         set(newNotification) {
             userNotifications = newNotification

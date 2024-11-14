@@ -16,11 +16,11 @@ class Ticket {
     private var status: TicketStatus
     private var agentId: Int?
     private let userId : Int
-    private var ticketCount = 1
+    private static var ticketCount = 0
     
     init(title: String, description: String, priority: Priority? = nil, createdDate: Date, status: TicketStatus, agentId: Int? = nil, userId : Int) {
-        ticketCount += 1
-        self.id = ticketCount
+        Ticket.ticketCount += 1
+        self.id = Ticket.ticketCount
         self.title = title
         self.description = description
         self.priority = priority

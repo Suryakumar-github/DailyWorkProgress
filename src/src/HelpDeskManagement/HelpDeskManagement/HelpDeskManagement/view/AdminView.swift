@@ -7,10 +7,10 @@
 import Foundation
 
 struct AdminView {
-    private var ticketController : TicketController?
-    private var reportGenerator : ReportAndAnalyticsController?
-    private var agentController : AgentController?
-    //private lazy var mainView = MainView()
+    private weak var ticketController : TicketController?
+    private weak var reportGenerator : ReportAndAnalyticsController?
+    private weak var agentController : AgentController?
+    private var loginedUser : User?
     
     mutating func setTicketController(ticketController : TicketControllerImpl) {
         self.ticketController = ticketController
@@ -21,6 +21,10 @@ struct AdminView {
     mutating func setReportAndAnalyticsController(reportAndAnalyticsController : ReportAndAnalyticsControllerImpl) {
         self.reportGenerator = reportAndAnalyticsController
     }
+    mutating func setLoginedUser(user : User) {
+        self.loginedUser = user
+    }
+    
     func adminMenu() {
         
         print(" ==== Admin Dashboard ==== ")
@@ -30,7 +34,9 @@ struct AdminView {
         print("4. Generate Ticket Reports")
         print("5. Generate Agent Reports")
         print("6. Escalate/Reassign Tickets")
-        print("7. Logout")
+        print("7. View Logs Entry")
+        print("8. View Agent Perfomance")
+        print("9. Logout")
         print("Select an option: ")
         let option = Int(readLine()!)
         
@@ -49,9 +55,14 @@ struct AdminView {
         case 6 :
             reassignTicket()
         case 7 :
+            viewLogsEntry()
+        case 8:
+            viewAgentPerfomance()
+        case 9 :
             mainView.showLoginScreen()
         default :
             print("Invalid Option")
+            adminMenu()
         }
     }
     
@@ -67,6 +78,19 @@ struct AdminView {
             }
         print("-------------------------------------------")
         adminMenu()
+    }
+    func viewAgentPerfomance() {
+        print("Enter the Agent ID:")
+        guard let agentId = Int(readLine()!) else {
+            print("Invalid ticket ID.")
+            return
+        }
+        guard let agentPerfomance = agentController?.trackAgentPerfomance(agentId: agentId) else {
+            print("There is no Agent Present with AgentId : \(agentId)")
+            viewAgentPerfomance()
+            return
+        }
+        print("Agents Perfomace For AgentId \(agentId) : \(String(describing: agentPerfomance))")
     }
     
     func addAgent() {
@@ -164,6 +188,19 @@ struct AdminView {
             return
         }
         print("Ticket Not Reassigned")
+        adminMenu()
+    }
+    
+    func viewLogsEntry() {
+       let dataEntries = DataStorage.allLogsEntry
+        print("---------------Log Entries------------------")
+        for (_,entry) in dataEntries {
+            print("---------------------------------------------")
+            print("Entry id : \(entry.getId)")
+            print("Entry Created Date : \(entry.getTimestamp)")
+            print("Entry Message : \(entry.messageProperty)")
+        }
+        print("---------------------------------------------")
         adminMenu()
     }
 }

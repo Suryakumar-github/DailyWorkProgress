@@ -8,9 +8,9 @@
 import Foundation
 
 class TicketControllerImpl: TicketController {
-
-    private var agentController : AgentController?
-    private var userController : UserController?
+    
+    private weak var agentController : AgentController?
+    private weak var userController : UserController?
     lazy var userView = UserView()
     
     func setAgentController(agentController: AgentController) {
@@ -36,28 +36,67 @@ class TicketControllerImpl: TicketController {
         DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
     }
     
-    func updateTicketStatus(ticketId: Int, status: TicketStatus) -> Bool {
-        if let ticket = getTicketById(ticketId: ticketId) {
-            ticket.statusProperty = status
-            let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticket Status Update for tickedId : \(ticketId) as \(status)", userId: ticketId)
-            DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
-            return true
-        }
-        return false
+    func getUserIdByTicketId(ticketId: Int) -> Int? {
+        let ticket = getTicketById(ticketId: ticketId)
+        return ticket?.getUserId
     }
     
-    func closeTicket(ticketId: Int) -> Bool {
-        let ticket = getTicketById(ticketId: ticketId)
-        agentController?.resolveTicket(ticketId: ticketId, userId: ticket!.getUserId)
-        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticket Closed for ticketId : \(ticketId)", userId: ticketId)
+    func updateTicketStatus(agent: Agent, ticketId: Int, status: TicketStatus) -> Bool {
+        guard agent.assignedTicketsProperty.contains(where: { $0.getTicketId == ticketId }) else {
+            print("Agent does not have this ticket assigned. Cannot update status.")
+            return false
+        }
+
+        guard let ticket = getTicketById(ticketId: ticketId) else {
+            print("Ticket not found with ID: \(ticketId)")
+            return false
+        }
+        ticket.statusProperty = status
+        
+        let logsEntry = LogsEntry(
+            timestamp: Date(),
+            logType: .info,
+            message: "Ticket status updated to \(status) for ticketId: \(ticketId) by agent.",
+            userId: ticketId
+        )
         DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
+        print("Ticket status updated to \(status) for ticketId: \(ticketId).")
+
         return true
     }
+
+
     
-    func fetchAssignedTickets(agentId: Int) -> [Ticket] {
-        let agent = agentController?.getAgentById(agentId: agentId)
-        print("agent is ...\(String(describing: agent?.getName))")
-        return agent!.assignedTicketsProperty
+    func closeTicket(agent: Agent, ticketId: Int) -> Bool {
+        guard agent.assignedTicketsProperty.contains(where: { $0.getTicketId == ticketId }) else {
+            print("Agent does not have this ticket assigned. Cannot close ticket.")
+            return false
+        }
+        
+        guard let ticket = getTicketById(ticketId: ticketId) else {
+            print("Ticket not found with ID: \(ticketId)")
+            return false
+        }
+        
+        agentController?.resolveTicket(agent: agent, ticketId: ticketId, userId: ticket.getUserId)
+        
+        let logsEntry = LogsEntry(
+            timestamp: Date(),
+            logType: .info,
+            message: "Ticket Closed for ticketId: \(ticketId)",
+            userId: ticket.getUserId
+        )
+        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
+        
+        DataStorage.allTickets.removeValue(forKey: ticketId)
+        print("Ticket with ID \(ticketId) has been successfully closed and removed.")
+        
+        return true
+    }
+
+    
+    func fetchAssignedTickets(agent: Agent) -> [Ticket] {
+        return agent.assignedTicketsProperty
     }
     
     func prioritizeTicket(ticketId: Int, userId: Int) {
@@ -105,5 +144,4 @@ class TicketControllerImpl: TicketController {
             Calendar.current.isDate(ticket.getTicketCreatedDate, inSameDayAs: date) ? ticket : nil
         }
     }
-
 }

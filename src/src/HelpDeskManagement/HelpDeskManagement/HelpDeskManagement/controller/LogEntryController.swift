@@ -6,7 +6,7 @@
 //
 import Foundation
 
-protocol LogEntryController {
+protocol LogEntryController : AnyObject{
     func createLogEntry(logId: Int, timestamp: Date, logType: LogType, message: String, userId: Int?, additionalInfo: [String: String]?)
     func fetchLogEntry(logId : Int, logType: LogType) -> LogsEntry?
 }

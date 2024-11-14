@@ -6,7 +6,7 @@
 //
 import Foundation
 
-protocol ReportAndAnalyticsController {
+protocol ReportAndAnalyticsController : AnyObject{
     func generateTicketReport(date : Date)
     func generateAgentreport(agentId : Int)
     func setTicketController(ticketController: TicketController)

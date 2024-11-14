@@ -8,6 +8,7 @@
 import Foundation
 
 class MainView {
+    
     private var userController : UserController?
     private lazy var userView = UserView()
     private var adminView = AdminView()
@@ -68,6 +69,7 @@ class MainView {
     func setAgentViewControllers() {
         agentView.setTicketController(ticketController: ticketController as! TicketControllerImpl)
         agentView.setKnowledgeBaseController(knowledgeBaseController: knowledgeBaseController as! KnowledgeBaseControllerImpl)
+        agentView.setAgentController(agentController: agentController as! AgentControllerImpl)
     }
     
     func showLoginScreen() {
@@ -80,7 +82,11 @@ class MainView {
         
         switch userChoice {
         case 1 :
-            userView.register()
+            guard let user = userView.register() else {
+                print("User is Not Registered")
+                return
+            }
+            userView.setLoginedUser(user: user)
             userView.userMenu()
         case 2 :
             login()
@@ -90,6 +96,7 @@ class MainView {
             
         default :
             print("Invalid Choice")
+            showLoginScreen()
         }
     }
     
@@ -112,27 +119,30 @@ class MainView {
         if let roleString = readLine(), let role = Role(role: roleString.trimmingCharacters(in: .whitespacesAndNewlines)) {
             print("Attempting login with role: \(role)")
             
-            if userController?.authenticate(username: username, password: password, role: role) == true {
-                print("Login successful for \(role) \(username)")
-                navigateToRoleView(role: role)
-            } else {
-                print("Authentication failed. Please try again.")
+            guard let actor = userController?.authenticate(username: username, password: password, role: role) else {
+                print("Login Failed for \(role) : \(username)")
                 login()
+                return
             }
+            print("Login Successfull for \(role) \(username)")
+            navigateToRoleView(role: role, actor: actor)
         } else {
             print("Invalid role entered.")
             login()
         }
     }
     
-    func navigateToRoleView(role: Role) {
+    func navigateToRoleView(role: Role, actor : AnyObject) {
         
         switch role {
         case .admin:
+            adminView.setLoginedUser(user: actor as! User)
             adminView.adminMenu()
         case .agent:
+            agentView.setLoginedUser(agent: actor as! Agent)
             agentView.agentMenu()
         case .user:
+            userView.setLoginedUser(user: actor as! User)
             userView.userMenu()
         }
     }

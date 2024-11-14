@@ -5,11 +5,11 @@
 //  Created by incubation on 06/11/24.
 //
 
-protocol AgentController {
+protocol AgentController : AnyObject{
     func checkAgentAvailability(agentId : Int) -> AgentStatus
     func assignTicketToAgent(ticket : Ticket) -> Bool
-    func updateAgentAvailability(agentId : Int, status : AgentStatus) -> Bool
-    func resolveTicket(ticketId : Int, userId : Int)
+    func updateAgentAvailability(agent : Agent, status : AgentStatus) -> Bool
+    func resolveTicket(agent : Agent, ticketId : Int, userId : Int)
     func trackAgentPerfomance(agentId : Int) -> AgentPerfomance?
     func getAgentById(agentId : Int) -> Agent?
     func setTicketController(ticketController : TicketController)

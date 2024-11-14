@@ -20,6 +20,14 @@ struct Main {
         agents[agent4.getId] = agent4
         
         DataStorage.allAgents = agents
+        let logsEntry1 = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Agent Logined with id : \(agent1.getId)", userId: agent1.getId)
+        DataStorage.allLogsEntry[logsEntry1.getId] = logsEntry1
+        let logsEntry2 = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Agent Logined with id : \(agent2.getId)", userId: agent2.getId)
+        DataStorage.allLogsEntry[logsEntry2.getId] = logsEntry2
+        let logsEntry3 = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Agent Logined with id : \(agent3.getId)", userId: agent3.getId)
+        DataStorage.allLogsEntry[logsEntry3.getId] = logsEntry3
+        let logsEntry4 = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Agent Logined with id : \(agent4.getId)", userId: agent4.getId)
+        DataStorage.allLogsEntry[logsEntry4.getId] = logsEntry4
     }
     
     func loadKnowledgeBaseEntries() {
@@ -63,6 +71,15 @@ struct Main {
         knowledgeBaseEntries[entry4.getId] = entry4
         
         DataStorage.knowledgeBaseEntry = knowledgeBaseEntries
+        let logsEntry1 = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Entrt added In Knowledge Base With Id : \(entry1.getId)", userId: entry1.getId)
+        DataStorage.allLogsEntry[logsEntry1.getId] = logsEntry1
+        let logsEntry2 = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Entrt added In Knowledge Base With Id  : \(entry2.getId)", userId: entry2.getId)
+        DataStorage.allLogsEntry[logsEntry2.getId] = logsEntry2
+        let logsEntry3 = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Entrt added In Knowledge Base With Id  : \(entry3.getId)", userId: entry3.getId)
+        DataStorage.allLogsEntry[logsEntry3.getId] = logsEntry3
+        let logsEntry4 = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Entrt added In Knowledge Base With Id  : \(entry4.getId)", userId: entry4.getId)
+        DataStorage.allLogsEntry[logsEntry4.getId] = logsEntry4
+        
     }
 
 

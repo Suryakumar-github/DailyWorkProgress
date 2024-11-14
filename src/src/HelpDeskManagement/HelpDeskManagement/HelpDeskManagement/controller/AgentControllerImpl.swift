@@ -8,10 +8,10 @@
 import Foundation
 
 class AgentControllerImpl : AgentController {
-    
-    private var userController : UserController?
-    private var ticketController : TicketController?
-    private var knowledgeBaseController : KnowledgeBaseController?
+   
+    private weak var userController : UserController?
+    private weak var ticketController : TicketController?
+    private weak var knowledgeBaseController : KnowledgeBaseController?
     
     func setTicketController(ticketController: TicketController) {
         self.ticketController = ticketController
@@ -41,37 +41,102 @@ class AgentControllerImpl : AgentController {
                 return true
             }
         }
-        
         return false
     }
 
-    func updateAgentAvailability(agentId: Int, status: AgentStatus) -> Bool {
-        let agent = getAgentById(agentId : agentId)
-        agent?.statusProperty = status
-        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Agent Availablity is Updated", userId: agentId)
+    func updateAgentAvailability(agent: Agent, status: AgentStatus) -> Bool {
+        agent.statusProperty = status
+        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Agent Availablity is Updated", userId: agent.getId)
         DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
         return true
     }
     
-    func resolveTicket(ticketId: Int, userId: Int) {
-        if let ticket = ticketController?.getTicketById(ticketId: ticketId),
-           var user = userController?.getUserById(userId: userId) {
-            let knowlegeBase = knowledgeBaseController?.search(title: ticket.getTicketTitle, tag: ticket.descriptionproperty)
-            if knowlegeBase != nil {
-                if ((userController?.notifyUser(ticket: ticketId, description: ticket.descriptionproperty, user: &user)) != nil) {
-                    ticket.statusProperty = TicketStatus.closed
-                }
-            }
-            else if ((userController?.notifyUser(ticket: ticketId, description: ticket.descriptionproperty, user: &user)) != nil) {
-                ticket.statusProperty = TicketStatus.closed
-                knowledgeBaseController?.addEntry(title: ticket.getTicketTitle, issueType: IssueType.softwareIssue, solution: ticket.descriptionproperty, tags: [ticket.getTicketTitle], createdDate: Date(), lastUpdatedDate: nil)
-            }
-        } else {
-            print("Ticket or user not found.")
+//    func resolveTicket(ticketId: Int, userId: Int) {
+//        print("Attempting to resolve ticket with ticketId: \(ticketId) and userId: \(userId)")
+//        if (userController == nil) {
+//            print("Usercontroller is nil")
+//            return
+//        }
+//        if (ticketController == nil) {
+//            print("TicketController is nil")
+//            return
+//        }
+//        guard let ticket = ticketController?.getTicketById(ticketId: ticketId) else {
+//            print("Ticket not found with ID: \(ticketId)")
+//            return
+//        }
+//        
+//        guard var user = userController?.getUserById(userId: userId) else {
+//            print("User not found with ID: \(userId)")
+//            return
+//        }
+//        
+//        print("Ticket found with ID: \(ticket.getTicketId), User found with ID: \(user.getUserId)")
+//        
+//        if let knowledgeBase = knowledgeBaseController?.search(title: ticket.getTicketTitle, tag: ticket.descriptionproperty) {
+//            print("Knowledge Base entry found: \(knowledgeBase.titleproperty)")
+//            
+//            if userController?.notifyUser(ticket: ticketId, description: knowledgeBase.solutionProperty, user: &user) != nil {
+//                ticket.statusProperty = .closed
+//                print("User notified with knowledge base solution. Ticket closed.")
+//            } else {
+//                print("Failed to notify user.")
+//            }
+//        } else {
+//            print("No Knowledge Base entry found. Creating a new entry.")
+//            
+//            if userController?.notifyUser(ticket: ticketId, description: ticket.descriptionproperty, user: &user) != nil {
+//                ticket.statusProperty = .closed
+//                print("User notified with new ticket resolution. Ticket closed.")
+//                
+//                knowledgeBaseController?.addEntry(
+//                    title: ticket.getTicketTitle,
+//                    issueType: .softwareIssue,
+//                    solution: ticket.descriptionproperty,
+//                    tags: [ticket.getTicketTitle],
+//                    createdDate: Date(),
+//                    lastUpdatedDate: nil
+//                )
+//                print("New Knowledge Base entry added.")
+//            } else {
+//                print("Failed to notify user.")
+//            }
+//        }
+//        
+//        let logEntry = LogsEntry(
+//            timestamp: Date(),
+//            logType: .info,
+//            message: "Ticket woth TickedId \(ticketId) resolved for user with UserId \(userId).",
+//            userId: userId
+//        )
+//        
+//        DataStorage.allLogsEntry[logEntry.getId] = logEntry
+//        print("Log entry added: \(logEntry.messageProperty)")
+//    }
+
+    func resolveTicket(agent: Agent, ticketId: Int, userId: Int) {
+        guard agent.assignedTicketsProperty.contains(where: { $0.getTicketId == ticketId }) else {
+            print("Agent does not have this ticket assigned. Cannot resolve ticket.")
+            return
         }
-        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticket is solved ", userId: ticketId)
-        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
+        
+        guard let ticket = ticketController?.getTicketById(ticketId: ticketId) else {
+            print("Ticket not found with ID: \(ticketId)")
+            return
+        }
+        
+        ticket.statusProperty = TicketStatus.solved
+        
+        let logEntry = LogsEntry(
+            timestamp: Date(),
+            logType: .info,
+            message: "Ticket with TicketId \(ticketId) resolved for user with UserId \(userId).",
+            userId: userId
+        )
+        DataStorage.allLogsEntry[logEntry.getId] = logEntry
+        print("Ticket with ID \(ticketId) has been successfully resolved.")
     }
+
     
     func trackAgentPerfomance(agentId: Int) -> AgentPerfomance? {
         guard let agent = getAgentById(agentId: agentId) else {
@@ -129,7 +194,7 @@ class AgentControllerImpl : AgentController {
             case .low:
                 lowPriorityTicketCounts += 1
             default :
-                lowPriorityTicketCounts += 1
+                lowPriorityTicketCounts += 0
                 
             }
         }
