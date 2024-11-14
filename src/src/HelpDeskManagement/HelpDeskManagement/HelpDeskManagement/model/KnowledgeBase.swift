@@ -85,3 +85,17 @@ class KnowledgeBase {
         }
     }    
 }
+
+extension KnowledgeBase: Loggable {
+    var logType: LogType {
+        return .info
+    }
+    
+    var logMessage: String {
+        return ""
+    }
+    
+    var logId : Int {
+        return self.getId
+    }
+}

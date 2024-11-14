@@ -10,14 +10,14 @@ class Agent {
     private let name : String
     private var ticketResolved : Int
     private var status : AgentStatus
-    private var assignedTickets : [Ticket]? = []
+    private var assignedTickets : [Ticket] = []
     private var department : String
     private var perfomance : AgentPerfomance?
     private let userName : String
     private var password : String
     private static var agentCount = 0
     
-    init(name: String,department: String,userName: String, password: String) {
+    init(name: String,department: String,userName: String, password: String, ticketResolved : Int, status : AgentStatus) {
         Agent.agentCount += 1
         self.id = Agent.agentCount
         self.name = name
@@ -26,6 +26,10 @@ class Agent {
         self.department = department
         self.userName = userName
         self.password = password
+    }
+    
+    convenience init(name : String, deparment : String, userName : String, password : String) {
+        self.init(name: name, department: deparment, userName: userName, password: password, ticketResolved: 0, status: AgentStatus.available)
     }
     
     var getId : Int {
@@ -63,21 +67,19 @@ class Agent {
             return status
         }
         set(newStatus) {
-            self.status = newStatus
+            let oldStatus = status
+            status = newStatus
+            print("Agent status changed from \(oldStatus) to \(newStatus)")
         }
     }
     
     var assignedTicketsProperty : [Ticket] {
         get {
-            return assignedTickets ?? []
+            return assignedTickets
         }
         set(newTicket) {
             assignedTickets = newTicket
         }
-    }
-    
-    func addTicket(ticket: Ticket) {
-        assignedTickets = (assignedTickets ?? []) + [ticket]
     }
     
     var departmentProperty : String {
@@ -102,4 +104,18 @@ class Agent {
         }
     }
     
+}
+
+extension Agent: Loggable {
+    var logType: LogType {
+        return .info
+    }
+    
+    var logMessage: String {
+        return ""
+    }
+    
+    var logId : Int {
+        return self.getId
+    }
 }

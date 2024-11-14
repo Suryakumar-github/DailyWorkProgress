@@ -7,9 +7,7 @@
 
 protocol AgentController : AnyObject{
     func checkAgentAvailability(agentId : Int) -> AgentStatus
-    func assignTicketToAgent(ticket : Ticket) -> Bool
     func updateAgentAvailability(agent : Agent, status : AgentStatus) -> Bool
-    func resolveTicket(agent : Agent, ticketId : Int, userId : Int)
     func trackAgentPerfomance(agentId : Int) -> AgentPerfomance?
     func getAgentById(agentId : Int) -> Agent?
     func setTicketController(ticketController : TicketController)

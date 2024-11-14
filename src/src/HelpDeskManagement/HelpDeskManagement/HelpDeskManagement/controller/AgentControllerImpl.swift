@@ -30,24 +30,9 @@ class AgentControllerImpl : AgentController {
         return agent!.statusProperty
     }
     
-    func assignTicketToAgent(ticket: Ticket) -> Bool {
-        let agents = DataStorage.allAgents
-        
-        for (_, agent) in agents {  
-            if agent.statusProperty == AgentStatus.available {
-                agent.assignedTicketsProperty.append(ticket)
-                let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticket is Assigned To Agent, agentId : \(agent.getId)", userId: agent.getId)
-                DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
-                return true
-            }
-        }
-        return false
-    }
-
     func updateAgentAvailability(agent: Agent, status: AgentStatus) -> Bool {
         agent.statusProperty = status
-        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Agent Availablity is Updated", userId: agent.getId)
-        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
+        Logger.log(logType: LogType.info, message: "Agent Availablity is Updated", userId: agent.getId, data: agent)
         return true
     }
     
@@ -113,30 +98,6 @@ class AgentControllerImpl : AgentController {
 //        DataStorage.allLogsEntry[logEntry.getId] = logEntry
 //        print("Log entry added: \(logEntry.messageProperty)")
 //    }
-
-    func resolveTicket(agent: Agent, ticketId: Int, userId: Int) {
-        guard agent.assignedTicketsProperty.contains(where: { $0.getTicketId == ticketId }) else {
-            print("Agent does not have this ticket assigned. Cannot resolve ticket.")
-            return
-        }
-        
-        guard let ticket = ticketController?.getTicketById(ticketId: ticketId) else {
-            print("Ticket not found with ID: \(ticketId)")
-            return
-        }
-        
-        ticket.statusProperty = TicketStatus.solved
-        
-        let logEntry = LogsEntry(
-            timestamp: Date(),
-            logType: .info,
-            message: "Ticket with TicketId \(ticketId) resolved for user with UserId \(userId).",
-            userId: userId
-        )
-        DataStorage.allLogsEntry[logEntry.getId] = logEntry
-        print("Ticket with ID \(ticketId) has been successfully resolved.")
-    }
-
     
     func trackAgentPerfomance(agentId: Int) -> AgentPerfomance? {
         guard let agent = getAgentById(agentId: agentId) else {
@@ -164,18 +125,13 @@ class AgentControllerImpl : AgentController {
         return nil
     }
     
-    func assignAgentAvailability() {
-        let agents = DataStorage.allAgents
+    func assignAgentAvailability(agent : Agent) {
         
-        for index in 0..<agents.count {
-            if let agent = agents[index] {
-                if  agent.assignedTicketsProperty.count > 5 && getAgentWorkLoad(agent: agent) > 1 {
-                    agent.statusProperty = AgentStatus.busy
-                }
-                else if agent.assignedTicketsProperty.count < 5 && getAgentWorkLoad(agent: agent) < 2 {
-                    agent.statusProperty = AgentStatus.available
-                }
-            }
+        if (agent.assignedTicketsProperty.count > 5 && getAgentWorkLoad(agent: agent) > 1) {
+            agent.statusProperty = AgentStatus.busy
+        }
+        else if agent.assignedTicketsProperty.count < 5 && getAgentWorkLoad(agent: agent) < 2 {
+            agent.statusProperty = AgentStatus.available
         }
     }
     
@@ -213,9 +169,39 @@ class AgentControllerImpl : AgentController {
     }
     
     func addAgent(name : String, department : String, userName : String, password : String) {
-        let agent = Agent(name: name, department: department, userName: userName, password: password)
+        let agent = Agent(name: name, deparment: department, userName: userName, password: password)
         DataStorage.allAgents[agent.getId] = agent
-        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Agent Added", userId: agent.getId)
-        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
+        Logger.log(logType: LogType.info, message: "New Agent Added with AgentId : \(agent.getId)", userId: agent.getId, data: agent)
+    }
+}
+extension AgentControllerImpl : TicketAssignmentDelegate {
+    func resolveTicket(agent: Agent, ticketId: Int, userId: Int) {
+        guard agent.assignedTicketsProperty.contains(where: { $0.getTicketId == ticketId }) else {
+            print("Agent does not have this ticket assigned. Cannot resolve ticket.")
+            return
+        }
+        
+        guard let ticket = ticketController?.getTicketById(ticketId: ticketId) else {
+            print("Ticket not found with ID: \(ticketId)")
+            return
+        }
+        
+        ticket.statusProperty = TicketStatus.solved
+        Logger.log(logType: LogType.info, message: "Ticket with TicketId \(ticketId) resolved for user with UserId \(userId).", userId: agent.getId, data: agent)
+        print("Ticket with ID \(ticketId) has been successfully resolved.")
+    }
+    
+    func assignTicketToAgent(ticket: Ticket) -> Bool {
+        let agents = DataStorage.allAgents
+        
+        for (_, agent) in agents {
+            if agent.statusProperty == AgentStatus.available {
+                agent.assignedTicketsProperty.append(ticket)
+                assignAgentAvailability(agent: agent)
+                Logger.log(logType: LogType.info, message: "Ticket is Assigned To Agent, agentId : \(agent.getId)", userId: agent.getId, data: agent)
+                return true
+            }
+        }
+        return false
     }
 }

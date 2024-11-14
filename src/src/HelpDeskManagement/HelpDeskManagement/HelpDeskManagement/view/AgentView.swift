@@ -80,7 +80,7 @@ struct AgentView {
         }
         
         if ((agentController?.updateAgentAvailability(agent: agent, status: agentStatus)) != nil){
-            print("Agent status updated successfully ")
+            //print("Agent status updated successfully ")
         }
         else {
             print("Agent status not updated ")
@@ -94,7 +94,7 @@ struct AgentView {
         print("Enter the ticket ID to Close :")
         guard let ticketId = Int(readLine()!) else {
             print("Invalid ticket ID.")
-            resolveTicket(agent: agent)
+            closeTicket(agent: agent)
             return
         }
         if ((ticketController?.closeTicket(agent : agent,ticketId: ticketId)) != nil) {
@@ -128,13 +128,19 @@ struct AgentView {
             print("No tickets Assigned For Agent")
             return
         }
+        if(tickets.count == 0) {
+            print("-------------No Tickets Assigned for Agent--------------- ")
+            agentMenu()
+        }
         print("----------------------------------------------------------------")
+        print("                      Assigned Tickets                          ")
         for index in 0..<tickets.count {
+            
             print("----------------------------------------------------------------")
             print("Ticket Id : \(String(describing: tickets[index].getTicketId))")
             print("Ticket Title : \(String(describing: tickets[index].getTicketTitle))")
             print("Ticket Description : \(String(describing: tickets[index].descriptionproperty))")
-            print("Ticket Priority : \(String(describing: tickets[index].priorityProperty))")
+            print("Ticket Priority : \(String(describing: tickets[index].priorityProperty!))")
         }
         print("----------------------------------------------------------------")
         agentMenu()

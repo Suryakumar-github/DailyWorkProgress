@@ -79,10 +79,12 @@ struct AdminView {
         print("-------------------------------------------")
         adminMenu()
     }
+    
     func viewAgentPerfomance() {
         print("Enter the Agent ID:")
         guard let agentId = Int(readLine()!) else {
             print("Invalid ticket ID.")
+            viewAgentPerfomance()
             return
         }
         guard let agentPerfomance = agentController?.trackAgentPerfomance(agentId: agentId) else {
@@ -91,6 +93,7 @@ struct AdminView {
             return
         }
         print("Agents Perfomace For AgentId \(agentId) : \(String(describing: agentPerfomance))")
+        adminMenu()
     }
     
     func addAgent() {

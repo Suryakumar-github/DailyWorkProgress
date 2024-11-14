@@ -8,10 +8,10 @@ struct Main {
     }
     
     func loadAgents() {
-        let agent1 = Agent(name: "agent1", department: "Software", userName: "Agent1", password: "Agent1@12")
-        let agent2 = Agent(name: "agent2", department: "Hardware", userName: "Agent2", password: "Agent2@12")
-        let agent3 = Agent(name: "agent3", department: "Security", userName: "Agent3", password: "Agent3@12")
-        let agent4 = Agent(name: "agent4", department: "Network",  userName: "Agent4", password: "Agent4@12")
+        let agent1 = Agent(name: "agent1", deparment: "Software", userName: "Agent1", password: "Agent1@12")
+        let agent2 = Agent(name: "agent2", deparment: "Hardware", userName: "Agent2", password: "Agent2@12")
+        let agent3 = Agent(name: "agent3", deparment: "Security", userName: "Agent3", password: "Agent3@12")
+        let agent4 = Agent(name: "agent4", deparment: "Network", userName: "Agent4", password: "Agent4@12")
         
         var agents = DataStorage.allAgents
         agents[agent1.getId] = agent1

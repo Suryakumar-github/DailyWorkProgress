@@ -15,7 +15,7 @@ class Ticket {
     private let createdDate: Date
     private var status: TicketStatus
     private var agentId: Int?
-    private let userId : Int
+    internal let userId : Int
     private static var ticketCount = 0
     
     init(title: String, description: String, priority: Priority? = nil, createdDate: Date, status: TicketStatus, agentId: Int? = nil, userId : Int) {
@@ -60,7 +60,9 @@ class Ticket {
             return status
         }
         set(newStatus) {
+            let oldStatus = status
             status = newStatus
+            print("Ticket status changed from \(oldStatus) to \(newStatus)")
         }
     }
     var getAgentId: Int? {
@@ -77,3 +79,16 @@ class Ticket {
     }
 }
 
+extension Ticket : Loggable {
+    var logType: LogType {
+        return .info
+    }
+    
+    var logMessage: String {
+        return ""
+    }
+    
+    var logId: Int {
+        return self.getTicketId
+    }
+}

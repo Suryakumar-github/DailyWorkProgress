@@ -16,13 +16,16 @@ class LogsEntry {
     private var additionalInfo: [String: String] = [:]
     private static var logCount = 0
     
-    init(timestamp: Date, logType: LogType, message: String, userId: Int? = nil) {
+    init(timestamp: Date, logType: LogType, message: String, userId: Int? = nil, additionalInfo: [String: String]) {
         LogsEntry.logCount += 1
         self.id = LogsEntry.logCount
         self.timestamp = timestamp
         self.logType = logType
         self.message = message
         self.userId = userId
+    }
+    convenience init(timestamp: Date, logType: LogType, message: String, userId: Int?) {
+        self.init(timestamp: timestamp, logType: logType, message: message, userId: userId, additionalInfo: [:])
     }
     
     var getId : Int {
@@ -65,5 +68,4 @@ class LogsEntry {
             additionalInfo = newAdditionalInfo ?? [:]
         }
     }
-    
 }

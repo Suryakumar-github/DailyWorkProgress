@@ -18,8 +18,7 @@ class UserControllerImpl : UserController {
     func register(name : String, userRole : UserRole, userName : String, password : String) -> User {
         let user = User(name: name, userRole: userRole, userName: userName, password: password, role : Role.user)
         DataStorage.allUsers[user.getUserId] = user
-        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New User Registered", userId: user.getUserId)
-        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
+        Logger.log(logType: LogType.info, message: "New User Registered", userId: user.getUserId, data: user)
         return user
     }
     
@@ -53,6 +52,7 @@ class UserControllerImpl : UserController {
     private var users = [
             ["SuperAdmin", "SuperAdmin@123", "Admin"]
         ]
+    
     func authenticate(username: String, password: String, role: Role) -> AnyObject? {
         switch role {
         case .admin:
@@ -63,8 +63,7 @@ class UserControllerImpl : UserController {
             return authenticateUser(username: username, password: password)
         }
     }
-    
-        
+            
     private func authenticateAdmin(username: String, password: String) -> User? {
         guard users.contains(where: { $0[0].lowercased() == username.lowercased() && $0[1] == password && $0[2].lowercased() == Role.admin.rawValue.lowercased() }) else {
             print("Login failed: Invalid admin credentials.")
@@ -73,11 +72,8 @@ class UserControllerImpl : UserController {
         let admin = User(name: "admin", userRole: UserRole.admin, userName: username, password: password, role: Role.admin)
         return admin
     }
-
-
-        
-    private func authenticateAgent(username: String, password: String) -> Agent?
-    {
+      
+    private func authenticateAgent(username: String, password: String) -> Agent? {
         guard let agent = DataStorage.allAgents.values.first(where: { agent in
             agent.getUserName == username && agent.passwordproperty == password
         }) else {
@@ -99,7 +95,7 @@ class UserControllerImpl : UserController {
             return nil
             
         }
-        print("Login successful for Agent \(user1.getName)")
+        print("Login successful for User : \(user1.getName)")
         return getUserByUserNameAndPassword(username: username, password: password)
     }
     
@@ -132,7 +128,5 @@ class UserControllerImpl : UserController {
             }
         }
         return nil
-        
     }
-    
 }

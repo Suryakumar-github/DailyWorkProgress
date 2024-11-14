@@ -31,7 +31,7 @@ class User {
     }
     
     var getUserName : String {
-        return name
+        return userName
     }
     var getName : String {
         return name
@@ -61,5 +61,18 @@ class User {
         set(newNotification) {
             userNotifications = newNotification
         }
+    }
+}
+extension User: Loggable {
+    var logType: LogType {
+        return .info
+    }
+    
+    var logMessage: String {
+        return ""
+    }
+    
+    var logId : Int {
+        return self.getUserId
     }
 }

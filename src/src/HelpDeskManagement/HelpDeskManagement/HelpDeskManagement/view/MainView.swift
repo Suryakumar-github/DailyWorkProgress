@@ -43,6 +43,7 @@ class MainView {
     func setAgentController() {
         ticketController?.setAgentController(agentController: agentController!)
         reportAndAnalyticsController?.setAgentController(agentController: agentController!)
+        ticketController?.setDelagate(ticketAssignmentDelegate: agentController as! TicketAssignmentDelegate)
     }
     
     func setUserController() {

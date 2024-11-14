@@ -9,6 +9,7 @@ import Foundation
 
 class TicketControllerImpl: TicketController {
     
+    private weak var delegate: TicketAssignmentDelegate?
     private weak var agentController : AgentController?
     private weak var userController : UserController?
     lazy var userView = UserView()
@@ -21,19 +22,22 @@ class TicketControllerImpl: TicketController {
         self.userController = userController
     }
     
+    func setDelagate(ticketAssignmentDelegate : TicketAssignmentDelegate) {
+        self.delegate = ticketAssignmentDelegate
+    }
+    
     func createTicket(title ticketTitle: String, description ticketDescription: String, priority ticketPriority: Priority?, createdDate: Date, status: TicketStatus, agentId: Int?, userId: Int) {
         let ticket = Ticket(title: ticketTitle, description: ticketDescription, priority: ticketPriority, createdDate: createdDate, status: status, userId: userId)
         
-        prioritizeTicket(ticketId: ticket.getTicketId, userId: ticket.getUserId)
-        if ((agentController?.assignTicketToAgent(ticket: ticket)) != nil) {
+        prioritizeTicket(ticket: ticket, userId: ticket.getUserId)
+        if ((delegate?.assignTicketToAgent(ticket: ticket)) != nil) {
             print("Ticket Created and Assigned to Agent")
         }
         else {
             print("Ticket Craetion is Failed ")
         }
         DataStorage.allTickets[ticket.getTicketId] = ticket
-        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "New Ticket Created with TicketId : \(ticket.getTicketId)", userId: ticket.getTicketId)
-        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
+        Logger.log(logType: LogType.info, message: "New Ticket Created with TicketId : \(ticket.getTicketId)", userId: ticket.getTicketId, data: ticket)
     }
     
     func getUserIdByTicketId(ticketId: Int) -> Int? {
@@ -52,22 +56,16 @@ class TicketControllerImpl: TicketController {
             return false
         }
         ticket.statusProperty = status
-        
-        let logsEntry = LogsEntry(
-            timestamp: Date(),
-            logType: .info,
-            message: "Ticket status updated to \(status) for ticketId: \(ticketId) by agent.",
-            userId: ticketId
-        )
-        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
-        print("Ticket status updated to \(status) for ticketId: \(ticketId).")
-
+        Logger.log(logType: LogType.info, message: "Ticket status updated to \(status) for ticketId: \(ticketId) by agent.", userId: ticketId, data: ticket)
         return true
     }
-
-
     
     func closeTicket(agent: Agent, ticketId: Int) -> Bool {
+        guard let ticketIndex = agent.assignedTicketsProperty.firstIndex(where: { $0.getTicketId == ticketId }) else {
+                print("Agent does not have this ticket assigned. Cannot close ticket.")
+                return false
+            }
+        
         guard agent.assignedTicketsProperty.contains(where: { $0.getTicketId == ticketId }) else {
             print("Agent does not have this ticket assigned. Cannot close ticket.")
             return false
@@ -78,54 +76,83 @@ class TicketControllerImpl: TicketController {
             return false
         }
         
-        agentController?.resolveTicket(agent: agent, ticketId: ticketId, userId: ticket.getUserId)
-        
-        let logsEntry = LogsEntry(
-            timestamp: Date(),
-            logType: .info,
-            message: "Ticket Closed for ticketId: \(ticketId)",
-            userId: ticket.getUserId
-        )
-        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
+        if (ticket.statusProperty != TicketStatus.solved ){
+            delegate?.resolveTicket(agent: agent, ticketId: ticketId, userId: ticket.getUserId)
+        }
+        Logger.log(logType: LogType.info, message: "Ticket Closed for ticketId: \(ticketId) by AgentId : \(agent.getId)", userId: ticket.getUserId, data: ticket)
         
         DataStorage.allTickets.removeValue(forKey: ticketId)
+        agent.assignedTicketsProperty.remove(at: ticketIndex)
         print("Ticket with ID \(ticketId) has been successfully closed and removed.")
         
         return true
     }
-
+    
+    func cancelTicket (user : User, ticketId : Int) -> Bool {
+        let tickets = userController?.getAllTheCreatedTickets(user: user)
+        guard (tickets?.firstIndex(where: { $0.getTicketId == ticketId })) != nil else {
+                print("User does not have this ticket assigned. Cannot close ticket.")
+                return false
+            }
+        
+        guard ((tickets?.contains(where: { $0.getTicketId == ticketId })) != nil) else {
+            return false
+        }
+        
+        guard let ticket = getTicketById(ticketId: ticketId) else {
+            print("Ticket not found with ID: \(ticketId)")
+            return false
+        }
+        if let assignedAgent = findAgentByTicketId(ticketId: ticketId) {
+                
+            assignedAgent.assignedTicketsProperty.removeAll { $0.getTicketId == ticketId }
+        }
+        Logger.log(logType: LogType.info, message: "Ticket canceld for ticketId: \(ticketId) by UserId : \(user.getUserId)", userId: ticketId, data: ticket)
+        DataStorage.allTickets.removeValue(forKey: ticketId)
+        
+        return true
+    }
+    
+    func findAgentByTicketId(ticketId: Int) -> Agent? {
+        for (_,agent) in DataStorage.allAgents {
+            if agent.assignedTicketsProperty.contains(where: { $0.getTicketId == ticketId }) {
+                return agent
+            }
+        }
+        return nil
+    }
     
     func fetchAssignedTickets(agent: Agent) -> [Ticket] {
         return agent.assignedTicketsProperty
     }
     
-    func prioritizeTicket(ticketId: Int, userId: Int) {
+    func prioritizeTicket(ticket: Ticket, userId: Int) {
         let user = userController?.getUserById(userId: userId)
-        let ticket = getTicketById(ticketId: ticketId)
         
         if user?.userRoleProperty == UserRole.vip{
-            ticket?.priorityProperty = Priority.high
+            ticket.priorityProperty = Priority.high
             print("prioritised as high")
         }
         else if user?.userRoleProperty == UserRole.standard{
-            ticket?.priorityProperty = Priority.medium
+            ticket.priorityProperty = Priority.medium
             print("prioritised as mid")
         }
         else if user?.userRoleProperty == UserRole.guest{
-            ticket?.priorityProperty = Priority.low
+            ticket.priorityProperty = Priority.low
             print("prioritised as low")
         }
-       
     }
     
     func reassignTicket(ticketId: Int, agentId : Int, oldAgentid : Int) -> Bool {
         let oldAgent = agentController?.getAgentById(agentId: oldAgentid)
         let ticket = getTicketById(ticketId: ticketId)!
-        let agent = agentController?.getAgentById(agentId: agentId)
-        agent?.assignedTicketsProperty.append(ticket)
+        guard let agent = agentController?.getAgentById(agentId: agentId) else {
+            print("No Agent available with agentId : \(agentId)")
+            return false
+        }
+        agent.assignedTicketsProperty.append(ticket)
         oldAgent?.assignedTicketsProperty.remove(at: ticketId)
-        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticket Reassigned From OldAgentId : \(oldAgentid) to NewAgentId : \(agentId)", userId: agentId)
-        DataStorage.allLogsEntry[logsEntry.getId] = logsEntry
+        Logger.log(logType: LogType.info, message: "Ticket Reassigned From OldAgentId : \(oldAgentid) to NewAgentId : \(agentId)", userId: agentId, data: agent)
         return true
     }
     
