@@ -84,8 +84,8 @@ struct UserView {
             cancelTicket(user: user)
             return
         }
-        if ((ticketController?.cancelTicket(user: user, ticketId: ticketId)) != nil) != true {
-            print("Ticket with ID \(ticketId) has been successfully cancelled and removed.")
+        if ((ticketController?.cancelTicket(user: user, ticketId: ticketId)) != nil) == true {
+            
         }
         else {
             print("User Doesn't have Ticket with ticketId : \(ticketId)  ")
@@ -108,7 +108,7 @@ struct UserView {
             return
         }
         print("--------------------------------------------------")
-        print("--------------------My Tickets--------------------")
+        print("                   My Tickets                     ")
         for ticket in tickets {
             print("--------------------------------------------------")
             print("Ticket Id : \(ticket.getTicketId)")
@@ -168,56 +168,72 @@ struct UserView {
     }
     
     func register() -> User? {
-        var name: String
+        var name: String?
         var role: UserRole?
-        var userName: String
-        var password: String
+        var userName: String?
+        var password: String?
         var user: User?
         
-        while true {
-            print("Enter the name:")
-            name = readLine()!
-            
-            if !Validation.validateName(name) {
-                print("Please enter a valid name.")
-                continue
+        while user == nil {
+            if name == nil {
+                print("Enter the name:")
+                let inputName = readLine() ?? ""
+                if Validation.validateName(inputName) {
+                    name = inputName
+                } else {
+                    print("Please enter a valid name.")
+                    continue
+                }
             }
             
-            print("Enter the user role (vip, standard, guest):")
-            if let roleString = readLine(), let parsedRole = UserRole(role: roleString) {
-                role = parsedRole
-            } else {
-                print("Invalid role entered. Please try again.")
-                continue
+            if role == nil {
+                print("Enter the user role (vip, standard, guest):")
+                if let roleString = readLine(), let parsedRole = UserRole(role: roleString) {
+                    role = parsedRole
+                } else {
+                    print("Invalid role entered. Please try again.")
+                    continue
+                }
             }
             
-            print("Enter the username:")
-            userName = readLine()!
-            
-            if !Validation.validateUsername(userName) {
-                print("Please enter a valid username.")
-                continue
+            if userName == nil {
+                print("Enter the username:")
+                let inputUsername = readLine() ?? ""
+                if Validation.validateUsername(inputUsername) {
+                    userName = inputUsername
+                } else {
+                    print("Please enter a valid username.")
+                    continue
+                }
             }
             
-            print("Enter the password:")
-            password = readLine()!
-            
-            if !Validation.validatePassword(password) {
-                print("Please enter a valid password.")
-                continue
+            if password == nil {
+                print("Enter the password:")
+                let inputPassword = readLine() ?? ""
+                if Validation.validatePassword(inputPassword) {
+                    password = inputPassword
+                } else {
+                    print("Please enter a valid password.")
+                    continue
+                }
             }
             
-            if let registeredUser = userController?.register(name: name, userRole: role!, userName: userName, password: password) {
-                user = registeredUser
-                print("User ID: \(String(describing: user!.getUserId))")
-                break
-            } else {
-                print("Registration failed, please try again.")
-                continue
+            if let validName = name, let validRole = role, let validUsername = userName, let validPassword = password {
+                if let registeredUser = userController?.register(name: validName, userRole: validRole, userName: validUsername, password: validPassword) {
+                    user = registeredUser
+                    print("User ID: \(String(describing: user!.getUserId))")
+                } else {
+                    print("Registration failed, please try again.")
+                    name = nil
+                    role = nil
+                    userName = nil
+                    password = nil
+                }
             }
         }
         
         return user
     }
+
 
 }

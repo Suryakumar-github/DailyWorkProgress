@@ -34,7 +34,7 @@ class TicketControllerImpl: TicketController {
             print("Ticket Created and Assigned to Agent")
         }
         else {
-            print("Ticket Craetion is Failed ")
+            print("Ticket Creation is Failed ")
         }
         DataStorage.allTickets[ticket.getTicketId] = ticket
         Logger.log(logType: LogType.info, message: "New Ticket Created with TicketId : \(ticket.getTicketId)", userId: ticket.getTicketId, data: ticket)
@@ -109,7 +109,7 @@ class TicketControllerImpl: TicketController {
         }
         Logger.log(logType: LogType.info, message: "Ticket canceld for ticketId: \(ticketId) by UserId : \(user.getUserId)", userId: ticketId, data: ticket)
         DataStorage.allTickets.removeValue(forKey: ticketId)
-        
+        print("Ticket cancelled ")
         return true
     }
     
@@ -143,26 +143,34 @@ class TicketControllerImpl: TicketController {
         }
     }
     
-    func reassignTicket(ticketId: Int, agentId : Int, oldAgentid : Int) -> Bool {
-        let oldAgent = agentController?.getAgentById(agentId: oldAgentid)
-        let ticket = getTicketById(ticketId: ticketId)!
-        guard let agent = agentController?.getAgentById(agentId: agentId) else {
-            print("No Agent available with agentId : \(agentId)")
+    func reassignTicket(ticketId: Int, agentId: Int, oldAgentid: Int) -> Bool {
+        guard let oldAgent = agentController?.getAgentById(agentId: oldAgentid) else {
+            print("No Agent available with oldAgentId: \(oldAgentid)")
             return false
         }
-        agent.assignedTicketsProperty.append(ticket)
-        oldAgent?.assignedTicketsProperty.remove(at: ticketId)
-        Logger.log(logType: LogType.info, message: "Ticket Reassigned From OldAgentId : \(oldAgentid) to NewAgentId : \(agentId)", userId: agentId, data: agent)
-        return true
-    }
-    
-    func getTicketById(ticketId : Int) -> Ticket? {
-        let tickets = DataStorage.allTickets
-        
-        if let ticket = tickets[ticketId] {
-            return ticket
+        guard let ticket = getTicketById(ticketId: ticketId) else {
+            print("No Ticket available with ticketId: \(ticketId)")
+            return false
         }
-        return nil
+        guard let agent = agentController?.getAgentById(agentId: agentId) else {
+            print("No Agent available with agentId: \(agentId)")
+            return false
+        }
+        
+        if let index = oldAgent.assignedTicketsProperty.firstIndex(where: { $0.getTicketId == ticketId }) {
+            oldAgent.assignedTicketsProperty.remove(at: index)
+            agent.assignedTicketsProperty.append(ticket)
+            
+            Logger.log(logType: LogType.info, message: "Ticket Reassigned From OldAgentId: \(oldAgentid) to NewAgentId: \(agentId)", userId: agentId, data: agent)
+            return true
+        } else {
+            print("Old Agent does not have the specified ticket assigned.")
+            return false
+        }
+    }
+
+    func getTicketById(ticketId : Int) -> Ticket? {
+        Logger.getItemById(from: DataStorage.allTickets, id: ticketId)
     }
     
     func getTicketByDate(date: Date) -> [Ticket] {

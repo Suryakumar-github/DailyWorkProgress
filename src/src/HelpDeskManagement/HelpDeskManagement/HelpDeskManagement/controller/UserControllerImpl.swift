@@ -28,7 +28,7 @@ class UserControllerImpl : UserController {
     }
     
     func getUserById(userId: Int) -> User? {
-        return DataStorage.allUsers[userId]
+        return Logger.getItemById(from: DataStorage.allUsers, id: userId)
     }
 
     func getAllTheCreatedTickets(user: User) -> [Ticket] {

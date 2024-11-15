@@ -119,10 +119,7 @@ class AgentControllerImpl : AgentController {
     
     func getAgentById(agentId : Int) -> Agent? {
         
-        if let agent = DataStorage.allAgents[agentId] {
-            return agent
-        }
-        return nil
+        return Logger.getItemById(from: DataStorage.allAgents, id: agentId)
     }
     
     func assignAgentAvailability(agent : Agent) {
@@ -174,6 +171,7 @@ class AgentControllerImpl : AgentController {
         Logger.log(logType: LogType.info, message: "New Agent Added with AgentId : \(agent.getId)", userId: agent.getId, data: agent)
     }
 }
+
 extension AgentControllerImpl : TicketAssignmentDelegate {
     func resolveTicket(agent: Agent, ticketId: Int, userId: Int) {
         guard agent.assignedTicketsProperty.contains(where: { $0.getTicketId == ticketId }) else {

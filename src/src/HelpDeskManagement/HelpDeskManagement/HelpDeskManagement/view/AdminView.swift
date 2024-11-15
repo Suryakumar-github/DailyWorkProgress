@@ -97,31 +97,62 @@ struct AdminView {
     }
     
     func addAgent() {
-        print("Enter the Agent's Name")
-        let agentName = readLine()!
-        if !Validation.validateName(agentName) {
-            print("Plese Enter Valid Name")
-        }
-        print("Enter Agent's Department")
-        let agentDepartMent = readLine()!
-        if !Validation.validateName(agentDepartMent) {
-            print("Plese Enter Valid Department")
-        }
-        print("Enter Agent's UserName")
-        let agentUserName = readLine()!
-        if !Validation.validateUsername(agentUserName) {
-            print("Plese Enter Valid User Name")
-        }
-        print("Enter Agent's Password")
-        let agentPassword = readLine()!
-        if !Validation.validatePassword(agentPassword) {
-            print("Plese Enter Valid Password")
+        var agentName: String?
+        var agentDepartment: String?
+        var agentUserName: String?
+        var agentPassword: String?
+        
+        while agentName == nil || agentDepartment == nil || agentUserName == nil || agentPassword == nil {
+            if agentName == nil {
+                print("Enter the Agent's Name:")
+                let inputName = readLine()!
+                if Validation.validateName(inputName) {
+                    agentName = inputName
+                } else {
+                    print("Please enter a valid name.")
+                    continue
+                }
+            }
+            
+            if agentDepartment == nil {
+                print("Enter Agent's Department:")
+                let inputDepartment = readLine()!
+                if Validation.validateName(inputDepartment) {
+                    agentDepartment = inputDepartment
+                } else {
+                    print("Please enter a valid department.")
+                    continue
+                }
+            }
+            
+            if agentUserName == nil {
+                print("Enter Agent's UserName:")
+                let inputUserName = readLine()!
+                if Validation.validateUsername(inputUserName) {
+                    agentUserName = inputUserName
+                } else {
+                    print("Please enter a valid username.")
+                    continue
+                }
+            }
+            
+            if agentPassword == nil {
+                print("Enter Agent's Password:")
+                let inputPassword = readLine()!
+                if Validation.validatePassword(inputPassword) {
+                    agentPassword = inputPassword
+                } else {
+                    print("Please enter a valid password.")
+                    continue
+                }
+            }
         }
         
-        agentController?.addAgent(name: agentName, department: agentDepartMent, userName: agentUserName, password: agentPassword)
-        print("Agent Added successfully")
+        agentController?.addAgent(name: agentName!, department: agentDepartment!, userName: agentUserName!, password: agentPassword!)
+        print("Agent added successfully")
         adminMenu()
     }
+
     
     func viewTicketStatus() {
         print("Enter the ticket ID:")
@@ -139,6 +170,7 @@ struct AdminView {
         
         guard let dateString = readLine(), !dateString.isEmpty else {
             print("Invalid date input.")
+            generateTicketReport()
             return
         }
         
@@ -147,6 +179,7 @@ struct AdminView {
         
         guard let date = dateFormatter.date(from: dateString) else {
             print("Invalid date format. Please use yyyy-MM-dd.")
+            generateTicketReport()
             return
         }
         
@@ -167,32 +200,48 @@ struct AdminView {
     }
     
     func reassignTicket() {
+        var oldAgentId: Int?
+        var ticketId: Int?
+        var newAgentId: Int?
+
+        while oldAgentId == nil || ticketId == nil || newAgentId == nil {
+            if oldAgentId == nil {
+                print("Enter the Old Agent ID:")
+                if let input = Int(readLine()!) {
+                    oldAgentId = input
+                } else {
+                    print("Invalid Agent ID. Please enter a valid integer.")
+                }
+            }
+            
+            if ticketId == nil {
+                print("Enter the Ticket ID:")
+                if let input = Int(readLine()!) {
+                    ticketId = input
+                } else {
+                    print("Invalid Ticket ID. Please enter a valid integer.")
+                }
+            }
+            
+            if newAgentId == nil {
+                print("Enter the New Agent ID:")
+                if let input = Int(readLine()!) {
+                    newAgentId = input
+                } else {
+                    print("Invalid Agent ID. Please enter a valid integer.")
+                }
+            }
+        }
         
-        print("Enter the Old Agent id ")
-        guard let oldAgentId = Int(readLine()!) else {
-            print("Invalid Agent ID.")
-            return
-        }
-        print("Enter the ticket ID :")
-        guard let ticketId = Int(readLine()!) else {
-            print("Invalid ticket ID.")
-            return
+        if let ticketController = ticketController, ticketController.reassignTicket(ticketId: ticketId!, agentId: newAgentId!, oldAgentid: oldAgentId!) {
+            print("Ticket successfully reassigned")
+        } else {
+            print("Ticket not reassigned")
         }
         
-        print("Enter the Agent ID:")
-        guard let agentId = Int(readLine()!) else {
-            print("Invalid Agent ID.")
-            return
-        }
-        let result = (ticketController?.reassignTicket(ticketId: ticketId, agentId: agentId, oldAgentid: oldAgentId))!
-        if result {
-            print("Ticket Successfully Reassigned")
-            adminMenu()
-            return
-        }
-        print("Ticket Not Reassigned")
         adminMenu()
     }
+
     
     func viewLogsEntry() {
        let dataEntries = DataStorage.allLogsEntry

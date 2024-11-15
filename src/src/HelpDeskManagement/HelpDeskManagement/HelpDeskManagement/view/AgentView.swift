@@ -85,8 +85,6 @@ struct AgentView {
         else {
             print("Agent status not updated ")
         }
-        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Agent Availablity is Updated", userId: userId)
-        DataStorage.allLogsEntry[userId] = logsEntry
         agentMenu()
     }
     
@@ -158,7 +156,6 @@ struct AgentView {
 
         if let status = TicketStatus(status: statusInput) {
             if((ticketController?.updateTicketStatus(agent : agent, ticketId: ticketId, status: status) ) != nil) {
-                print("Ticket status updated ")
             }
             else {
                 print("Invalid Ticket Id ")
@@ -166,8 +163,6 @@ struct AgentView {
         } else {
             print("Invalid status entered.")
         }
-        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "Ticket Status is Updated", userId: ticketId)
-        DataStorage.allLogsEntry[ticketId] = logsEntry
         agentMenu()
     }
     
@@ -197,42 +192,59 @@ struct AgentView {
     }
 
     func addKnowledgeBaseEntry() {
-        print("Enter the Title:")
-        guard let title = readLine(), !title.isEmpty  else {
-            print("Invalid Title")
-            return
+        var title: String?
+        var issueType: IssueType?
+        var solution: String?
+        var tags: [String]?
+
+        while title == nil || issueType == nil || solution == nil || tags == nil {
+            if title == nil {
+                print("Enter the Title:")
+                if let input = readLine(), !input.isEmpty {
+                    title = input
+                } else {
+                    print("Invalid Title. Please enter a non-empty title.")
+                }
+            }
+            
+            if issueType == nil {
+                print("Enter the issue type (network, software, hardware, security):")
+                if let issueTypeInput = readLine(), let parsedIssueType = IssueType(status: issueTypeInput) {
+                    issueType = parsedIssueType
+                } else {
+                    print("Invalid Issue Type. Please enter a valid issue type.")
+                }
+            }
+            
+            if solution == nil {
+                print("Enter the Solution:")
+                if let input = readLine(), !input.isEmpty {
+                    solution = input
+                } else {
+                    print("Invalid Solution. Please enter a non-empty solution.")
+                }
+            }
+            
+            if tags == nil {
+                print("Enter the Tags (comma-separated if multiple):")
+                if let tagInput = readLine(), !tagInput.isEmpty {
+                    tags = tagInput.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                } else {
+                    print("Invalid Tags. Please enter at least one tag.")
+                }
+            }
         }
-        
-        print("Enter the issue type (network, software, hardware, security):")
-        guard let issueTypeInput = readLine(), let issueType = IssueType(status: issueTypeInput) else {
-            print("Invalid Issue Type")
-            return
-        }
-        
-        print("Enter the Solution:")
-        guard let solution = readLine(), !solution.isEmpty else {
-            print("Invalid Solution")
-            return
-        }
-        
-        print("Enter the Tags (comma-separated if multiple):")
-        guard let tagInput = readLine(), !tagInput.isEmpty else {
-            print("Invalid Tags")
-            return
-        }
-        
-        let tags = tagInput.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
         
         knowledgeBase?.addEntry(
-            title: title,
-            issueType: issueType,
-            solution: solution,
-            tags: tags,
+            title: title!,
+            issueType: issueType!,
+            solution: solution!,
+            tags: tags!,
             createdDate: Date(),
             lastUpdatedDate: Date()
         )
-        let logsEntry = LogsEntry(timestamp: Date(), logType: LogType.info, message: "One Entry Added In KnowledgeBase", userId: nil)
-        DataStorage.allLogsEntry[0] = logsEntry
+
         agentMenu()
     }
+
 }
