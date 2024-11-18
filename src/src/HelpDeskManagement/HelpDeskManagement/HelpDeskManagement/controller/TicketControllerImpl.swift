@@ -26,15 +26,15 @@ class TicketControllerImpl: TicketController {
         self.delegate = ticketAssignmentDelegate
     }
     
-    func createTicket(title ticketTitle: String, description ticketDescription: String, priority ticketPriority: Priority?, createdDate: Date, status: TicketStatus, agentId: Int?, userId: Int) {
-        let ticket = Ticket(title: ticketTitle, description: ticketDescription, priority: ticketPriority, createdDate: createdDate, status: status, userId: userId)
+    func createTicket(title ticketTitle: String, description ticketDescription: String, priority ticketPriority: Priority?, createdDate: Date, status: TicketStatus, agentId: Int?, userId: Int, issueType : IssueType) {
+        let ticket = Ticket(title: ticketTitle, description: ticketDescription, priority: ticketPriority, createdDate: createdDate, status: status, userId: userId, issueType: issueType)
         
         prioritizeTicket(ticket: ticket, userId: ticket.getUserId)
-        if ((delegate?.assignTicketToAgent(ticket: ticket)) != nil) {
+        if ((delegate?.assignTicketToAgent(ticket: ticket)) != nil)  {
             print("Ticket Created and Assigned to Agent")
         }
         else {
-            print("Ticket Creation is Failed ")
+            print("Ticket Created but Agent is Notavailable to Assign the Ticket")
         }
         DataStorage.allTickets[ticket.getTicketId] = ticket
         Logger.log(logType: LogType.info, message: "New Ticket Created with TicketId : \(ticket.getTicketId)", userId: ticket.getTicketId, data: ticket)
@@ -55,6 +55,7 @@ class TicketControllerImpl: TicketController {
             print("Ticket not found with ID: \(ticketId)")
             return false
         }
+        
         ticket.statusProperty = status
         Logger.log(logType: LogType.info, message: "Ticket status updated to \(status) for ticketId: \(ticketId) by agent.", userId: ticketId, data: ticket)
         return true
@@ -103,13 +104,16 @@ class TicketControllerImpl: TicketController {
             print("Ticket not found with ID: \(ticketId)")
             return false
         }
+        
         if let assignedAgent = findAgentByTicketId(ticketId: ticketId) {
                 
             assignedAgent.assignedTicketsProperty.removeAll { $0.getTicketId == ticketId }
         }
+        
         Logger.log(logType: LogType.info, message: "Ticket canceld for ticketId: \(ticketId) by UserId : \(user.getUserId)", userId: ticketId, data: ticket)
         DataStorage.allTickets.removeValue(forKey: ticketId)
         print("Ticket cancelled ")
+        
         return true
     }
     

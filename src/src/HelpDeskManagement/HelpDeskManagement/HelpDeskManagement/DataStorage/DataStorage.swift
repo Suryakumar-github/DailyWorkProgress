@@ -12,5 +12,5 @@ struct DataStorage {
     static var allUsers : [Int : User] = [:]
     static var allLogsEntry : [Int : LogsEntry] = [:]
     static var knowledgeBaseEntry : [Int : KnowledgeBase] = [:]
-    
+    static var agentTickets : [Agent : [Ticket]] = [:]
 }

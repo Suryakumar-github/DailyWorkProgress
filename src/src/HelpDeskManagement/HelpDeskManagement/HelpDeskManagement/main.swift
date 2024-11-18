@@ -33,7 +33,7 @@ struct Main {
     func loadKnowledgeBaseEntries() {
         let entry1 = KnowledgeBase(
             title: "Software Installation Issue",
-            issue: IssueType.softwareIssue,
+            issue: IssueType.software,
             solution: "Ensure you have the latest version of the installer...",
             tags: ["installation", "software", "admin rights"],
             createdDate: Date()
@@ -41,7 +41,7 @@ struct Main {
         
         let entry2 = KnowledgeBase(
             title: "Printer Not Responding",
-            issue: IssueType.hardwareIssue,
+            issue: IssueType.hardware,
             solution: "Check if the printer is turned on...",
             tags: ["printer", "hardware", "connection"],
             createdDate: Date()
@@ -49,7 +49,7 @@ struct Main {
         
         let entry3 = KnowledgeBase(
             title: "Slow Network Connection",
-            issue: IssueType.networkIisue,
+            issue: IssueType.network,
             solution: "Check the router and modem connection...",
             tags: ["network", "connection", "speed"],
             createdDate: Date()
@@ -57,7 +57,7 @@ struct Main {
         
         let entry4 = KnowledgeBase(
             title: "Unauthorized Access Alert",
-            issue: IssueType.securityIssue,
+            issue: IssueType.security,
             solution: "Immediately change your password...",
             tags: ["security", "unauthorized access", "password"],
             createdDate: Date()
@@ -81,7 +81,6 @@ struct Main {
         DataStorage.allLogsEntry[logsEntry4.getId] = logsEntry4
         
     }
-
 
 }
 let main = Main()

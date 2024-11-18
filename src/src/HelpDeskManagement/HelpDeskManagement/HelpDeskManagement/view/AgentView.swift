@@ -35,7 +35,8 @@ struct AgentView {
         print("5. Update Agent Availability")
         print("6. Resolve Ticket")
         print("7. Close Ticket")
-        print("8. Logout")
+        print("8. Change Password")
+        print("9. Logout")
         print("................................")
         print("Choose an Option ")
         let option = Int(readLine()!)
@@ -47,7 +48,7 @@ struct AgentView {
             updateTicketStatus(agent : loginedAgent!)
         case 3 :
             searchKnowledgeBase()
-        case 4:
+        case 4 :
             addKnowledgeBaseEntry()
         case 5 :
             updateAgentAvailability(agent : loginedAgent!)
@@ -55,7 +56,9 @@ struct AgentView {
             resolveTicket(agent : loginedAgent!)
         case 7 :
             closeTicket(agent : loginedAgent!)
-        case 8:
+        case 8 :
+            changePassword(agent : loginedAgent!)
+        case 9 :
             mainView.showLoginScreen()
         default :
             print("Invalid Option")
@@ -64,13 +67,6 @@ struct AgentView {
     }
     
     func updateAgentAvailability(agent : Agent) {
-        print("Enter the userId: ")
-        
-        guard let userIdString = readLine(), let userId = Int(userIdString) else {
-            print("Invalid input. Please enter a valid user ID.")
-            return
-        }
-        
         print("Enter Agent's Status (available, busy, leave, offline):")
         
         guard let agentStatusString = readLine(),
@@ -86,6 +82,21 @@ struct AgentView {
             print("Agent status not updated ")
         }
         agentMenu()
+    }
+    
+    func changePassword(agent : Agent) {
+        print("Enter Password:")
+        guard let password = readLine(), !password.isEmpty else {
+            print("Invalid Password")
+            changePassword(agent: agent)
+            return
+        }
+        if ((agentController?.changePassword(agent: agent, newPassword : password)) != nil) {
+            print("Password Changed Successfully ")
+        }
+        else {
+            print("Password Not Changed ")
+        }
     }
     
     func closeTicket(agent : Agent) {
@@ -204,6 +215,7 @@ struct AgentView {
                     title = input
                 } else {
                     print("Invalid Title. Please enter a non-empty title.")
+                    continue
                 }
             }
             
@@ -213,6 +225,7 @@ struct AgentView {
                     issueType = parsedIssueType
                 } else {
                     print("Invalid Issue Type. Please enter a valid issue type.")
+                    continue
                 }
             }
             
@@ -222,6 +235,7 @@ struct AgentView {
                     solution = input
                 } else {
                     print("Invalid Solution. Please enter a non-empty solution.")
+                    continue
                 }
             }
             
@@ -231,6 +245,7 @@ struct AgentView {
                     tags = tagInput.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
                 } else {
                     print("Invalid Tags. Please enter at least one tag.")
+                    continue
                 }
             }
         }

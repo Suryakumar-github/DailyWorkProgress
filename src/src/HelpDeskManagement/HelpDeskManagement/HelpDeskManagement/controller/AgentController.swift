@@ -13,5 +13,6 @@ protocol AgentController : AnyObject{
     func setTicketController(ticketController : TicketController)
     func setUserController(userController : UserController)
     func setKnowledgeBaseController(knowledgeBaseController : KnowledgeBaseController)
-    func addAgent(name : String, department : String, userName : String, password : String) 
+    func addAgent(name : String, department : String, userName : String, password : String)
+    func changePassword(agent: Agent, newPassword : String) -> Bool
 }

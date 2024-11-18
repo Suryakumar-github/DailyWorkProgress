@@ -117,7 +117,7 @@ class MainView {
         }
 
         print("Enter Role (admin, agent, user):")
-        if let roleString = readLine(), let role = Role(role: roleString.trimmingCharacters(in: .whitespacesAndNewlines)) {
+        if let roleString = readLine(), let role = Role(role: roleString.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()) {
             print("Attempting login with role: \(role)")
             
             guard let actor = userController?.authenticate(username: username, password: password, role: role) else {

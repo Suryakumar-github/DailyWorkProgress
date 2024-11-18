@@ -85,15 +85,13 @@ class UserControllerImpl : UserController {
     }
     
     private func authenticateUser(username: String, password: String) -> User? {
-        print(DataStorage.allUsers.count)
         guard let user1 = DataStorage.allUsers.values.first(where: { user1 in
-            print("Compare : \(username) with \(user1.getUserName)")
-            print("Compare : \(password) with \(user1.passwordProperty)")
+//            print("Compare : \(username) with \(user1.getUserName)")
+//            print("Compare : \(password) with \(user1.passwordProperty)")
             return user1.getUserName == username && user1.passwordProperty == password
         }) else {
             print("Login failed: Invalid User credentials.")
             return nil
-            
         }
         print("Login successful for User : \(user1.getName)")
         return getUserByUserNameAndPassword(username: username, password: password)

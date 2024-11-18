@@ -6,21 +6,21 @@
 //
 
 enum IssueType : String{
-    case networkIisue
-    case softwareIssue
-    case hardwareIssue
-    case securityIssue
+    case network
+    case software
+    case hardware
+    case security
     
     init?(status: String) {
         switch status.lowercased() {
         case "network":
-            self = .networkIisue
+            self = .network
         case "software":
-            self = .softwareIssue
+            self = .software
         case "hardware":
-            self = .hardwareIssue
+            self = .hardware
         case "security":
-            self = .securityIssue
+            self = .security
         default:
             return nil
         }

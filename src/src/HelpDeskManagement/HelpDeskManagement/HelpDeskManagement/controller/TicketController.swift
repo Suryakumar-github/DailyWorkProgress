@@ -7,7 +7,7 @@
 import Foundation
 
 protocol TicketController : AnyObject{
-    func createTicket (title : String, description : String, priority : Priority?, createdDate : Date, status : TicketStatus, agentId : Int?, userId : Int) 
+    func createTicket (title : String, description : String, priority : Priority?, createdDate : Date, status : TicketStatus, agentId : Int?, userId : Int, issueType : IssueType) 
     func updateTicketStatus (agent : Agent, ticketId : Int, status : TicketStatus) -> Bool
     func closeTicket (agent : Agent, ticketId : Int) -> Bool
     func cancelTicket (user : User, ticketId : Int) -> Bool

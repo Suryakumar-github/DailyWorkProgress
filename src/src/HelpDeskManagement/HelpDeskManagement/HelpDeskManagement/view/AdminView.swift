@@ -68,7 +68,6 @@ struct AdminView {
     
     func viewAllAgents() {
         let allAgents = DataStorage.allAgents
-        print(allAgents)
         print("-------------------------------------------")
         for (_, agent) in allAgents {
             print("-------------------------------------------")
@@ -152,7 +151,6 @@ struct AdminView {
         print("Agent added successfully")
         adminMenu()
     }
-
     
     func viewTicketStatus() {
         print("Enter the ticket ID:")
@@ -211,6 +209,7 @@ struct AdminView {
                     oldAgentId = input
                 } else {
                     print("Invalid Agent ID. Please enter a valid integer.")
+                    continue
                 }
             }
             
@@ -220,6 +219,7 @@ struct AdminView {
                     ticketId = input
                 } else {
                     print("Invalid Ticket ID. Please enter a valid integer.")
+                    continue
                 }
             }
             
@@ -229,6 +229,7 @@ struct AdminView {
                     newAgentId = input
                 } else {
                     print("Invalid Agent ID. Please enter a valid integer.")
+                    continue
                 }
             }
         }
@@ -242,7 +243,6 @@ struct AdminView {
         adminMenu()
     }
 
-    
     func viewLogsEntry() {
        let dataEntries = DataStorage.allLogsEntry
         print("---------------Log Entries------------------")

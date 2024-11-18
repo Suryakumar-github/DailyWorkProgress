@@ -119,3 +119,12 @@ extension Agent: Loggable {
         return self.getId
     }
 }
+extension Agent: Hashable {
+    static func == (lhs: Agent, rhs: Agent) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}

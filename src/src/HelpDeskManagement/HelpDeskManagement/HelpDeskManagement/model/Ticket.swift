@@ -17,8 +17,9 @@ class Ticket {
     private var agentId: Int?
     internal let userId : Int
     private static var ticketCount = 0
+    private let issueType : IssueType
     
-    init(title: String, description: String, priority: Priority? = nil, createdDate: Date, status: TicketStatus, agentId: Int? = nil, userId : Int) {
+    init(title: String, description: String, priority: Priority? = nil, createdDate: Date, status: TicketStatus, agentId: Int? = nil, userId : Int, issueType : IssueType) {
         Ticket.ticketCount += 1
         self.id = Ticket.ticketCount
         self.title = title
@@ -28,6 +29,7 @@ class Ticket {
         self.status = status
         self.agentId = agentId
         self.userId = userId
+        self.issueType = issueType
     }
     
     var getTicketId : Int {
@@ -35,6 +37,9 @@ class Ticket {
     }
     var getTicketTitle : String {
         return title
+    }
+    var getIssueType : IssueType {
+        return issueType
     }
     var descriptionproperty : String {
         get {

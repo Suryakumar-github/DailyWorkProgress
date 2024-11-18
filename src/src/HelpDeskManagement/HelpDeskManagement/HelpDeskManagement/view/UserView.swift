@@ -72,8 +72,14 @@ struct UserView {
             createTicket(user: user)
             return
         }
+        print("Enter the issue type (softwareIssue, networkIisue, hardwareIssue, securityIssue")
+        guard let issueString = readLine(),
+              let issueType = IssueType(rawValue: issueString.lowercased()) else {
+            print("Invalid isuue type. Please enter a valid issue type (softwareIssue, networkIisue, hardwareIssue, securityIssue).")
+            return
+        }
         
-        ticketController?.createTicket(title: ticketTitle, description: ticketDescription, priority: nil, createdDate: Date(), status: TicketStatus.created, agentId: nil, userId: user.getUserId)
+        ticketController?.createTicket(title: ticketTitle, description: ticketDescription, priority: nil, createdDate: Date(), status: TicketStatus.created, agentId: nil, userId: user.getUserId, issueType: issueType)
         userMenu()
     }
     

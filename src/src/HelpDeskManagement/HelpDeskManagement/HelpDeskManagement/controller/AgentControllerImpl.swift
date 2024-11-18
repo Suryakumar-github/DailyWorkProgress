@@ -35,7 +35,10 @@ class AgentControllerImpl : AgentController {
         Logger.log(logType: LogType.info, message: "Agent Availablity is Updated", userId: agent.getId, data: agent)
         return true
     }
-    
+    func changePassword(agent: Agent, newPassword : String) -> Bool {
+        agent.passwordproperty = newPassword
+        return true
+    }
 //    func resolveTicket(ticketId: Int, userId: Int) {
 //        print("Attempting to resolve ticket with ticketId: \(ticketId) and userId: \(userId)")
 //        if (userController == nil) {
@@ -101,10 +104,9 @@ class AgentControllerImpl : AgentController {
     
     func trackAgentPerfomance(agentId: Int) -> AgentPerfomance? {
         guard let agent = getAgentById(agentId: agentId) else {
-                print("Agent not found.")
-                return nil
-            }
-        
+            print("Agent not found.")
+            return nil
+        }
         if agent.ticketResolvedProperty == agent.assignedTicketsProperty.count {
             agent.perfomanceProperty = AgentPerfomance.Super
         }
@@ -185,6 +187,7 @@ extension AgentControllerImpl : TicketAssignmentDelegate {
         }
         
         ticket.statusProperty = TicketStatus.solved
+        agent.ticketResolvedProperty += 1
         Logger.log(logType: LogType.info, message: "Ticket with TicketId \(ticketId) resolved for user with UserId \(userId).", userId: agent.getId, data: agent)
         print("Ticket with ID \(ticketId) has been successfully resolved.")
     }
@@ -193,7 +196,7 @@ extension AgentControllerImpl : TicketAssignmentDelegate {
         let agents = DataStorage.allAgents
         
         for (_, agent) in agents {
-            if agent.statusProperty == AgentStatus.available {
+            if ticket.getIssueType.rawValue.lowercased() == agent.departmentProperty.lowercased() && agent.statusProperty == AgentStatus.available {
                 agent.assignedTicketsProperty.append(ticket)
                 assignAgentAvailability(agent: agent)
                 Logger.log(logType: LogType.info, message: "Ticket is Assigned To Agent, agentId : \(agent.getId)", userId: agent.getId, data: agent)
@@ -201,5 +204,15 @@ extension AgentControllerImpl : TicketAssignmentDelegate {
             }
         }
         return false
+    }
+    
+    func getAgentTickets(agent : Agent) -> [Ticket] {
+        let agentTickets = DataStorage.agentTickets
+        for (agents,_) in agentTickets {
+            if agents == agent {
+                return agentTickets[agents] ?? []
+            }
+        }
+        return []
     }
 }
