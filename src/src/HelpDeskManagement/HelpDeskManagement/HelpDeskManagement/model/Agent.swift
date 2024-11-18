@@ -24,8 +24,8 @@ class Agent {
         self.ticketResolved = 0
         self.status = AgentStatus.available
         self.department = department
-        self.userName = userName
-        self.password = password
+        self.userName = StringHasher.hash(userName)
+        self.password = StringHasher.hash(password)
     }
     
     convenience init(name : String, deparment : String, userName : String, password : String) {
@@ -67,9 +67,8 @@ class Agent {
             return status
         }
         set(newStatus) {
-            let oldStatus = status
+            _ = status
             status = newStatus
-            print("Agent status changed from \(oldStatus) to \(newStatus)")
         }
     }
     
@@ -102,6 +101,10 @@ class Agent {
         set(newPerfomance) {
             perfomance = newPerfomance
         }
+    }
+    
+    deinit{
+        
     }
     
 }

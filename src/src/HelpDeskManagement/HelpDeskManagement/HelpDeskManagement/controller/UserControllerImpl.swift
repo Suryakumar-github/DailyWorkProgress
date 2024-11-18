@@ -22,6 +22,15 @@ class UserControllerImpl : UserController {
         return user
     }
     
+    func changePassword(user : User, password : String) -> Bool {
+        let hashedPassword = StringHasher.hash(password)
+        if user.passwordProperty == hashedPassword {
+            return false
+        }
+        user.passwordProperty = hashedPassword
+        return true
+    }
+    
     func viewTicketStatus(ticketid: Int) -> TicketStatus {
         let ticket = ticketController?.getTicketById(ticketId: ticketid)
         return ticket!.statusProperty
@@ -74,26 +83,30 @@ class UserControllerImpl : UserController {
     }
       
     private func authenticateAgent(username: String, password: String) -> Agent? {
-        guard let agent = DataStorage.allAgents.values.first(where: { agent in
-            agent.getUserName == username && agent.passwordproperty == password
+        let hashedUsername = StringHasher.hash(username)
+        let hashedPassword = StringHasher.hash(password)
+
+        guard let agent = DataStorage.allAgents.values.first(where: {
+            $0.getUserName == hashedUsername && $0.passwordproperty == hashedPassword
         }) else {
             print("Login failed: Invalid Agent credentials.")
             return nil
         }
-        print("Login successful for Agent \(agent.getName)")
-        return getAgentByUserNameAndPassword(username: username, password: password)
+
+        return agent
     }
     
     private func authenticateUser(username: String, password: String) -> User? {
-        guard let user1 = DataStorage.allUsers.values.first(where: { user1 in
-//            print("Compare : \(username) with \(user1.getUserName)")
-//            print("Compare : \(password) with \(user1.passwordProperty)")
-            return user1.getUserName == username && user1.passwordProperty == password
+        let hashedUsername = StringHasher.hash(username)
+        let hashedPassword = StringHasher.hash(password)
+        
+        guard let user1 = DataStorage.allUsers.values.first(where: {
+            $0.getUserName == hashedUsername && $0.passwordProperty == hashedPassword
+            
         }) else {
             print("Login failed: Invalid User credentials.")
             return nil
         }
-        print("Login successful for User : \(user1.getName)")
         return getUserByUserNameAndPassword(username: username, password: password)
     }
     
@@ -126,5 +139,8 @@ class UserControllerImpl : UserController {
             }
         }
         return nil
+    }
+    deinit{
+        
     }
 }

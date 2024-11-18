@@ -60,5 +60,8 @@ class ReportAndAnalyticsControllerImpl : ReportAndAnalyticsController {
         print("Agent Performance: \(agentPerformance)")
         print("----------------------------------------------------------------")
     }
+       
+    deinit{
         
+    }
 }

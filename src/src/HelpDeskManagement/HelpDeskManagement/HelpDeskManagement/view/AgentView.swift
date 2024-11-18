@@ -67,11 +67,13 @@ struct AgentView {
     }
     
     func updateAgentAvailability(agent : Agent) {
+        print("----------------------------------------------------------------")
         print("Enter Agent's Status (available, busy, leave, offline):")
         
         guard let agentStatusString = readLine(),
               let agentStatus = AgentStatus(rawValue: agentStatusString.lowercased()) else {
             print("Invalid status. Please enter a valid status (available, busy, leave, offline).")
+            updateAgentAvailability(agent: agent)
             return
         }
         
@@ -80,59 +82,100 @@ struct AgentView {
         }
         else {
             print("Agent status not updated ")
+            updateAgentAvailability(agent: agent)
+            print("----------------------------------------------------------------")
         }
+        print("----------------------------------------------------------------")
         agentMenu()
     }
     
     func changePassword(agent : Agent) {
+        print("----------------------------------------------------------------")
         print("Enter Password:")
-        guard let password = readLine(), !password.isEmpty else {
+        guard let password = readLine(), !password.isEmpty && Validation.validatePassword(password) else {
             print("Invalid Password")
             changePassword(agent: agent)
             return
         }
         if ((agentController?.changePassword(agent: agent, newPassword : password)) != nil) {
             print("Password Changed Successfully ")
+            print("----------------------------------------------------------------")
         }
         else {
-            print("Password Not Changed ")
+            print("Old Password and New Password should not be same ")
+            print("----------------------------------------------------------------")
         }
     }
     
-    func closeTicket(agent : Agent) {
-        print("Enter the ticket ID to Close :")
-        guard let ticketId = Int(readLine()!) else {
-            print("Invalid ticket ID.")
-            closeTicket(agent: agent)
-            return
+    func closeTicket(agent: Agent) {
+        print("----------------------------------------------------------------")
+        
+        while true {
+            print("Enter the ticket ID (or type 'exit' to go back):")
+            
+            if let input = readLine()?.trimmingCharacters(in: .whitespacesAndNewlines) {
+                if input.lowercased() == "exit" {
+                    print("Exiting to Agent Menu...")
+                    agentMenu()
+                    return
+                }
+                
+                guard let ticketId = Int(input) else {
+                    print("Invalid ticket ID. Please enter a valid numeric ticket ID.")
+                    continue
+                }
+                
+                guard let controller = ticketController else {
+                    print("TicketController is nil. Cannot proceed.")
+                    return
+                }
+                
+                if controller.closeTicket(agent: agent, ticketId: ticketId) {
+                    print("Ticket \(ticketId) successfully closed.")
+                    print("----------------------------------------------------------------")
+                    agentMenu()
+                } else {
+                    print("Failed to close ticket \(ticketId). Either it doesn't exist or you are not authorized.")
+                    print("----------------------------------------------------------------")
+                }
+            }
         }
-        if ((ticketController?.closeTicket(agent : agent,ticketId: ticketId)) != nil) {
-            print("Ticket Closed")            
-        }
-        else {
-            print("Ticket Not Closed")
-        }
-        agentMenu()
     }
 
-    func resolveTicket(agent : Agent) {
-        print("Enter the ticket ID:")
-        guard let ticketId = Int(readLine()!) else {
-            print("Invalid ticket ID.")
-            resolveTicket(agent: agent)
-            return
+
+    func resolveTicket(agent: Agent) {
+        print("----------------------------------------------------------------")
+        while true {
+            print("Enter the ticket ID (or type 'exit' to go back):")
+            
+            if let input = readLine()?.trimmingCharacters(in: .whitespacesAndNewlines) {
+                if input.lowercased() == "exit" {
+                    print("Exiting to Agent Menu...")
+                    agentMenu()
+                    return
+                }
+                
+                if let ticketId = Int(input) {
+                    guard let userId = ticketController?.getUserIdByTicketId(ticketId: ticketId) else {
+                        print("No User Found For Ticket ID: \(ticketId)")
+                        print("----------------------------------------------------------------")
+                        continue
+                    }
+                    
+                    agentController?.resolveTicket(agent: agent, ticketId: ticketId, userId: userId)
+                    print("----------------------------------------------------------------")
+                    agentMenu()
+                    return
+                } else {
+                    print("Invalid input. Please enter a valid ticket ID or type 'exit' to go back.")
+                    
+                }
+            }
         }
-        guard let userId = ticketController?.getUserIdByTicketId(ticketId: ticketId) else {
-            print("No User Found For TicketId : \(ticketId)")
-            resolveTicket(agent: agent)
-            return
-        }
-        agentController?.resolveTicket(agent : agent, ticketId: ticketId, userId: userId)
-        agentMenu()
     }
-    
+
     func viewAssignedTickets(loginedAgent : Agent) {
-        
+        print("----------------------------------------------------------------")
         guard let tickets = ticketController?.fetchAssignedTickets(agent: loginedAgent) else {
             print("No tickets Assigned For Agent")
             return
@@ -156,9 +199,11 @@ struct AgentView {
     }
     
     func updateTicketStatus(agent : Agent) {
+        print("----------------------------------------------------------------")
         print("Enter the ticket ID:")
         guard let ticketId = Int(readLine()!) else {
             print("Invalid ticket ID.")
+            updateTicketStatus(agent: agent)
             return
         }
 
@@ -170,14 +215,24 @@ struct AgentView {
             }
             else {
                 print("Invalid Ticket Id ")
+                updateTicketStatus(agent: agent)
             }
         } else {
             print("Invalid status entered.")
         }
+        print("----------------------------------------------------------------")
         agentMenu()
     }
     
     func searchKnowledgeBase() {
+        print("------------------Available Title's---------------------")
+        let entries = DataStorage.knowledgeBaseEntry
+        print("--------------------------------------------------------")
+        for (_,entry) in entries {
+            print("Title : \(entry.titleproperty)")
+            print("Tag : \(entry.tagsProperty)")
+        }
+        print("--------------------------------------------------------")
         print("Enter the Ticket Title:")
         guard let ticketTitle = readLine(), !ticketTitle.isEmpty else {
             print("Invalid Title")
@@ -198,11 +253,11 @@ struct AgentView {
         } else {
             print("No matching knowledge base entry found.")
         }
-
         agentMenu()
     }
 
     func addKnowledgeBaseEntry() {
+        print("----------------------------------------------------------------")
         var title: String?
         var issueType: IssueType?
         var solution: String?
@@ -258,8 +313,7 @@ struct AgentView {
             createdDate: Date(),
             lastUpdatedDate: Date()
         )
-
+        print("----------------------------------------------------------------")
         agentMenu()
     }
-
 }

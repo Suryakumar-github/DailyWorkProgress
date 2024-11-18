@@ -5,8 +5,7 @@
 //  Created by incubation on 06/11/24.
 //
 
-struct DataStorage {
-    
+struct DataStorage {    
     static var allTickets : [Int : Ticket] = [:]
     static var allAgents : [Int : Agent] = [:]
     static var allUsers : [Int : User] = [:]

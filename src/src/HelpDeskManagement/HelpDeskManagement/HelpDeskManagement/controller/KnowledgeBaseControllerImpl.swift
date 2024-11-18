@@ -34,4 +34,7 @@ class KnowledgeBaseControllerImpl : KnowledgeBaseController {
         let knowledgeBaseEntries = DataStorage.knowledgeBaseEntry
         return knowledgeBaseEntries[id]!
     }
+    deinit{
+        
+    }
 }

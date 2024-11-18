@@ -21,8 +21,8 @@ class User {
         self.id = User.userCount
         self.name = name
         self.userRole = userRole
-        self.password = password
-        self.userName = userName
+        self.password = StringHasher.hash(password)
+        self.userName = StringHasher.hash(userName)
         self.role = role
     }
     
@@ -33,9 +33,11 @@ class User {
     var getUserName : String {
         return userName
     }
+    
     var getName : String {
         return name
     }
+    
     var passwordProperty : String {
         get {
             return password
@@ -61,6 +63,9 @@ class User {
         set(newNotification) {
             userNotifications = newNotification
         }
+    }
+    deinit{
+        
     }
 }
 extension User: Loggable {

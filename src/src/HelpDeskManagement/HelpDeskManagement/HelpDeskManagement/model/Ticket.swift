@@ -65,9 +65,8 @@ class Ticket {
             return status
         }
         set(newStatus) {
-            let oldStatus = status
+            _ = status
             status = newStatus
-            print("Ticket status changed from \(oldStatus) to \(newStatus)")
         }
     }
     var getAgentId: Int? {
@@ -81,6 +80,9 @@ class Ticket {
 
     var getUserId : Int {
         return userId
+    }
+    deinit{
+        
     }
 }
 

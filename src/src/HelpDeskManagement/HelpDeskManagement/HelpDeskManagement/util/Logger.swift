@@ -18,4 +18,7 @@ class Logger {
         return dictionary[id]
     }
 
+    deinit{
+        
+    }
 }

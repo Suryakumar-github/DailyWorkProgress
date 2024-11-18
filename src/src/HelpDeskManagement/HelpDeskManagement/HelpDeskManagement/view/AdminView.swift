@@ -69,6 +69,7 @@ struct AdminView {
     func viewAllAgents() {
         let allAgents = DataStorage.allAgents
         print("-------------------------------------------")
+        print("                Agent's                    ")
         for (_, agent) in allAgents {
             print("-------------------------------------------")
                 print("Agent Id : \(String(describing: agent.getId))")
@@ -80,6 +81,7 @@ struct AdminView {
     }
     
     func viewAgentPerfomance() {
+        print("------------------------------------------------------------")
         print("Enter the Agent ID:")
         guard let agentId = Int(readLine()!) else {
             print("Invalid ticket ID.")
@@ -92,6 +94,7 @@ struct AdminView {
             return
         }
         print("Agents Perfomace For AgentId \(agentId) : \(String(describing: agentPerfomance))")
+        print("------------------------------------------------------------")
         adminMenu()
     }
     
@@ -100,7 +103,7 @@ struct AdminView {
         var agentDepartment: String?
         var agentUserName: String?
         var agentPassword: String?
-        
+        print("------------------------------------------------------------")
         while agentName == nil || agentDepartment == nil || agentUserName == nil || agentPassword == nil {
             if agentName == nil {
                 print("Enter the Agent's Name:")
@@ -109,6 +112,7 @@ struct AdminView {
                     agentName = inputName
                 } else {
                     print("Please enter a valid name.")
+                    
                     continue
                 }
             }
@@ -149,21 +153,27 @@ struct AdminView {
         
         agentController?.addAgent(name: agentName!, department: agentDepartment!, userName: agentUserName!, password: agentPassword!)
         print("Agent added successfully")
+        print("------------------------------------------------------------")
         adminMenu()
     }
     
     func viewTicketStatus() {
+        print("------------------------------------------------------------")
+        
         print("Enter the ticket ID:")
         guard let ticketId = Int(readLine()!) else {
             print("Invalid ticket ID.")
+            viewTicketStatus()
             return
         }
         let ticket = ticketController?.getTicketById(ticketId: ticketId)
         print("Ticket Status : \(String(describing: ticket?.statusProperty))")
+        print("------------------------------------------------------------")
         adminMenu()
     }
     
     func generateTicketReport() {
+        print("------------------------------------------------------------")
         print("Enter the Date to Generate Report (format: yyyy-MM-dd):")
         
         guard let dateString = readLine(), !dateString.isEmpty else {
@@ -183,17 +193,20 @@ struct AdminView {
         
         let ticketReport: () = (reportGenerator?.generateTicketReport(date: date))!
         print("Report generated for \(dateString): \(ticketReport)")
+        print("------------------------------------------------------------")
         adminMenu()
     }
 
     func generateAgentReport() {
+        print("------------------------------------------------------------")
         print("Enter the Agent ID:")
         guard let agentId = Int(readLine()!) else {
             print("Invalid ticket ID.")
+            generateAgentReport()
             return
         }
         let _: () = (reportGenerator?.generateAgentreport(agentId: agentId))!
-        
+        print("------------------------------------------------------------")
         adminMenu()
     }
     
@@ -201,7 +214,7 @@ struct AdminView {
         var oldAgentId: Int?
         var ticketId: Int?
         var newAgentId: Int?
-
+        print("------------------------------------------------------------")
         while oldAgentId == nil || ticketId == nil || newAgentId == nil {
             if oldAgentId == nil {
                 print("Enter the Old Agent ID:")
@@ -236,23 +249,26 @@ struct AdminView {
         
         if let ticketController = ticketController, ticketController.reassignTicket(ticketId: ticketId!, agentId: newAgentId!, oldAgentid: oldAgentId!) {
             print("Ticket successfully reassigned")
+            
         } else {
             print("Ticket not reassigned")
+            
         }
-        
+        print("------------------------------------------------------------")
         adminMenu()
     }
 
     func viewLogsEntry() {
+        print("------------------------------------------------------------")
        let dataEntries = DataStorage.allLogsEntry
-        print("---------------Log Entries------------------")
+        print("                       Log Entries                          ")
         for (_,entry) in dataEntries {
-            print("---------------------------------------------")
+            print("------------------------------------------------------------")
             print("Entry id : \(entry.getId)")
             print("Entry Created Date : \(entry.getTimestamp)")
             print("Entry Message : \(entry.messageProperty)")
         }
-        print("---------------------------------------------")
+        print("------------------------------------------------------------")
         adminMenu()
     }
 }

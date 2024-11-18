@@ -14,4 +14,5 @@ protocol UserController : AnyObject {
     func setTicketController(ticketController : TicketController)
     func getAllTheCreatedTickets(user: User) -> [Ticket]
     func getUserNotifications(userId : Int) -> [Int: String]
+    func changePassword(user : User, password : String) -> Bool
 }

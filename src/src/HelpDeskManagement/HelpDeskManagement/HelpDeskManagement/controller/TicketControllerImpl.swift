@@ -31,6 +31,7 @@ class TicketControllerImpl: TicketController {
         
         prioritizeTicket(ticket: ticket, userId: ticket.getUserId)
         if ((delegate?.assignTicketToAgent(ticket: ticket)) != nil)  {
+            ticket.statusProperty = TicketStatus.assigned
             print("Ticket Created and Assigned to Agent")
         }
         else {
@@ -63,12 +64,10 @@ class TicketControllerImpl: TicketController {
     
     func closeTicket(agent: Agent, ticketId: Int) -> Bool {
         guard let ticketIndex = agent.assignedTicketsProperty.firstIndex(where: { $0.getTicketId == ticketId }) else {
-                print("Agent does not have this ticket assigned. Cannot close ticket.")
                 return false
             }
         
         guard agent.assignedTicketsProperty.contains(where: { $0.getTicketId == ticketId }) else {
-            print("Agent does not have this ticket assigned. Cannot close ticket.")
             return false
         }
         
@@ -84,7 +83,6 @@ class TicketControllerImpl: TicketController {
         
         DataStorage.allTickets.removeValue(forKey: ticketId)
         agent.assignedTicketsProperty.remove(at: ticketIndex)
-        print("Ticket with ID \(ticketId) has been successfully closed and removed.")
         
         return true
     }
@@ -92,7 +90,6 @@ class TicketControllerImpl: TicketController {
     func cancelTicket (user : User, ticketId : Int) -> Bool {
         let tickets = userController?.getAllTheCreatedTickets(user: user)
         guard (tickets?.firstIndex(where: { $0.getTicketId == ticketId })) != nil else {
-                print("User does not have this ticket assigned. Cannot close ticket.")
                 return false
             }
         
@@ -101,7 +98,6 @@ class TicketControllerImpl: TicketController {
         }
         
         guard let ticket = getTicketById(ticketId: ticketId) else {
-            print("Ticket not found with ID: \(ticketId)")
             return false
         }
         
@@ -135,15 +131,14 @@ class TicketControllerImpl: TicketController {
         
         if user?.userRoleProperty == UserRole.vip{
             ticket.priorityProperty = Priority.high
-            print("prioritised as high")
         }
         else if user?.userRoleProperty == UserRole.standard{
             ticket.priorityProperty = Priority.medium
-            print("prioritised as mid")
+            
         }
         else if user?.userRoleProperty == UserRole.guest{
             ticket.priorityProperty = Priority.low
-            print("prioritised as low")
+            
         }
     }
     
@@ -182,5 +177,8 @@ class TicketControllerImpl: TicketController {
         return tickets.compactMap { (_, ticket) in
             Calendar.current.isDate(ticket.getTicketCreatedDate, inSameDayAs: date) ? ticket : nil
         }
+    }
+    deinit{
+        
     }
 }

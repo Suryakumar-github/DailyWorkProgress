@@ -35,7 +35,8 @@ struct UserView {
         print("2. View My Tickets")
         print("3. Search Knowledge Base")
         print("4. Cancel Ticket")
-        print("5. Logout")
+        print("5. Change Password")
+        print("6. Logout")
 
         print("Select an option: ")
         let option = Int(readLine()!)
@@ -45,11 +46,13 @@ struct UserView {
             createTicket(user : loginedUser!)
         case 2 :
             viewMyTicket(user : loginedUser!)
-        case 3:
+        case 3 :
             searchKnowledgeBase()
-        case 4:
+        case 4 :
             cancelTicket(user : loginedUser!)
-        case 5:
+        case 5 :
+            changePassword(user : loginedUser!)
+        case 6:
             mainView.showLoginScreen()
             
         default :
@@ -58,45 +61,96 @@ struct UserView {
         }
     }
     
+    func changePassword(user : User) {
+        print("-----------------------------------------------------")
+        print("Enter Password:")
+        guard let password = readLine(), !password.isEmpty && Validation.validatePassword(password) else {
+            print("Invalid Password")
+            changePassword(user: user)
+            return
+        }
+        guard let controller = userController else {
+            print("Controller in nil")
+            return
+        }
+        if (controller.changePassword(user : user, password : password)) {
+            print("Password Changed Successfully ")
+            print("-----------------------------------------------------")
+            userMenu()
+        }
+        else {
+            print("Old password and New password should not be the same ")
+            print("-----------------------------------------------------")
+            changePassword(user: user)
+        }
+    }
+    
     func createTicket(user : User) {
+        print("-----------------------------------------------------")
         print("Enter the Ticket Title:")
         guard let ticketTitle = readLine(), !ticketTitle.isEmpty  else {
             print("Invalid Title")
             createTicket(user: user)
             return
         }
-        
         print("Enter the Description :")
         guard let ticketDescription  = readLine(), !ticketDescription.isEmpty else {
             print("Invalid Ticket Description")
             createTicket(user: user)
             return
         }
-        print("Enter the issue type (softwareIssue, networkIisue, hardwareIssue, securityIssue")
-        guard let issueString = readLine(),
-              let issueType = IssueType(rawValue: issueString.lowercased()) else {
-            print("Invalid isuue type. Please enter a valid issue type (softwareIssue, networkIisue, hardwareIssue, securityIssue).")
-            return
+        print("Enter the issue type (1 : for software, 2 : for network, 3 : for hardware , 4 : for security")
+        let choice = Int(readLine()!)
+        var issue : IssueType.RawValue = ""
+        switch choice {
+        case 1:
+            issue = "software"
+        case 2:
+            issue = "network"
+        case 3:
+            issue = "hardware"
+        case 4:
+            issue = "security"
+        default :
+            print("Invalid isuue type. Please enter a valid issue type (software, network, hardware, security).")
+            createTicket(user: user)
         }
+    
         
-        ticketController?.createTicket(title: ticketTitle, description: ticketDescription, priority: nil, createdDate: Date(), status: TicketStatus.created, agentId: nil, userId: user.getUserId, issueType: issueType)
+        ticketController?.createTicket(title: ticketTitle, description: ticketDescription, priority: nil, createdDate: Date(), status: TicketStatus.created, agentId: nil, userId: user.getUserId, issueType: IssueType(rawValue: issue) ?? IssueType.software)
+        print("-----------------------------------------------------")
         userMenu()
     }
     
-    func cancelTicket(user : User) {
-        print("Enter the ticket ID to Cancel :")
-        guard let ticketId = Int(readLine()!) else {
-            print("Invalid ticket ID.")
-            cancelTicket(user: user)
-            return
-        }
-        if ((ticketController?.cancelTicket(user: user, ticketId: ticketId)) != nil) == true {
+    func cancelTicket(user: User) {
+        print("-----------------------------------------------------")
+        while true {
+            print("Enter the ticket ID to Cancel (or type 'exit' to go back):")
             
+            if let input = readLine()?.trimmingCharacters(in: .whitespacesAndNewlines) {
+                if input.lowercased() == "exit" {
+                    print("Exiting to User Menu...")
+                    print("-----------------------------------------------------")
+                    userMenu()
+                    return
+                }
+                
+                if let ticketId = Int(input) {
+                    let isCancelled = ticketController?.cancelTicket(user: user, ticketId: ticketId) ?? false
+                    
+                    if isCancelled {
+                        print("Ticket \(ticketId) successfully canceled.")
+                        print("-----------------------------------------------------")
+                        userMenu()
+                        return
+                    } else {
+                        print("User doesn't have a ticket with ticketId: \(ticketId). Please try again.")
+                    }
+                } else {
+                    print("Invalid input. Please enter a valid ticket ID or type 'exit' to go back.")
+                }
+            }
         }
-        else {
-            print("User Doesn't have Ticket with ticketId : \(ticketId)  ")
-        }
-        userMenu()
     }
     
     func viewMyTicket(user : User) {
@@ -148,6 +202,15 @@ struct UserView {
 //    }
     
     func searchKnowledgeBase() {
+        print("------------------Available Title's---------------------")
+        let entries = DataStorage.knowledgeBaseEntry
+        print("--------------------------------------------------------")
+        for (_,entry) in entries {
+            print("Title : \(entry.titleproperty)")
+            print("Tag : \(entry.tagsProperty)")
+        }
+        print("--------------------------------------------------------")
+        
         print("Enter the Ticket Title:")
         guard let ticketTitle = readLine(), !ticketTitle.isEmpty else {
             print("Invalid Title")
@@ -179,7 +242,7 @@ struct UserView {
         var userName: String?
         var password: String?
         var user: User?
-        
+        print("-----------------------------------------------------")
         while user == nil {
             if name == nil {
                 print("Enter the name:")
@@ -228,6 +291,7 @@ struct UserView {
                 if let registeredUser = userController?.register(name: validName, userRole: validRole, userName: validUsername, password: validPassword) {
                     user = registeredUser
                     print("User ID: \(String(describing: user!.getUserId))")
+                    print("-----------------------------------------------------")
                 } else {
                     print("Registration failed, please try again.")
                     name = nil
@@ -237,9 +301,7 @@ struct UserView {
                 }
             }
         }
-        
+        print("-----------------------------------------------------")
         return user
     }
-
-
 }

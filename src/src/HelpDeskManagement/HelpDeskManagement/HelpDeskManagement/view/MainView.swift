@@ -102,6 +102,7 @@ class MainView {
     }
     
     func login() {
+        print("----------------------------------------------------------------")
         print("Enter Username:")
         guard let username = readLine(), !username.isEmpty else {
             print("Invalid Username")
@@ -126,7 +127,9 @@ class MainView {
                 return
             }
             print("Login Successfull for \(role) \(username)")
+            print("----------------------------------------------------------------")
             navigateToRoleView(role: role, actor: actor)
+            
         } else {
             print("Invalid role entered.")
             login()

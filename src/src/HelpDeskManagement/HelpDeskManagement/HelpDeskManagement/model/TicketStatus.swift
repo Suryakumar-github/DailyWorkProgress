@@ -6,12 +6,14 @@
 //
 
 enum TicketStatus: String {
-    case created, opened, closed, solved, cancelled, onHold
+    case created, assigned, opened, closed, solved, cancelled, onHold
     
     init?(status: String) {
         switch status.lowercased() {
         case "created" :
             self = .created
+        case "assigned" :
+            self = .assigned
         case "opened":
             self = .opened
         case "closed":

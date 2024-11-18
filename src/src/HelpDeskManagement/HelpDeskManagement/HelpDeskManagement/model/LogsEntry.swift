@@ -68,4 +68,7 @@ class LogsEntry {
             additionalInfo = newAdditionalInfo ?? [:]
         }
     }
+    deinit{
+        
+    }
 }

@@ -35,10 +35,16 @@ class AgentControllerImpl : AgentController {
         Logger.log(logType: LogType.info, message: "Agent Availablity is Updated", userId: agent.getId, data: agent)
         return true
     }
-    func changePassword(agent: Agent, newPassword : String) -> Bool {
-        agent.passwordproperty = newPassword
+    
+    func changePassword(agent : Agent, newPassword : String) -> Bool {
+        let hashedPassword = StringHasher.hash(newPassword)
+        if agent.passwordproperty == hashedPassword {
+            return false
+        }
+        agent.passwordproperty = hashedPassword
         return true
     }
+    
 //    func resolveTicket(ticketId: Int, userId: Int) {
 //        print("Attempting to resolve ticket with ticketId: \(ticketId) and userId: \(userId)")
 //        if (userController == nil) {
@@ -172,6 +178,10 @@ class AgentControllerImpl : AgentController {
         DataStorage.allAgents[agent.getId] = agent
         Logger.log(logType: LogType.info, message: "New Agent Added with AgentId : \(agent.getId)", userId: agent.getId, data: agent)
     }
+    
+    deinit{
+        
+    }
 }
 
 extension AgentControllerImpl : TicketAssignmentDelegate {
@@ -215,4 +225,5 @@ extension AgentControllerImpl : TicketAssignmentDelegate {
         }
         return []
     }
+    
 }
