@@ -19,8 +19,9 @@ struct AgentView {
     }
     
     func agentMenu() {
-        print("==== Agent Dashboard ====")
-        print("................................")
+        print("------------------------------------------------------------")
+        print("                  ==== Agent Dashboard ====                 ")
+        print("------------------------------------------------------------")
         print("1. View Assigned Tickets")
         print("2. Update Ticket Status")
         print("3. Search Knowledge Base")
@@ -93,7 +94,8 @@ struct AgentView {
             print("---------------------------------------------------------------------------------")
         }
         catch let error {
-            print("Error while Update Agent Availabilty : \(error)")
+            print("Error while Update Agent Availabilty : \(error.localizedDescription)")
+            print("---------------------------------------------------------------------------------")
         }
         agentMenu()
     }
@@ -103,8 +105,13 @@ struct AgentView {
         
         var currentPassword: String?
         while currentPassword == nil {
-            print("Enter the Current Password:")
+            print("Enter the Current Password (or enter 0 to exit):")
             if let input = readLine(), !input.isEmpty {
+                if input == "0" {
+                    print("Exiting to agent Menu..")
+                    agentMenu()
+                    return
+                }
                 currentPassword = input
             } else {
                 print("Invalid Password. Please try again.")
@@ -113,8 +120,13 @@ struct AgentView {
 
         var newPassword: String?
         while newPassword == nil {
-            print("Enter New Password:")
+            print("Enter New Password (or enter 0 to exit):")
             if let input = readLine(), !input.isEmpty {
+                if input == "0" {
+                    print("Exiting to agent Menu..")
+                    agentMenu()
+                    return
+                }
                 if Validation.validatePassword(input) {
                     newPassword = input
                 } else {
@@ -136,7 +148,8 @@ struct AgentView {
                 print("Failed to change the password. Please try again.")
             }
         } catch let error {
-            print("Error while updating the password: \(error)")
+            print("Error while updating the password: \(error.localizedDescription)")
+            print("----------------------------------------------------------------")
         }
         
         print("----------------------------------------------------------------")
@@ -155,25 +168,25 @@ struct AgentView {
                 return
             }
             
-            if(tickets.count == 0) {
-                print("-------------No Tickets Assigned for Agent----------------")
-                print("----------------------------------------------------------")
+            if(tickets.isEmpty) {
+                print("----------------No Tickets Assigned for Agent-------------------")
+                print("----------------------------------------------------------------")
                 agentMenu()
             }
             
             print("----------------------------------------------------------------")
             print("                      Assigned Tickets                          ")
             
-            for index in 0..<tickets.count {
-                
+            for ticket in tickets {
                 print("----------------------------------------------------------------")
-                print("Ticket Id : \(String(describing: tickets[index].getTicketId))")
-                print("Ticket Title : \(String(describing: tickets[index].getTicketTitle))")
+                print("Ticket Id : \(String(describing: ticket.getTicketId))")
+                print("Ticket Title : \(String(describing: ticket.getTicketTitle))")
             }
             print("----------------------------------------------------------------")
         }
         catch let error {
-            print("Error while fetching the tickets : \(error)")
+            print("Error while fetching the tickets : \(error.localizedDescription)")
+            print("----------------------------------------------------------------")
         }
         while true {
             print("Enter the ticket ID (or type '0' to go back):")
@@ -185,13 +198,20 @@ struct AgentView {
                     return
                 }
         
-                
+                print("Enter the solution for the Ticket's Issue")
+                 let solution = readLine()!
+                    if solution == "0" {
+                        print("Exiting to Agent Menu...")
+                        agentMenu()
+                        return
+                    }
+                    
                 guard let controller = agentController else {
                     print("AgentController is nil. Cannot proceed.")
                     return
                 }
                 do {
-                    if try controller.closeTicket(agent: agent, ticketId: input) {
+                    if try controller.closeTicket(agent: agent, ticketId: input, solution: solution) {
                         print("Ticket \(input) successfully closed.")
                         print("----------------------------------------------------------------")
                         agentMenu()
@@ -202,7 +222,8 @@ struct AgentView {
                     }
                 }
                 catch let error {
-                    print("Error while closing the Ticket : \(error)")
+                    print("Error while closing the Ticket : \(error.localizedDescription)")
+                    print("----------------------------------------------------------------")
                 }
             }
         }
@@ -235,7 +256,8 @@ struct AgentView {
             print("----------------------------------------------------------------")
         }
         catch let error {
-            print("Error while fetching the tickets : \(error)")
+            print("Error while fetching the tickets : \(error.localizedDescription)")
+            print("----------------------------------------------------------------")
         }
         agentMenu()
     }
@@ -251,8 +273,8 @@ struct AgentView {
             }
             
             if(tickets.count == 0) {
-                print("-------------No Tickets Assigned for Agent----------------")
-                print("----------------------------------------------------------")
+                print("-----------------No Tickets Assigned for Agent------------------")
+                print("----------------------------------------------------------------")
                 agentMenu()
             }
             
@@ -269,7 +291,8 @@ struct AgentView {
             print("----------------------------------------------------------------")
         }
         catch let error {
-            print("Error while fetching the tickets : \(error)")
+            print("Error while fetching the tickets : \(error.localizedDescription)")
+            print("----------------------------------------------------------------")
         }
         while true {
             print("Enter the ticket ID (or type '0' to go back):")
@@ -282,11 +305,13 @@ struct AgentView {
                 }
                 do {
                     try agentController?.resolveTicket(agent: agent, ticketId: input)
+                    print("Ticket with ID \(input) has been successfully resolved.")
                     print("----------------------------------------------------------------")
                     agentMenu()
                 }
                 catch let error {
-                    print("Error while resolving the Ticket : \(error)")
+                    print("Error while resolving the Ticket : \(error.localizedDescription)")
+                    print("----------------------------------------------------------------")
                 }
             }
         }
@@ -313,7 +338,8 @@ struct AgentView {
             }
             print("----------------------------------------------------------------")
         } catch let error {
-            print("Error while fetching tickets: \(error)")
+            print("Error while fetching tickets: \(error.localizedDescription)")
+            print("----------------------------------------------------------------")
             agentMenu()
             return
         }
@@ -368,13 +394,14 @@ struct AgentView {
                     print("No ticket found with ID \(input). Please try again.")
                 }
             } catch let error {
-                print("Error while updating ticket: \(error)")
+                print("Error while updating ticket: \(error.localizedDescription)")
+                print("----------------------------------------------------------------")
             }
         }
     }
     
     func searchKnowledgeBase() {
-        print("----------------------------------------------------------------")
+        print("------------------- KnowledgeBase Menu -------------------------")
         print("1. View All KnowledgeBase Entry")
         print("2. Search Using Specific Field")
         print("----------------------------------------------------------------")
@@ -384,23 +411,24 @@ struct AgentView {
         let choice = Int(readLine()!)
         if choice == 1 {
             do {
-                guard let entries = try agentController?.getAllKnowledgeBaseEntries() else {
+                guard let entries = try agentController?.getAllKnowledgeBaseEntries(), !entries.isEmpty else {
                     print("No Entries Found ")
                     agentMenu()
                     return
                 }
-                print("------------------Available Title's---------------------")
-                print("--------------------------------------------------------")
+                print("-------------------- Available Entrie's -------------------------")
+                
                 for (entry) in entries {
                     print("Title : \(entry.titleproperty)")
-                    print("Tag : \(entry.tagsProperty)")
                     print("Issue : \(entry.issueProperty)")
                     print("Solution : \(entry.solutionProperty)")
+                    print("----------------------------------------------------------------")
                 }
-                print("--------------------------------------------------------")
+                print("----------------------------------------------------------------")
             }
             catch let error {
-                print("Error while fetching the data : \(error)")
+                print("Error while fetching the data : \(error.localizedDescription)")
+                print("----------------------------------------------------------------")
             }
             agentMenu()
         }
@@ -413,17 +441,18 @@ struct AgentView {
             }
             do {
                 if let knowledgeBaseEntry = try agentController?.search(word: word) {
-                    print("-----------------Problem Solution-----------------------")
-                    print("--------------------------------------------------------")
+                    print("-------------------- Problem Solution --------------------------")
+                    print("----------------------------------------------------------------")
                     for entry in knowledgeBaseEntry {
                         print("Title: \(entry.titleproperty )")
                         print("Solution: \(entry.solutionProperty )")
-                        print("---------------------------------------------------------")
+                        print("----------------------------------------------------------------")
                     }
                 }
             }
             catch let error {
-                print("Error while Fetching the data : \(error)")
+                print("Error while Fetching the data : \(error.localizedDescription)")
+                print("----------------------------------------------------------------")
             }
         }
         else {
@@ -439,9 +468,9 @@ struct AgentView {
         var title: String?
         var issueType: IssueType?
         var solution: String?
-        var tags: [String]?
+        
 
-        while title == nil || issueType == nil || solution == nil || tags == nil {
+        while title == nil || issueType == nil || solution == nil {
             if title == nil {
                 print("Enter the Title:")
                 if let input = readLine(), !input.isEmpty {
@@ -480,29 +509,21 @@ struct AgentView {
                 }
             }
             
-            if tags == nil {
-                print("Enter the Tags (comma-separated if multiple):")
-                if let tagInput = readLine(), !tagInput.isEmpty {
-                    tags = tagInput.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                } else {
-                    print("Invalid Tags. Please enter at least one tag.")
-                    continue
-                }
-            }
         }
         do {
             try agentController?.addEntry(
                 title: title!,
                 issueType: issueType!,
                 solution: solution!,
-                tags: tags!,
                 createdDate: Date(),
                 lastUpdatedDate: Date(), userId: agent.getId
             )
+            print("KnowldgeBase Entry Added Successfully")
             print("----------------------------------------------------------------")
         }
         catch let error {
-            print(error)
+            print(error.localizedDescription)
+            print("----------------------------------------------------------------")
         }
         agentMenu()
     }

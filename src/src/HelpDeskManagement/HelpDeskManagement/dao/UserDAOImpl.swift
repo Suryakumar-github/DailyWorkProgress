@@ -92,7 +92,7 @@ class UserDAOImpl: UserDAO {
     }
 
     func getAllUsers() -> Result<[User], DatabaseError> {
-        let query = "SELECT id, name, role FROM Users"
+        let query = Queries.getAllUsers
         var statement: OpaquePointer?
         var users: [User] = []
 

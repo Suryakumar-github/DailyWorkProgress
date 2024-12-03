@@ -16,10 +16,10 @@ protocol AgentController : AnyObject{
     func setKnowledgeBaseController(knowledgeBaseController : KnowledgeBaseController)
     func addAgent(name : String, department : String, userName : String, password : String)throws
     func changePassword(agent : Agent, newPassword: String, currentPassword: String)throws -> Bool
-    func closeTicket(agent: Agent, ticketId: Int) throws -> Bool
+    func closeTicket(agent: Agent, ticketId: Int, solution : String) throws -> Bool
     func fetchAssignedTickets(agent: Agent) throws -> [Ticket]
     func updateTicketStatus(agent : Agent, ticketId: Int, status: TicketStatus) throws -> Bool
-    func addEntry(title: String, issueType : IssueType, solution: String, tags: [String], createdDate: Date, lastUpdatedDate: Date?, userId : Int)throws
+    func addEntry(title: String, issueType : IssueType, solution: String, createdDate: Date, lastUpdatedDate: Date?, userId : Int)throws
     func search(word: String) throws -> [KnowledgeBase]
     func assignTicketToAgent(ticket: Ticket) throws -> Bool
     func getAllAgents() throws -> [Agent]

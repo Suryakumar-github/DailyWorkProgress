@@ -127,7 +127,8 @@ class AgentDAOImpl : AgentDAO {
             let ticketResolvedCount = Int(sqlite3_column_int(statement, 3))
             let userId = Int(sqlite3_column_int(statement, 4))
             let name = String(cString: sqlite3_column_text(statement, 5))
-            let newAgent = Agent(id: agentId, name: name, department: department, status: AgentStatus(rawValue: availabiltyStatus) ?? AgentStatus.available, ticketResolved: ticketResolvedCount, userId: userId)
+            let status = AgentStatus(rawValue: availabiltyStatus) ?? AgentStatus.available
+            let newAgent = Agent(id: agentId, name: name, department: department, status: status, ticketResolved: ticketResolvedCount, userId: userId)
             agents.append(newAgent)
         }
 
@@ -204,7 +205,6 @@ class AgentDAOImpl : AgentDAO {
         guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
             return .failure(.preparationFailed("Failed to prepare SELECT statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
         }
-
         sqlite3_bind_int(statement, 1, Int32(userId))
         
         if sqlite3_step(statement) == SQLITE_ROW {
@@ -219,7 +219,7 @@ class AgentDAOImpl : AgentDAO {
     }
     
     func updateTicketsResolvedCount(agentId: Int, newCount: Int) -> Result<Void, DatabaseError> {
-        let query = "UPDATE Agents SET ticketsResolvedCount = ? WHERE agent_id = ?"
+        let query = Queries.updateTicketResolvedCount
         var statement: OpaquePointer?
         
         guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {

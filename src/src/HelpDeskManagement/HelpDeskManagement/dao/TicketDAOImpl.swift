@@ -23,7 +23,7 @@ class TicketDAOImpl : TicketDAO{
     }
     
     func addTicket(ticket: Ticket) -> Result<Void, DatabaseError> {
-        let query = "INSERT INTO Tickets (title, description, user_id, agent_id, priority, status, issueType) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        let query = Queries.addTicket
         var statement: OpaquePointer?
         
         guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
@@ -273,7 +273,7 @@ class TicketDAOImpl : TicketDAO{
                 createdDate: createdDate,
                 status: status,
                 userId: userId,
-                agentId: agentId!,
+                agentId: agentId ?? 0,
                 issueType: issueType,
                 priority: priority
             )
@@ -358,7 +358,7 @@ class TicketDAOImpl : TicketDAO{
         dateFormatter2.dateFormat = "yyyy-MM-dd"
         let formattedDateString2 = dateFormatter2.string(from: date2)
 
-        let query = "SELECT * FROM LogsEntry WHERE DATE(timestamp) BETWEEN '\(formattedDateString1)' AND '\(formattedDateString2)';"
+        let query = "SELECT * FROM Tickets WHERE DATE(created_at) BETWEEN '\(formattedDateString1)' AND '\(formattedDateString2)';"
         var statement: OpaquePointer?
         var tickets: [Ticket] = []
 

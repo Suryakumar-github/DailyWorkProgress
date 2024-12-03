@@ -33,10 +33,7 @@ class KnowledgeBaseControllerImpl : KnowledgeBaseController {
                     knowledgeBaseEntries.append(entry)
                     continue
                 }
-                    
-                if entry.tagsProperty.contains(where: { $0.lowercased().contains(word.lowercased()) }) {
-                    knowledgeBaseEntries.append(entry)
-                }
+                
             }
             return knowledgeBaseEntries
             
@@ -45,16 +42,17 @@ class KnowledgeBaseControllerImpl : KnowledgeBaseController {
         }
     }
   
-    func addEntry(title: String, issueType : IssueType, solution: String, tags: [String], createdDate: Date, lastUpdatedDate: Date?, userId : Int) throws {
-        let knowledgeBase = KnowledgeBase( title: title, issue: issueType, solution: solution, tags: tags, createdDate: createdDate, lastUpdatedDate: nil, userId: userId)
+    func addEntry(title: String, issueType : IssueType, solution: String, createdDate: Date, lastUpdatedDate: Date?, userId : Int) throws -> Bool{
+        let knowledgeBase = KnowledgeBase( title: title, issue: issueType, solution: solution, createdDate: createdDate, lastUpdatedDate: nil, userId: userId)
         let result = knowledgeBaseDao.addEntry(entry: knowledgeBase)
         switch result {
         case .success() :
-            print("New Knowledge Base Entry Added")
+            try Logger.log(logType: LogType.info, message: "New Knowledge Base Entry Added with Id : \(knowledgeBase.getId)", userId: knowledgeBase.getId, data: knowledgeBase)
+            return true
         case .failure(let error) :
             throw error
         }
-        try Logger.log(logType: LogType.info, message: "New Knowledge Base Entry Added with Id : \(knowledgeBase.getId)", userId: knowledgeBase.getId, data: knowledgeBase)
+        
     }
     
     func updateEntry(id: Int, solution: String, lastUpdatedDate: Date?) throws {

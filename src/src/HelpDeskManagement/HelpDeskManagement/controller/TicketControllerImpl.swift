@@ -10,13 +10,18 @@ import Foundation
 class TicketControllerImpl: TicketController {
     
     private weak var delegate: TicketAssignmentDelegate?
-    private weak var agentController : AgentController?
-    private weak var userController : UserController?
+    private var agentController : AgentController?
+    private var userController : UserController?
+    private var knowleggeBaseController : KnowledgeBaseController?
     lazy var userView = UserView()
     private let ticketDao : TicketDAO = TicketDAOImpl()
     
     func setAgentController(agentController: AgentController) {
         self.agentController = agentController
+    }
+    
+    func setKnowledgeBaseController(knowledgeBaseController: KnowledgeBaseController) {
+        self.knowleggeBaseController = knowledgeBaseController
     }
     
     func setUserController(userController: UserController) {
@@ -115,10 +120,9 @@ class TicketControllerImpl: TicketController {
         case .failure(let error) :
             throw error
         }
-        
     }
     
-    func closeTicket(agent: Agent, ticketId: Int)throws -> Bool {
+    func closeTicket(agent: Agent, ticketId: Int, solution : String)throws -> Bool {
         
         guard (try fetchAssignedTickets(agent: agent).contains(where: { $0.getTicketId == ticketId })) else {
             return false
@@ -132,9 +136,10 @@ class TicketControllerImpl: TicketController {
         if (ticket.statusProperty != TicketStatus.solved ){
             try delegate?.resolveTicket(agent: agent, ticketId: ticketId)
         }
-        try Logger.log(logType: LogType.info, message: "Ticket Closed for ticketId: \(ticketId) by AgentId : \(agent.getId)", userId: ticket.getUserId, data: ticket)
         
         if (try updateTicketStatus(agent: agent, ticketId: ticketId, status: TicketStatus.closed) ){
+            try knowleggeBaseController?.addEntry(title: ticket.getTicketTitle, issueType: ticket.getIssueType, solution: solution, createdDate: Date(), lastUpdatedDate: Date(), userId: agent.getUserId)
+            try Logger.log(logType: LogType.info, message: "Ticket Closed for ticketId: \(ticketId) by AgentId : \(agent.getId)", userId: ticket.getUserId, data: ticket)
             return true
         }
         
@@ -160,7 +165,6 @@ class TicketControllerImpl: TicketController {
             case .failure(let error) :
                 throw error
         }
-        
     }
 
     func findAgentByTicketId(ticketId: Int)throws -> Agent? {
@@ -194,17 +198,18 @@ class TicketControllerImpl: TicketController {
             return false
         }
         
-        if let oldAgentId = try? getAgentIdByTicketId(ticketId: ticketId),
-           let oldAgent = try agentController?.getAgentById(agentId: oldAgentId) {
-            guard let newAgent = try agentController?.getAgentById(agentId: agentId) else {
-                print("No agent found with ID: \(agentId)")
-                return false
-            }
-            return try reAssignTicket(ticket: ticket, oldAgent: oldAgent, newAgent: newAgent)
-        } else {
+        if let oldAgentId =  try getAgentIdByTicketId(ticketId: ticketId) , oldAgentId != 0 {
+            let oldAgent =  try agentController?.getAgentById(agentId: oldAgentId)
+             guard let newAgent = try agentController?.getAgentById(agentId: agentId) else {
+                 print("No Old agent found with ID: \(agentId)")
+                 return false
+             }
+            return try reAssignTicket(ticket: ticket, oldAgent: oldAgent!, newAgent: newAgent)
+        }
+        else {
             
             guard let newAgent = try agentController?.getAgentById(agentId: agentId) else {
-                print("No agent found with ID: \(agentId)")
+                print("No New agent found with ID: \(agentId)")
                 return false
             }
             return try reAssignTicket(ticket: ticket, newAgent: newAgent)

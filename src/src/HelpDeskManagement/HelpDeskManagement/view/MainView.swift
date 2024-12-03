@@ -58,6 +58,7 @@ class MainView {
     func setKnowledgeBaseController() {
         agentController?.setKnowledgeBaseController(knowledgeBaseController: knowledgeBaseController!)
         userController?.setKnowledgeBaseController(knowledgeBaseController: knowledgeBaseController as! KnowledgeBaseControllerImpl)
+        ticketController?.setKnowledgeBaseController(knowledgeBaseController: knowledgeBaseController!)
     }
     
     func setUserViewControllers() {
@@ -73,9 +74,9 @@ class MainView {
     }
     
     func showLoginScreen() {
-        print()
-        print("--------------------------------------------------------------")
-        print("==== Welcome to Help Desk System ====")
+        print("------------------------------------------------------------")
+        print("            ==== Welcome to Help Desk System ====           ")
+        print("------------------------------------------------------------")
         print("1. Register as User")
         print("2. Login")
         print("3. Exit")
@@ -85,7 +86,7 @@ class MainView {
         switch userChoice {
         case 1 :
             guard let user = userView.register() else {
-                print("User is Not Registered")
+                showLoginScreen()
                 return
             }
             userView.setLoginedUser(user: user)
@@ -126,7 +127,8 @@ class MainView {
                 }
             }
             catch let error {
-                print("Error while searching User : \(error)")
+                print("Error while searching User : \(error.localizedDescription)")
+                print("------------------------------------------------------------")
                 print("Do you want to try again? (1 to retry, enter any number to exit)")
                 
                 guard let choice = Int(readLine()!),
@@ -150,7 +152,8 @@ class MainView {
                         try adminView.setDefaultpassword(passwordState: false, adminId : admin.getUserId)
                     }
                     catch let error {
-                        print(error)
+                        print(error.localizedDescription)
+                        print("------------------------------------------------------------")
                         adminView.changePassword(user: admin as Admin)
                     }
                 }

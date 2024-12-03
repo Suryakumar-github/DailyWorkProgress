@@ -10,12 +10,12 @@ import Foundation
 class Logger {
     private static let logsEntryDao : LogsEntryDAO = LogsEntryDAOImpl()
     
-    static func log<T: Loggable>(logType: LogType, message: String, userId: Int, data : T) throws {
+    static func log<T: Loggable>(logType: LogType, message: String, userId: Int, data : T) throws -> Bool {
         let logEntry = LogsEntry(timestamp: Date(), logType: logType, message: message, userId: userId)
         let result = logsEntryDao.addLogsEntry(logsEntry: logEntry)
         switch result {
         case .success() :
-            print()
+            return true
         case .failure(let error) :
             throw error
         }

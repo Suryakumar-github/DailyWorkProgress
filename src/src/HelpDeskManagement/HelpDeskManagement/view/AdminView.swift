@@ -20,8 +20,8 @@ struct AdminView {
     
     func adminMenu() {
         print("------------------------------------------------------------")
-        print(" ==== Admin Dashboard ==== ")
-        print()
+        print("                  ==== Admin Dashboard ====                  ")
+        print("------------------------------------------------------------")
         print("1. Add Agent")
         print("2. View All Agents")
         print("3. View Tickets")
@@ -67,6 +67,7 @@ struct AdminView {
 
             print("------------------------------------------------------------")
             print("                      Available Agents                      ")
+            
             for (agent) in allAgents {
                 print("------------------------------------------------------------")
                 print("Agent ID       : \(agent.getId)")
@@ -76,7 +77,8 @@ struct AdminView {
             print("------------------------------------------------------------")
             adminMenu()
         } catch let error {
-            print("Error occurred while fetching agents: \(error)")
+            print("Error occurred while fetching agents: \(error.localizedDescription)")
+            print("------------------------------------------------------------")
         }
     }
     
@@ -95,7 +97,8 @@ struct AdminView {
                  try controller.updatePassword(user : user, password : newPassword) 
             }
             catch let error {
-                print("Error occured while updating the Password : \(error)")
+                print("Error occured while updating the Password : \(error.localizedDescription)")
+                print("------------------------------------------------------------")
             }
             
         }
@@ -162,7 +165,8 @@ struct AdminView {
             print("------------------------------------------------------------")
         }
         catch let error {
-            print("Error occured while adding the Agent : \(error) ")
+            print("Error occured while adding the Agent : \(error.localizedDescription) ")
+            print("------------------------------------------------------------")
         }
        
         adminMenu()
@@ -170,10 +174,11 @@ struct AdminView {
     func viewTickets() {
         print("------------------------------------------------------------")
         print("                  ==== Ticket Menu ===                      ")
+        print("------------------------------------------------------------")
         print("1. View All Tickets")
         print("2. View Ticket By Particular date")
         print("3. View Tickets Beyween Two Days")
-        print("4. enter '0' to exit")
+        print("4. exit")
         print("Choose an option:")
         
         if let choice = Int(readLine() ?? "") {
@@ -184,14 +189,16 @@ struct AdminView {
                 viewTicketByDate()
             case 3:
                 viewTicketBetweenDates()
-            case 0:
+            case 4:
                 print("Exiting Ticketsy Viewer.!")
-                return
+                adminMenu()
             default:
                 print("Invalid choice. Please try again.")
+                viewTickets()
             }
         } else {
             print("Invalid input. Please enter a number.")
+            viewTickets()
         }
         
     }
@@ -216,7 +223,7 @@ struct AdminView {
         
         guard let date = dateFormatter.date(from: dateString) else {
             print("Invalid date format. Please use yyyy-MM-dd.")
-            viewLogsByParticularDate()
+            viewTicketByDate()
             return
         }
         
@@ -231,7 +238,7 @@ struct AdminView {
             dateFormatter.dateStyle = .medium
             dateFormatter.timeStyle = .short
             
-            print("                       Log Entries                          ")
+            print("                        Tickets                         ")
             for entry in dataEntries {
                 print("------------------------------------------------------------")
                 let formattedDate = adminController?.formatDateForDisplay(entry.getTicketCreatedDate)
@@ -244,13 +251,14 @@ struct AdminView {
             }
             print("------------------------------------------------------------")
         } catch let error {
-            print("Error while reading logs: \(error)")
+            print(error.localizedDescription)
+            print("------------------------------------------------------------")
         }
         
         print("Type 0 to return to the main menu or press any key to view logs for another date:")
         if let input = readLine(), input == "0" {
             print("------------------------------------------------------------")
-            adminMenu()
+            viewTickets()
         } else {
             viewTicketByDate()
         }
@@ -264,6 +272,7 @@ struct AdminView {
                 adminMenu()
                 return
             }
+            print("                       Tickets                         ")
             for (ticket) in tickets {
                 let formattedDate = adminController?.formatDateForDisplay(ticket.getTicketCreatedDate)
                 print("Ticket Status : \(String(describing: ticket.statusProperty))")
@@ -275,11 +284,11 @@ struct AdminView {
             }
         }
         catch let error {
-            print(error)
+            print(error.localizedDescription)
             print("------------------------------------------------------------")
         }
         
-        adminMenu()
+        viewTickets()
     }
     
     private func viewTicketBetweenDates() {
@@ -315,7 +324,7 @@ struct AdminView {
         }
         
         if dateString2 == "0" {
-            adminMenu()
+            viewTickets()
             return
         }
         
@@ -336,7 +345,7 @@ struct AdminView {
             dateFormatter.dateStyle = .medium
             dateFormatter.timeStyle = .short
             
-            print("                       Log Entries                          ")
+            print("                       Tickets                         ")
             for entry in dataEntries {
                 let formattedDate = adminController?.formatDateForDisplay(entry.getTicketCreatedDate)
                 print("Ticket Status : \(String(describing: entry.statusProperty))")
@@ -348,13 +357,14 @@ struct AdminView {
             }
             print("------------------------------------------------------------")
         } catch let error {
-            print("Error while reading logs: \(error)")
+            print(error.localizedDescription)
+            print("------------------------------------------------------------")
         }
         
         print("Type 0 to return to the main menu or press any key to view logs for another date range:")
         if let input = readLine(), input == "0" {
             print("------------------------------------------------------------")
-            adminMenu()
+            viewTickets()
         } else {
             viewTicketBetweenDates()
         }
@@ -405,7 +415,7 @@ struct AdminView {
             print("------------------------------------------------------------")
         }
         catch let error {
-            print("Error while generate Ticket report : \(error)")
+            print(error.localizedDescription)
             print("------------------------------------------------------------")
         }
         adminMenu()
@@ -459,7 +469,8 @@ struct AdminView {
 
         }
         catch let error {
-            print("Error while generate Agent report : \(error)")
+            print(error.localizedDescription)
+            print("------------------------------------------------------------")
         }
         adminMenu()
     }
@@ -487,7 +498,7 @@ struct AdminView {
                         print("No tickets assigned.")
                     }
                 } catch let error {
-                    print("Error fetching tickets for Agent \(agent.getAgentId): \(error)")
+                    print(error.localizedDescription)
                 }
                 print("------------------------------------------------------------")
             }
@@ -515,11 +526,13 @@ struct AdminView {
                     print("Ticket reassignment failed. Please check the IDs and try again.")
                 }
             } catch let error {
-                print("Error while reassigning the ticket: \(error)")
+                print("Error while reassigning the ticket: \(error.localizedDescription)")
+                print("------------------------------------------------------------")
             }
 
         } catch let error {
-            print("Error occurred while fetching agents: \(error)")
+            print("Error occurred while fetching agents: \(error.localizedDescription)")
+            print("------------------------------------------------------------")
         }
 
         adminMenu()
@@ -530,10 +543,11 @@ struct AdminView {
         while true {
             print("------------------------------------------------------------")
             print("                     ==== Logs Menu ====                    ")
+            print("------------------------------------------------------------")
             print("1. View All LogsEntry")
             print("2. View LogsEntry in Particular Date")
             print("3. View LogsEntry in Between Two Dates")
-            print("0. Exit")
+            print("4. Exit")
             print("Choose an option:")
             
             if let choice = Int(readLine() ?? "") {
@@ -544,9 +558,9 @@ struct AdminView {
                     viewLogsByParticularDate()
                 case 3:
                     viewLogsBetweenDates()
-                case 0:
-                    print("Exiting Logs Entry Viewer. Goodbye!")
-                    return
+                case 4:
+                    print("Exiting Logs Entry ")
+                    adminMenu()
                 default:
                     print("Invalid choice. Please try again.")
                 }
@@ -558,7 +572,7 @@ struct AdminView {
 
     private func viewLogsByParticularDate() {
         print("------------------------------------------------------------")
-        print("Enter the Date to view Logs (format: yyyy-MM-dd) or type 0 to return to the main menu:")
+        print("Enter the Date to view Logs (format: yyyy-MM-dd) or type 0 to return to the menu:")
         
         guard let dateString = readLine(), !dateString.isEmpty else {
             print("Invalid input.")
@@ -586,7 +600,10 @@ struct AdminView {
                 print("No entries found for the provided date.")
                 return
             }
-            
+            if dataEntries.isEmpty {
+                print("No Logs Available for the Given Date..")
+                viewLogsEntry()
+            }
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = .medium
             dateFormatter.timeStyle = .short
@@ -596,18 +613,19 @@ struct AdminView {
                 print("------------------------------------------------------------")
                 let formattedDate = dateFormatter.string(from: entry.getTimestamp)
                 print("Entry ID: \(entry.getId)")
-                print("Entry Created Date: \(formattedDate)")
+                print("Entry Created Date: \(String(describing: formattedDate))")
                 print("Entry Message: \(entry.messageProperty)")
             }
             print("------------------------------------------------------------")
         } catch let error {
-            print("Error while reading logs: \(error)")
+            print("Error while reading logs: \(error.localizedDescription)")
+            print("------------------------------------------------------------")
         }
         
         print("Type 0 to return to the main menu or press any key to view logs for another date:")
         if let input = readLine(), input == "0" {
             print("------------------------------------------------------------")
-            adminMenu()
+            viewLogsEntry()
         } else {
             viewLogsByParticularDate()
         }
@@ -663,6 +681,10 @@ struct AdminView {
                 print("No entries found between the provided dates.")
                 return
             }
+            if dataEntries.isEmpty {
+                print("No Logs Available for the Given Date..")
+                viewLogsEntry()
+            }
             
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = .medium
@@ -678,13 +700,14 @@ struct AdminView {
             }
             print("------------------------------------------------------------")
         } catch let error {
-            print("Error while reading logs: \(error)")
+            print("Error while reading logs: \(error.localizedDescription)")
+            print("------------------------------------------------------------")
         }
         
         print("Type 0 to return to the main menu or press any key to view logs for another date range:")
         if let input = readLine(), input == "0" {
             print("------------------------------------------------------------")
-            adminMenu()
+            viewLogsEntry()
         } else {
             viewLogsBetweenDates()
         }
@@ -697,7 +720,10 @@ struct AdminView {
                 print("No entries found.")
                 return
             }
-            
+            if dataEntries.isEmpty {
+                print("No Logs Available for the Given Date..")
+                viewLogsEntry()
+            }
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = .medium
             dateFormatter.timeStyle = .short
@@ -712,7 +738,8 @@ struct AdminView {
             }
             print("------------------------------------------------------------")
         } catch let error {
-            print("Error while reading logs: \(error)")
+            print("Error while reading logs: \(error.localizedDescription)")
+            print("------------------------------------------------------------")
         }
         
         print("Type 0 to return to the main menu or press any key to refresh and view all logs again:")

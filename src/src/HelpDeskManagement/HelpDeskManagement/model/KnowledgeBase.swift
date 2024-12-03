@@ -12,26 +12,24 @@ class KnowledgeBase {
     private var title: String
     private var issue : IssueType
     private var solution: String
-    private var tags: [String]
     private let createdDate: Date
     private var lastUpdatedDate: Date?
     private let userId : Int
     private static var idCount = 0
     
-    init(title: String, issue: IssueType, solution: String, tags: [String], createdDate: Date, lastUpdatedDate: Date? = nil, userId : Int) {
+    init(title: String, issue: IssueType, solution: String, createdDate: Date, lastUpdatedDate: Date? = nil, userId : Int) {
         KnowledgeBase.idCount += 1
         self.id = KnowledgeBase.idCount
         self.title = title
         self.issue = issue
         self.solution = solution
-        self.tags = tags
         self.createdDate = createdDate
         self.lastUpdatedDate = lastUpdatedDate
         self.userId = userId
     }
     
     convenience init (id: Int, title: String, issueType: IssueType, solution: String, createdDate: Date, lastUpdatedDate: Date, userId: Int) {
-        self.init(title: title, issue: issueType, solution: solution, tags: [], createdDate: createdDate, lastUpdatedDate: lastUpdatedDate, userId: userId)
+        self.init(title: title, issue: issueType, solution: solution, createdDate: createdDate, lastUpdatedDate: lastUpdatedDate, userId: userId)
         self.id = id
     }
     
@@ -67,17 +65,7 @@ class KnowledgeBase {
             solution = newSolution
         }
     }
-    var tagsProperty : [String] {
-        get {
-            return tags
-        }
-        set(newTags) {
-            tags = newTags
-        }
-    }
-    func addtags(tag : String ) {
-        tags.append(tag)
-    }
+   
     var getCreatedDate : Date {
         return createdDate
     }

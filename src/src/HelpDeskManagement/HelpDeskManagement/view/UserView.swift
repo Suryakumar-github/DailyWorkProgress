@@ -21,10 +21,9 @@ struct UserView {
     }
     
     func userMenu() {
-        
-        print("==== User Dashboard ====")
-
-        print("Welcome, \(String(describing: loginedUser?.getName))")
+        print("------------------------------------------------------------")
+        print("                  ==== User Dashboard ====                  ")
+        print("------------------------------------------------------------")
         print("1. Create a New Ticket")
         print("2. View My Tickets")
         print("3. Search Knowledge Base")
@@ -56,7 +55,7 @@ struct UserView {
     }
     
     func changePassword(user: User) {
-        print("-----------------------------------------------------")
+        print("----------------------------------------------------------------")
         
         while true {
             print("Enter the Current Password:")
@@ -80,22 +79,23 @@ struct UserView {
             do {
                 if try controller.changePassword(user: user, password: newPassword, currentPassword: currentPassword) {
                     print("Password Changed Successfully.")
-                    print("-----------------------------------------------------")
+                    print("----------------------------------------------------------------")
                     userMenu()
                     return
                 } else {
                     print("New password cannot be the same as the current password.")
-                    print("-----------------------------------------------------")
+                    print("----------------------------------------------------------------")
                 }
             }
             catch let error {
-                print("Error while change Password : \(error)")
+                print("Error while change Password : \(error.localizedDescription)")
+                print("----------------------------------------------------------------")
             }
         }
     }
     
     func createTicket(user: User) {
-        print("-----------------------------------------------------")
+        print("----------------------------------------------------------------")
         
         print("Enter the Ticket Title:")
         guard let ticketTitle = readLine(), !ticketTitle.isEmpty else {
@@ -138,18 +138,19 @@ struct UserView {
             )
             
             print("Ticket successfully created!")
-            print("-----------------------------------------------------")
+            print("----------------------------------------------------------------")
         }
         catch let error {
-            print("Error while Creating Ticket : \(error)")
+            print("Error while Creating Ticket : \(error.localizedDescription)")
+            print("----------------------------------------------------------------")
         }
         userMenu()
     }
 
     
     func cancelTicket(user: User) {
-        print("-----------------------------------------------------")
-        print("                 Available Tickets                   ")
+        print("----------------------------------------------------------------")
+        print("                      Available Tickets                         ")
         do {
             guard let tickets = try userController?.getAllTheCreatedTickets(user: user), !tickets.isEmpty else {
                 print("No tickets found for user with ID \(user.getId).")
@@ -158,24 +159,25 @@ struct UserView {
             }
             for ticket in tickets {
                 if ticket.statusProperty != TicketStatus.cancelled && ticket.statusProperty != TicketStatus.closed && ticket.statusProperty != TicketStatus.solved {
-                    print("--------------------------------------------------")
+                    print("----------------------------------------------------------------")
                     print("Ticket Id : \(ticket.getTicketId)")
                 }
             }
         }
         catch {
-            print("Error while fetching the Tickets : \(error)")
+            print("Error while fetching the Tickets : \(error.localizedDescription)")
+            print("----------------------------------------------------------------")
             userMenu()
         }
      
-        print("--------------------------------------------------")
+        print("----------------------------------------------------------------")
         while true {
             print("Enter the ticket ID to Cancel (or type '0' to go back):")
             
             if let input = Int(readLine()!) {
                 if input == 0{
                     print("Exiting to User Menu...")
-                    print("-----------------------------------------------------")
+                    print("----------------------------------------------------------------")
                     userMenu()
                     return
                 }
@@ -189,7 +191,7 @@ struct UserView {
                     
                     if isCancelled {
                         print("Ticket \(input) successfully canceled.")
-                        print("-----------------------------------------------------")
+                        print("----------------------------------------------------------------")
                         userMenu()
                         return
                     } else {
@@ -197,7 +199,8 @@ struct UserView {
                     }
                 }
                 catch {
-                    print("Error : \(error)")
+                    print("Error : \(error.localizedDescription)")
+                    print("----------------------------------------------------------------")
                 }
             }
             
@@ -218,18 +221,19 @@ struct UserView {
                 userMenu()
                 return
             }
-            print("--------------------------------------------------")
-            print("                   My Tickets                     ")
+            print("----------------------------------------------------------------")
+            print("                         My Tickets                             ")
             for ticket in tickets {
-                print("--------------------------------------------------")
+                print("----------------------------------------------------------------")
                 print("Ticket Id : \(ticket.getTicketId)")
                 print("Ticket Title : \(ticket.getTicketTitle)")
                 print("Ticket Status : \(ticket.statusProperty)")
             }
-            print("--------------------------------------------------")
+            print("----------------------------------------------------------------")
         }
         catch let error {
-            print("Error while fetching Tickets : \(error)")
+            print("Error while fetching Tickets : \(error.localizedDescription)")
+            print("----------------------------------------------------------------")
         }
         
         userMenu()
@@ -251,18 +255,18 @@ struct UserView {
                     userMenu()
                     return
                 }
-                print("------------------Available Title's---------------------")
-                print("--------------------------------------------------------")
+                print("--------------------- Available Title's ------------------------")
+                print("----------------------------------------------------------------")
                 for (entry) in entries {
                     print("Title : \(entry.titleproperty)")
-                    print("Tag : \(entry.tagsProperty)")
                     print("Issue : \(entry.issueProperty)")
                     print("Solution : \(entry.solutionProperty)")
                 }
-                print("--------------------------------------------------------")
+                print("----------------------------------------------------------------")
             }
             catch let error {
-                print("Error while fetching the data : \(error)")
+                print("Error while fetching the data : \(error.localizedDescription)")
+                print("----------------------------------------------------------------")
             }
             userMenu()
         }
@@ -275,17 +279,18 @@ struct UserView {
             }
             do {
                 if let knowledgeBaseEntry = try userController?.search(word: word) {
-                    print("-----------------Problem Solution-----------------------")
-                    print("--------------------------------------------------------")
+                    print("--------------------- Problem Solution -------------------------")
+                    print("----------------------------------------------------------------")
                     for entry in knowledgeBaseEntry {
                         print("Title: \(entry.titleproperty )")
                         print("Solution: \(entry.solutionProperty )")
-                        print("---------------------------------------------------------")
+                        print("----------------------------------------------------------------")
                     }
                 }
             }
             catch let error {
-                print("Error while Fetching the data : \(error)")
+                print("Error while Fetching the data : \(error.localizedDescription)")
+                print("----------------------------------------------------------------")
             }
         }
         else {
@@ -303,11 +308,15 @@ struct UserView {
         var password: String?
         var user: User?
 
-        print("-----------------------------------------------------")
+        print("----------------------------------------------------------------")
         while user == nil {
             if name == nil {
-                print("Enter the name:")
+                print("Enter the name (or enter 0 to exit):")
                 let inputName = readLine() ?? ""
+                if inputName == "0" {
+                    print("Exiting to Main Menu..")
+                    return nil
+                }
                 if Validation.validateName(inputName) {
                     name = inputName
                 } else {
@@ -317,18 +326,20 @@ struct UserView {
             }
 
             if role == nil {
-                print("Choose the Subscription pack (1. 50$/month, 2. 30$/month, 3. 20$/month):")
+                print("Choose the Subscription pack (1. 50$/month, 2. 30$/month, 3. 20$/month, or enter 0 to exit):")
                 if let roleString = readLine() {
+                    if roleString == "0" {
+                        print("Exiting to Main Menu..")
+                        
+                        return nil
+                    }
                     switch roleString {
                     case "1":
                         role = .vip
-                        
                     case "2":
                         role = .standard
-                        
                     case "3":
                         role = .guest
-                        
                     default:
                         print("Invalid subscription choice. Please try again.")
                         continue
@@ -340,8 +351,13 @@ struct UserView {
             }
 
             if userName == nil {
-                print("Enter the username:")
+                print("Enter the username (or enter 0 to exit):")
                 let inputUsername = readLine() ?? ""
+                if inputUsername == "0" {
+                    print("Exiting to Main Menu..")
+                    
+                    return nil
+                }
                 if Validation.validateUsername(inputUsername) {
                     userName = inputUsername
                 } else {
@@ -351,8 +367,12 @@ struct UserView {
             }
 
             if password == nil {
-                print("Enter the password:")
+                print("Enter the password (or enter 0 to exit):")
                 let inputPassword = readLine() ?? ""
+                if inputPassword == "0" {
+                    print("Exiting to Main Menu..")
+                    return nil
+                }
                 if Validation.validatePassword(inputPassword) {
                     password = inputPassword
                 } else {
@@ -361,7 +381,7 @@ struct UserView {
                 }
             }
 
-            if let validName = name, let validRole = role, let validUsername = userName, let validPassword = password{
+            if let validName = name, let validRole = role, let validUsername = userName, let validPassword = password {
                 do {
                     if let registeredUser = try userController?.register(
                         name: validName,
@@ -371,22 +391,20 @@ struct UserView {
                     ) {
                         user = registeredUser
                         print("User ID: \(String(describing: user!.getId))")
-                        print("-----------------------------------------------------")
+                        print("----------------------------------------------------------------")
                     } else {
                         print("Registration failed, please try again.")
                         name = nil
                         role = nil
                         userName = nil
                         password = nil
-                        
                     }
                 } catch let error {
-                    print("Error while registering the User: \(error)")
+                    print("Error while registering the User: \(error.localizedDescription)")
+                    print("----------------------------------------------------------------")
                 }
             }
         }
-        print("-----------------------------------------------------")
         return user
     }
-
 }

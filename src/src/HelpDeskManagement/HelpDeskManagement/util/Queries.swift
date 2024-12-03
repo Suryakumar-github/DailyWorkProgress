@@ -13,7 +13,7 @@ struct Queries {
         role TEXT NOT NULL
     );
     """
-    static let getAllUsers = "SELECT * FROM Users;"
+    static let getAllUsers = "SELECT id, name, role FROM Users;"
     static let addUser = "INSERT INTO Users (name, role) VALUES (?, ?)"
     static let getUserById = "SELECT * FROM Users where user_id = ?"
     static let createTicketTable = """
@@ -98,7 +98,7 @@ struct Queries {
         FOREIGN KEY("ticketId") REFERENCES "Tickets"("ticket_id")
     );
     """
-    static let addTicket = "INSERT INTO Tickets (title, description, user_id,priority,status,issueType) values (?,?,?,?,?,?)"
+    static let addTicket = "INSERT INTO Tickets (title, description, user_id, agent_id, priority, status, issueType) VALUES (?, ?, ?, ?, ?, ?, ?)"
     static let getUserCreatedTickets = "SELECT * FROM Tickets  WHERE user_id = ?"
     static let updateTicketStatus = "UPDATE Tickets SET status = ? WHERE ticket_id = ?"
     static let getAgentTickets = """

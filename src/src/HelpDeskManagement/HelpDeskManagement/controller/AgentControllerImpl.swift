@@ -22,11 +22,12 @@ class AgentControllerImpl : AgentController {
         self.knowledgeBaseController = knowledgeBaseController
     }
     
-    func closeTicket(agent: Agent, ticketId: Int)throws -> Bool{
+    func closeTicket(agent: Agent, ticketId: Int, solution : String)throws -> Bool{
         guard let controller = ticketController else {
             return false
         }
-        if (try controller.closeTicket(agent: agent, ticketId: ticketId) ){
+        if (try controller.closeTicket(agent: agent, ticketId: ticketId, solution: solution) ){
+            try assignAgentAvailability(agent: agent)
             return true
         }
         return false
@@ -158,8 +159,8 @@ class AgentControllerImpl : AgentController {
         return 0
     }
     
-    func addEntry(title: String, issueType : IssueType, solution: String, tags: [String], createdDate: Date, lastUpdatedDate: Date?, userId : Int)throws {
-        try knowledgeBaseController?.addEntry(title: title, issueType: issueType, solution: solution, tags: tags, createdDate: createdDate, lastUpdatedDate: lastUpdatedDate, userId: userId)
+    func addEntry(title: String, issueType : IssueType, solution: String, createdDate: Date, lastUpdatedDate: Date?, userId : Int)throws {
+        try knowledgeBaseController?.addEntry(title: title, issueType: issueType, solution: solution, createdDate: createdDate, lastUpdatedDate: lastUpdatedDate, userId: userId)
     }
     
     func getAllKnowledgeBaseEntries() throws -> [KnowledgeBase] {
@@ -178,12 +179,12 @@ class AgentControllerImpl : AgentController {
         //let hashedPassword = StringHasher.hash(password)
         let user = User(userId: id, name: name, userRole: UserRole.vip, role: Role.agent)
         let agent = Agent(name : name,deparment: department, userId: id)
-        let ans = userDao.addUser(user: user)
+        userDao.addUser(user: user)
         let result = agentDao.addAgent(agent: agent)
         switch result {
         case .success() :
-            try Logger.log(logType: LogType.info, message: "New Agent Added with AgentId : \(agent.getId)", userId: agent.getId, data: agent)
             agentDao.addAgentUserNamePassword(userName: userName, password: password, agent: agent)
+            try Logger.log(logType: LogType.info, message: "New Agent Added with AgentId : \(agent.getId)", userId: agent.getId, data: agent)
         case .failure(let error) :
             throw error
         }
@@ -237,6 +238,7 @@ class AgentControllerImpl : AgentController {
 }
 
 extension AgentControllerImpl : TicketAssignmentDelegate {
+    
     func resolveTicket(agent: Agent, ticketId: Int) throws {
         
         guard let userId = try ticketController?.getUserIdByTicketId(ticketId: ticketId) else {
@@ -258,7 +260,7 @@ extension AgentControllerImpl : TicketAssignmentDelegate {
         try ticketController?.updateTicketStatus(agent: agent, ticketId: ticketId, status: TicketStatus.solved)
         agentDao.updateTicketsResolvedCount(agentId: agent.getAgentId, newCount: agent.ticketResolvedProperty+1)
         try Logger.log(logType: LogType.info, message: "Ticket with TicketId \(ticketId) resolved for user with UserId \(userId).", userId: agent.getId, data: agent)
-        print("Ticket with ID \(ticketId) has been successfully resolved.")
+        
     }
     
     func assignTicketToAgent(ticket: Ticket) throws -> Bool {
@@ -267,8 +269,8 @@ extension AgentControllerImpl : TicketAssignmentDelegate {
         switch result {
         case .success(let agents):
             for agent in agents {
-                if ticket.getIssueType.rawValue.lowercased() == agent.departmentProperty.lowercased(),
-                   agent.statusProperty == .available {
+                if ticket.getIssueType.rawValue.lowercased() == agent.departmentProperty.lowercased() &&
+                    agent.statusProperty == AgentStatus.available {
                     
                     let addTicketResult = agentDao.addTicketToAgent(agent: agent, ticket: ticket)
                     

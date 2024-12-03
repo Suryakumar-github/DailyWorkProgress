@@ -25,11 +25,13 @@ class Agent : User {
     
     convenience init(name : String, deparment : String, userId : Int) {
         self.init(name: name, department: deparment, ticketResolved: 0, status: AgentStatus.available, userId: userId)
+        
     }
     
     convenience init(id : Int, name : String, department : String, status : AgentStatus, ticketResolved : Int, userId : Int) {
         self.init(name: name, department: department, ticketResolved: ticketResolved, status: status, userId: userId)
         self.id = id
+        self.status = status
     }
     
     var getAgentId : Int {
@@ -55,7 +57,6 @@ class Agent : User {
             return status
         }
         set(newStatus) {
-            _ = status
             status = newStatus
         }
     }

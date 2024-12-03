@@ -65,9 +65,9 @@ class KnowledgeBaseDAOImpl : KnowledgeBaseDAO {
     }
     
     func getAllEntries() -> Result<[KnowledgeBase], DatabaseError> {
-            let query = "SELECT * FROM KnowledgeBase;"
-            var statement: OpaquePointer?
-            var entries: [KnowledgeBase] = []
+        let query = Queries.getAllKnowledgeBaseEntries
+        var statement: OpaquePointer?
+        var entries: [KnowledgeBase] = []
             
         guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
             return .failure(.preparationFailed("Failed to prepare INSERT statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
