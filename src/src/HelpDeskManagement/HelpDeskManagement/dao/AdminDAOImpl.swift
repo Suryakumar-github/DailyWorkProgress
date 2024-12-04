@@ -23,7 +23,6 @@ class AdminDAOImpl : AdminDAO {
         if sqlite3_exec(dbConnector, Queries.createAdminTable, nil, nil, nil) != SQLITE_OK {
             throw DatabaseError.tableCreationFailed("Users table creation failed. Error: \(String(cString: sqlite3_errmsg(dbConnector)))")
         }
-        print("Admin table created successfully (or already exists).")
     }
     
     func setDefaultpassword(passwordState: Bool, adminId: Int) -> Result<Void, DatabaseError> {

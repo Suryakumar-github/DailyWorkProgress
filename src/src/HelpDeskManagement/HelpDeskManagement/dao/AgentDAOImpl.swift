@@ -23,7 +23,6 @@ class AgentDAOImpl : AgentDAO {
         if sqlite3_exec(dbConnector, Queries.createAgentTable, nil, nil, nil) != SQLITE_OK {
             throw DatabaseError.tableCreationFailed("Users table creation failed. Error: \(String(cString: sqlite3_errmsg(dbConnector)))")
         }
-        print("Agent table created successfully (or already exists).")
     }
     
     func addAgent(agent: Agent) -> Result<Void, DatabaseError>{

@@ -22,7 +22,7 @@ class UserDAOImpl: UserDAO {
         if sqlite3_exec(dbConnector, Queries.createUserTable, nil, nil, nil) != SQLITE_OK {
             throw DatabaseError.tableCreationFailed("Users table creation failed. Error: \(String(cString: sqlite3_errmsg(dbConnector)))")
         }
-        print("Users table created successfully (or already exists).")
+       
     }
 
     func getUserById(userId: Int) -> Result<User, DatabaseError> {

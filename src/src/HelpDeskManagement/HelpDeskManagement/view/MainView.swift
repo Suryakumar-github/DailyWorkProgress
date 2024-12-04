@@ -74,12 +74,13 @@ class MainView {
     }
     
     func showLoginScreen() {
-        print("------------------------------------------------------------")
-        print("            ==== Welcome to Help Desk System ====           ")
-        print("------------------------------------------------------------")
+        print("----------------------------------------------------------------")
+        print("             ==== Welcome to Help Desk System ====              ")
+        print("----------------------------------------------------------------")
         print("1. Register as User")
         print("2. Login")
         print("3. Exit")
+        print("----------------------------------------------------------------")
         print("Enter the choice")
         let userChoice = Int(readLine()!)
         
@@ -169,6 +170,5 @@ class MainView {
             print("Invalid actor type")
         }
     }
-
 
 }

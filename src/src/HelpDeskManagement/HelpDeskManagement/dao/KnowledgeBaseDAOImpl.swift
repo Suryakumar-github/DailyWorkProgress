@@ -25,7 +25,6 @@ class KnowledgeBaseDAOImpl : KnowledgeBaseDAO {
         if sqlite3_exec(dbConnector, Queries.createKnowledgeBadeTable, nil, nil, nil) != SQLITE_OK {
             throw DatabaseError.tableCreationFailed("Users table creation failed. Error: \(String(cString: sqlite3_errmsg(dbConnector)))")
         }
-        print("knowledgeBase table created successfully (or already exists).")
     }
     
     func addEntry(entry: KnowledgeBase) -> Result<Void, DatabaseError> {

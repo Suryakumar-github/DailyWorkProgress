@@ -19,9 +19,9 @@ struct AdminView {
     }
     
     func adminMenu() {
-        print("------------------------------------------------------------")
-        print("                  ==== Admin Dashboard ====                  ")
-        print("------------------------------------------------------------")
+        print("----------------------------------------------------------------")
+        print("                    ==== Admin Dashboard ====                   ")
+        print("----------------------------------------------------------------")
         print("1. Add Agent")
         print("2. View All Agents")
         print("3. View Tickets")
@@ -30,6 +30,7 @@ struct AdminView {
         print("6. Escalate/Reassign Tickets")
         print("7. View Logs Entry")
         print("8. Logout")
+        print("----------------------------------------------------------------")
         print("Select an option: ")
         let option = Int(readLine()!)
         
@@ -172,13 +173,14 @@ struct AdminView {
         adminMenu()
     }
     func viewTickets() {
-        print("------------------------------------------------------------")
-        print("                  ==== Ticket Menu ===                      ")
-        print("------------------------------------------------------------")
+        print("----------------------------------------------------------------")
+        print("                    ==== Ticket Menu ===                        ")
+        print("----------------------------------------------------------------")
         print("1. View All Tickets")
-        print("2. View Ticket By Particular date")
-        print("3. View Tickets Beyween Two Days")
+        print("2. View Ticket By Particular Date")
+        print("3. View Tickets Between Two Date's")
         print("4. exit")
+        print("----------------------------------------------------------------")
         print("Choose an option:")
         
         if let choice = Int(readLine() ?? "") {
@@ -238,15 +240,16 @@ struct AdminView {
             dateFormatter.dateStyle = .medium
             dateFormatter.timeStyle = .short
             
-            print("                        Tickets                         ")
+            print("                     Available Tickets                      ")
+            print("------------------------------------------------------------")
             for entry in dataEntries {
                 print("------------------------------------------------------------")
                 let formattedDate = adminController?.formatDateForDisplay(entry.getTicketCreatedDate)
-                print("Ticket Status : \(String(describing: entry.statusProperty))")
-                print("TicketId : \(entry.getTicketId)")
-                print("Ticket's UserId : \(entry.getUserId)")
+                print("Ticket Status    : \(String(describing: entry.statusProperty))")
+                print("TicketId         : \(entry.getTicketId)")
+                print("Ticket's UserId  : \(entry.getUserId)")
                 print("Ticket's AgentId : \(String(describing: entry.getAgentId!))")
-                print("Created Date : \(String(describing: formattedDate!))")
+                print("Created Date     : \(String(describing: formattedDate!))")
                 print("------------------------------------------------------------")
             }
             print("------------------------------------------------------------")
@@ -272,14 +275,16 @@ struct AdminView {
                 adminMenu()
                 return
             }
-            print("                       Tickets                         ")
+            print("                     Available Tickets                      ")
+            print("------------------------------------------------------------")
             for (ticket) in tickets {
+                print("------------------------------------------------------------")
                 let formattedDate = adminController?.formatDateForDisplay(ticket.getTicketCreatedDate)
-                print("Ticket Status : \(String(describing: ticket.statusProperty))")
-                print("TicketId : \(ticket.getTicketId)")
-                print("Ticket's UserId : \(ticket.getUserId)")
+                print("Ticket Status    : \(String(describing: ticket.statusProperty))")
+                print("TicketId         : \(ticket.getTicketId)")
+                print("Ticket's UserId  : \(ticket.getUserId)")
                 print("Ticket's AgentId : \(String(describing: ticket.getAgentId!))")
-                print("Created Date : \(String(describing: formattedDate!))")
+                print("Created Date     : \(String(describing: formattedDate!))")
                 print("------------------------------------------------------------")
             }
         }
@@ -345,14 +350,16 @@ struct AdminView {
             dateFormatter.dateStyle = .medium
             dateFormatter.timeStyle = .short
             
-            print("                       Tickets                         ")
+            print("                     Available Tickets                      ")
+            print("------------------------------------------------------------")
             for entry in dataEntries {
+                print("------------------------------------------------------------")
                 let formattedDate = adminController?.formatDateForDisplay(entry.getTicketCreatedDate)
-                print("Ticket Status : \(String(describing: entry.statusProperty))")
-                print("TicketId : \(entry.getTicketId)")
-                print("Ticket's UserId : \(entry.getUserId)")
+                print("Ticket Status    : \(String(describing: entry.statusProperty))")
+                print("TicketId         : \(entry.getTicketId)")
+                print("Ticket's UserId  : \(entry.getUserId)")
                 print("Ticket's AgentId : \(String(describing: entry.getAgentId!))")
-                print("Created Date : \(String(describing: formattedDate!))")
+                print("Created Date     : \(String(describing: formattedDate!))")
                 print("------------------------------------------------------------")
             }
             print("------------------------------------------------------------")
@@ -405,12 +412,12 @@ struct AdminView {
             let reassignedTickets = tickets.filter({ $0.statusProperty == .reassigned }).count
             
             print("------------------------Ticket Report------------------------")
-            print("Total Tickets Created: \(totalTickets)")
-            print("ReAssigned Tickets Count: \(reassignedTickets)")
-            print("Solved Tickets Count: \(solvedTickets)")
-            print("Closed Tickets Count: \(closedTickets)")
-            print("Holded Tickets Count: \(holdedTickets)")
-            print("Canceled Tickets Count: \(canceledTickets)")
+            print("Total Tickets Created    : \(totalTickets)")
+            print("ReAssigned Tickets Count : \(reassignedTickets)")
+            print("Solved Tickets Count     : \(solvedTickets)")
+            print("Closed Tickets Count     : \(closedTickets)")
+            print("Holded Tickets Count     : \(holdedTickets)")
+            print("Canceled Tickets Count   : \(canceledTickets)")
             
             print("------------------------------------------------------------")
         }
@@ -462,9 +469,9 @@ struct AdminView {
             let solvedTicketsCount = agent.ticketResolvedProperty
             
             print("-----------------------Agent Report-------------------------")
-            print("Agent Name: \(agentName)")
-            print("Assigned Tickets Count: \(String(describing: assignedTicketsCount!))")
-            print("Solved Tickets Count: \(solvedTicketsCount)")
+            print("Agent Name             : \(agentName)")
+            print("Assigned Tickets Count : \(String(describing: assignedTicketsCount!))")
+            print("Solved Tickets Count   : \(solvedTicketsCount)")
             print("------------------------------------------------------------")
 
         }
@@ -541,13 +548,14 @@ struct AdminView {
 
     func viewLogsEntry() {
         while true {
-            print("------------------------------------------------------------")
-            print("                     ==== Logs Menu ====                    ")
-            print("------------------------------------------------------------")
+            print("----------------------------------------------------------------")
+            print("                       ==== Logs Menu ====                      ")
+            print("----------------------------------------------------------------")
             print("1. View All LogsEntry")
             print("2. View LogsEntry in Particular Date")
             print("3. View LogsEntry in Between Two Dates")
             print("4. Exit")
+            print("----------------------------------------------------------------")
             print("Choose an option:")
             
             if let choice = Int(readLine() ?? "") {
@@ -612,9 +620,9 @@ struct AdminView {
             for entry in dataEntries {
                 print("------------------------------------------------------------")
                 let formattedDate = dateFormatter.string(from: entry.getTimestamp)
-                print("Entry ID: \(entry.getId)")
-                print("Entry Created Date: \(String(describing: formattedDate))")
-                print("Entry Message: \(entry.messageProperty)")
+                print("Entry ID           : \(entry.getId)")
+                print("Entry Created Date : \(String(describing: formattedDate))")
+                print("Entry Message      : \(entry.messageProperty)")
             }
             print("------------------------------------------------------------")
         } catch let error {
@@ -694,9 +702,9 @@ struct AdminView {
             for entry in dataEntries {
                 print("------------------------------------------------------------")
                 let formattedDate = dateFormatter.string(from: entry.getTimestamp)
-                print("Entry ID: \(entry.getId)")
-                print("Entry Created Date: \(formattedDate)")
-                print("Entry Message: \(entry.messageProperty)")
+                print("Entry ID           : \(entry.getId)")
+                print("Entry Created Date : \(formattedDate)")
+                print("Entry Message      : \(entry.messageProperty)")
             }
             print("------------------------------------------------------------")
         } catch let error {
@@ -732,9 +740,9 @@ struct AdminView {
             for entry in dataEntries {
                 print("------------------------------------------------------------")
                 let formattedDate = dateFormatter.string(from: entry.getTimestamp)
-                print("Entry ID: \(entry.getId)")
-                print("Entry Created Date: \(formattedDate)")
-                print("Entry Message: \(entry.messageProperty)")
+                print("Entry ID           : \(entry.getId)")
+                print("Entry Created Date : \(formattedDate)")
+                print("Entry Message      : \(entry.messageProperty)")
             }
             print("------------------------------------------------------------")
         } catch let error {

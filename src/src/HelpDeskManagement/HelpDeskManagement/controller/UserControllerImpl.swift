@@ -77,7 +77,6 @@ class UserControllerImpl : UserController {
             }
 
             if storedPassword == newPassword {
-                print("New password cannot be the same as the current password.")
                 return false
             }
             

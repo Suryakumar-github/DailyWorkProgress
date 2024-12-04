@@ -21,16 +21,16 @@ struct UserView {
     }
     
     func userMenu() {
-        print("------------------------------------------------------------")
-        print("                  ==== User Dashboard ====                  ")
-        print("------------------------------------------------------------")
+        print("----------------------------------------------------------------")
+        print("                    ==== User Dashboard ====                    ")
+        print("----------------------------------------------------------------")
         print("1. Create a New Ticket")
         print("2. View My Tickets")
         print("3. Search Knowledge Base")
         print("4. Cancel Ticket")
         print("5. Change Password")
         print("6. Logout")
-
+        print("----------------------------------------------------------------")
         print("Select an option: ")
         let option = Int(readLine()!)
         
@@ -58,37 +58,49 @@ struct UserView {
         print("----------------------------------------------------------------")
         
         while true {
-            print("Enter the Current Password:")
+            
+            print("Enter the Current Password, or enter '0' to exit:")
             guard let currentPassword = readLine(), !currentPassword.isEmpty else {
-                print("Invalid Password. Current password cannot be empty.")
+                print("Invalid input. Current password cannot be empty.")
                 continue
             }
+            if currentPassword == "0" {
+                print("Exiting to User Menu..")
+                userMenu()
+            }
             
-            print("Enter the New Password:")
-            guard let newPassword = readLine(),
-                  !newPassword.isEmpty,
-                  Validation.validatePassword(newPassword) else {
-                print("Invalid Password. Ensure it meets the required criteria.")
+            print("Enter the New Password, or enter '0' to exit:")
+            guard let newPassword = readLine(), !newPassword.isEmpty else {
+                print("Invalid input. New password cannot be empty.")
+                continue
+            }
+            if newPassword == "0" {
+                print("Exiting to User Menu..")
+                userMenu()
+            }
+            
+            if !Validation.validatePassword(newPassword) {
+                print("Invalid password. Ensure it meets the required criteria.")
                 continue
             }
             
             guard let controller = userController else {
-                print("Controller is nil")
+                print("Error: User controller is not available.")
+                userMenu()
                 return
             }
+            
             do {
                 if try controller.changePassword(user: user, password: newPassword, currentPassword: currentPassword) {
-                    print("Password Changed Successfully.")
+                    print("Password changed successfully.")
                     print("----------------------------------------------------------------")
-                    userMenu()
                     return
                 } else {
                     print("New password cannot be the same as the current password.")
                     print("----------------------------------------------------------------")
                 }
-            }
-            catch let error {
-                print("Error while change Password : \(error.localizedDescription)")
+            } catch {
+                print("Error while changing password: \(error.localizedDescription)")
                 print("----------------------------------------------------------------")
             }
         }
@@ -147,7 +159,6 @@ struct UserView {
         userMenu()
     }
 
-    
     func cancelTicket(user: User) {
         print("----------------------------------------------------------------")
         print("                      Available Tickets                         ")
@@ -225,8 +236,8 @@ struct UserView {
             print("                         My Tickets                             ")
             for ticket in tickets {
                 print("----------------------------------------------------------------")
-                print("Ticket Id : \(ticket.getTicketId)")
-                print("Ticket Title : \(ticket.getTicketTitle)")
+                print("Ticket Id     : \(ticket.getTicketId)")
+                print("Ticket Title  : \(ticket.getTicketTitle)")
                 print("Ticket Status : \(ticket.statusProperty)")
             }
             print("----------------------------------------------------------------")
@@ -242,6 +253,7 @@ struct UserView {
     func searchKnowledgeBase() {
         print("----------------------------------------------------------------")
         print("                  === KnowledgeBase Menu ===                    ")
+        print("----------------------------------------------------------------")
         print("1. View All KnowledgeBase Entry")
         print("2. Search Using Specific Field")
         print("----------------------------------------------------------------")
@@ -250,19 +262,21 @@ struct UserView {
         let choice = Int(readLine()!)
         if choice == 1 {
             do {
-                guard let entries = try userController?.getAllKnowledgeBaseEntries() else {
-                    print("No Entries Found ")
+                guard let entries = try userController?.getAllKnowledgeBaseEntries(), !entries.isEmpty else {
+                    print("                       No Entries Found                        ")
+                    print("----------------------------------------------------------------")
                     userMenu()
                     return
                 }
-                print("--------------------- Available Title's ------------------------")
-                print("----------------------------------------------------------------")
+                print("--------------------- Available Entrie's ------------------------")
+                print("-----------------------------------------------------------------")
                 for (entry) in entries {
-                    print("Title : \(entry.titleproperty)")
-                    print("Issue : \(entry.issueProperty)")
+                    print("Title    : \(entry.titleproperty)")
+                    print("Issue    : \(entry.issueProperty)")
                     print("Solution : \(entry.solutionProperty)")
+                    print("----------------------------------------------------------------")
                 }
-                print("----------------------------------------------------------------")
+                
             }
             catch let error {
                 print("Error while fetching the data : \(error.localizedDescription)")
@@ -278,14 +292,20 @@ struct UserView {
                 return
             }
             do {
-                if let knowledgeBaseEntry = try userController?.search(word: word) {
-                    print("--------------------- Problem Solution -------------------------")
-                    print("----------------------------------------------------------------")
+                if let knowledgeBaseEntry = try userController?.search(word: word), !knowledgeBaseEntry.isEmpty {
+                    print("--------------------- Available Entrie's ------------------------")
+                    print("---------------------------------------------------------------- ")
                     for entry in knowledgeBaseEntry {
-                        print("Title: \(entry.titleproperty )")
-                        print("Solution: \(entry.solutionProperty )")
+                        print("Title    : \(entry.titleproperty )")
+                        print("Solution : \(entry.solutionProperty )")
                         print("----------------------------------------------------------------")
                     }
+                }
+                else {
+                    print("                       No Entries Found                        ")
+                    print("----------------------------------------------------------------")
+                    userMenu()
+
                 }
             }
             catch let error {
@@ -308,7 +328,9 @@ struct UserView {
         var password: String?
         var user: User?
 
+        
         print("----------------------------------------------------------------")
+
         while user == nil {
             if name == nil {
                 print("Enter the name (or enter 0 to exit):")
@@ -326,7 +348,7 @@ struct UserView {
             }
 
             if role == nil {
-                print("Choose the Subscription pack (1. 50$/month, 2. 30$/month, 3. 20$/month, or enter 0 to exit):")
+                print("Choose the Subscription pack ( enter 1 : 50$/month, 2 : 30$/month, 3 : 20$/month, or enter 0 to exit):")
                 if let roleString = readLine() {
                     if roleString == "0" {
                         print("Exiting to Main Menu..")

@@ -19,9 +19,9 @@ struct AgentView {
     }
     
     func agentMenu() {
-        print("------------------------------------------------------------")
-        print("                  ==== Agent Dashboard ====                 ")
-        print("------------------------------------------------------------")
+        print("----------------------------------------------------------------")
+        print("                    ==== Agent Dashboard ====                   ")
+        print("----------------------------------------------------------------")
         print("1. View Assigned Tickets")
         print("2. Update Ticket Status")
         print("3. Search Knowledge Base")
@@ -31,7 +31,7 @@ struct AgentView {
         print("7. Close Ticket")
         print("8. Change Password")
         print("9. Logout")
-        print("................................")
+        print("----------------------------------------------------------------")
         print("Choose an Option ")
         let option = Int(readLine()!)
         
@@ -162,16 +162,11 @@ struct AgentView {
         print("----------------------------------------------------------------")
         print()
         do {
-            guard let tickets = try agentController?.fetchAssignedTickets(agent: agent) else {
-                print("No tickets Assigned For Agent")
-                agentMenu()
-                return
-            }
-            
-            if(tickets.isEmpty) {
-                print("----------------No Tickets Assigned for Agent-------------------")
+            guard let tickets = try agentController?.fetchAssignedTickets(agent: agent), !tickets.isEmpty else {
+                print("                No Tickets Assigned for Agent                   ")
                 print("----------------------------------------------------------------")
                 agentMenu()
+                return
             }
             
             print("----------------------------------------------------------------")
@@ -179,7 +174,7 @@ struct AgentView {
             
             for ticket in tickets {
                 print("----------------------------------------------------------------")
-                print("Ticket Id : \(String(describing: ticket.getTicketId))")
+                print("Ticket Id    : \(String(describing: ticket.getTicketId))")
                 print("Ticket Title : \(String(describing: ticket.getTicketTitle))")
             }
             print("----------------------------------------------------------------")
@@ -234,8 +229,9 @@ struct AgentView {
         print("----------------------------------------------------------------")
         print()
         do {
-            guard let tickets = try agentController?.fetchAssignedTickets(agent: loginedAgent) else {
-                print("No tickets Assigned For Agent")
+            guard let tickets = try agentController?.fetchAssignedTickets(agent: loginedAgent), !tickets.isEmpty else {
+                print("                No tickets Assigned For Agent                   ")
+                print("----------------------------------------------------------------")
                 agentMenu()
                 return
             }
@@ -247,11 +243,11 @@ struct AgentView {
             for ticket in tickets {
                 
                 print("----------------------------------------------------------------")
-                print("Ticket Id : \(String(describing: ticket.getTicketId))")
-                print("Ticket Title : \(String(describing: ticket.getTicketTitle))")
+                print("Ticket Id          : \(String(describing: ticket.getTicketId))")
+                print("Ticket Title       : \(String(describing: ticket.getTicketTitle))")
                 print("Ticket Description : \(String(describing: ticket.descriptionproperty))")
-                print("Ticket Priority : \(String(describing: ticket.priorityProperty!))")
-                print("Ticket Status : \(ticket.statusProperty)")
+                print("Ticket Priority    : \(String(describing: ticket.priorityProperty!))")
+                print("Ticket Status      : \(ticket.statusProperty)")
             }
             print("----------------------------------------------------------------")
         }
@@ -266,16 +262,11 @@ struct AgentView {
         print("----------------------------------------------------------------")
         print()
         do {
-            guard let tickets = try agentController?.fetchAssignedTickets(agent: agent) else {
-                print("No tickets Assigned For Agent")
-                agentMenu()
-                return
-            }
-            
-            if(tickets.count == 0) {
-                print("-----------------No Tickets Assigned for Agent------------------")
+            guard let tickets = try agentController?.fetchAssignedTickets(agent: agent), !tickets.isEmpty else {
+                print("                 No tickets Assigned For Agent                  ")
                 print("----------------------------------------------------------------")
                 agentMenu()
+                return
             }
             
             print("----------------------------------------------------------------")
@@ -284,8 +275,8 @@ struct AgentView {
             for ticket in tickets {
                 
                 print("----------------------------------------------------------------")
-                print("Ticket Id : \(String(describing: ticket.getTicketId))")
-                print("Ticket Title : \(String(describing: ticket.getTicketTitle))")
+                print("Ticket Id     : \(String(describing: ticket.getTicketId))")
+                print("Ticket Title  : \(String(describing: ticket.getTicketTitle))")
                 print("Ticket Status : \(ticket.statusProperty)")
             }
             print("----------------------------------------------------------------")
@@ -323,7 +314,8 @@ struct AgentView {
 
         do {
             guard let tickets = try agentController?.fetchAssignedTickets(agent: agent), !tickets.isEmpty else {
-                print("No tickets assigned for agent \(agent.getName).")
+                print("                No tickets assigned for agent                  ")
+                print("----------------------------------------------------------------")
                 agentMenu()
                 return
             }
@@ -332,8 +324,8 @@ struct AgentView {
             print("                      Assigned Tickets                          ")
             for ticket in tickets {
                 print("----------------------------------------------------------------")
-                print("Ticket Id : \(ticket.getTicketId)")
-                print("Ticket Title : \(ticket.getTicketTitle)")
+                print("Ticket Id     : \(ticket.getTicketId)")
+                print("Ticket Title  : \(ticket.getTicketTitle)")
                 print("Ticket Status : \(ticket.statusProperty)")
             }
             print("----------------------------------------------------------------")
@@ -401,11 +393,13 @@ struct AgentView {
     }
     
     func searchKnowledgeBase() {
-        print("------------------- KnowledgeBase Menu -------------------------")
+        print("----------------------------------------------------------------")
+        print("                 ==== KnowledgeBase Menu ===                    ")
+        print("----------------------------------------------------------------")
         print("1. View All KnowledgeBase Entry")
         print("2. Search Using Specific Field")
         print("----------------------------------------------------------------")
-        print()
+
         
         print("Please Choose an Option")
         let choice = Int(readLine()!)
@@ -419,12 +413,12 @@ struct AgentView {
                 print("-------------------- Available Entrie's -------------------------")
                 
                 for (entry) in entries {
-                    print("Title : \(entry.titleproperty)")
-                    print("Issue : \(entry.issueProperty)")
+                    print("Title    : \(entry.titleproperty)")
+                    print("Issue    : \(entry.issueProperty)")
                     print("Solution : \(entry.solutionProperty)")
                     print("----------------------------------------------------------------")
                 }
-                print("----------------------------------------------------------------")
+                
             }
             catch let error {
                 print("Error while fetching the data : \(error.localizedDescription)")
@@ -440,14 +434,18 @@ struct AgentView {
                 return
             }
             do {
-                if let knowledgeBaseEntry = try agentController?.search(word: word) {
-                    print("-------------------- Problem Solution --------------------------")
+                if let knowledgeBaseEntry = try agentController?.search(word: word), !knowledgeBaseEntry.isEmpty {
+                    print("------------------- Available Entrie's  ------------------------")
                     print("----------------------------------------------------------------")
                     for entry in knowledgeBaseEntry {
-                        print("Title: \(entry.titleproperty )")
-                        print("Solution: \(entry.solutionProperty )")
+                        print("Title    : \(entry.titleproperty )")
+                        print("Solution : \(entry.solutionProperty )")
                         print("----------------------------------------------------------------")
                     }
+                }
+                else {
+                    print("No Solutions Found for the Given Word..")
+                    agentMenu()
                 }
             }
             catch let error {
@@ -472,17 +470,23 @@ struct AgentView {
 
         while title == nil || issueType == nil || solution == nil {
             if title == nil {
-                print("Enter the Title:")
-                if let input = readLine(), !input.isEmpty {
+                print("Enter the Title: or enter '0' to exit ")
+                let input = readLine()!
+                if input == "0" {
+                    print("Exiting to Agent Menu..")
+                    agentMenu()
+                }
+                else if !input.isEmpty {
                     title = input
-                } else {
+                }
+                 else {
                     print("Invalid Title. Please enter a non-empty title.")
                     continue
                 }
             }
             
             if issueType == nil {
-                print("Enter the issue type (1 : for network, 2 : for software, 3 : for hardware, 4 : for security):")
+                print("Enter the issue type (1 : for network, 2 : for software, 3 : for hardware, 4 : for security): or enter '5' to exit ")
                 let choice = Int(readLine()!)
                 switch choice {
                     case 1 :
@@ -493,6 +497,9 @@ struct AgentView {
                         issueType = IssueType.hardware
                     case 4 :
                         issueType = IssueType.security
+                    case 5 :
+                    print("Exiting to Agent Menu..")
+                    agentMenu()
                     default :
                         print("Enter the valid Option")
                         continue
@@ -500,10 +507,16 @@ struct AgentView {
             }
             
             if solution == nil {
-                print("Enter the Solution:")
-                if let input = readLine(), !input.isEmpty {
+                print("Enter the Solution: or enter '0' to exit")
+                let input = readLine()!
+                if input == "0" {
+                    print("Exiting to Agent Menu..")
+                    agentMenu()
+                }
+                else if !input.isEmpty {
                     solution = input
-                } else {
+                }
+                 else {
                     print("Invalid Solution. Please enter a non-empty solution.")
                     continue
                 }

@@ -23,7 +23,7 @@ class LogsEntryDAOImpl : LogsEntryDAO {
         if sqlite3_exec(dbConnector, Queries.createLogsEntryTable, nil, nil, nil) != SQLITE_OK {
             throw DatabaseError.tableCreationFailed("Users table creation failed. Error: \(String(cString: sqlite3_errmsg(dbConnector)))")
         }
-        print("LogsEntry table created successfully (or already exists).")
+        
     }
     
     func addLogsEntry(logsEntry: LogsEntry) -> Result<Void, DatabaseError> {

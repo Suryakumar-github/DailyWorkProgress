@@ -19,7 +19,7 @@ class TicketDAOImpl : TicketDAO{
         if sqlite3_exec(dbConnector, createTableQuery, nil, nil, nil) != SQLITE_OK {
             throw DatabaseError.tableCreationFailed("Tickets table creation failed. Error: \(String(cString: sqlite3_errmsg(dbConnector)))")
         }
-        print("Tickets table created successfully (or already exists).")
+        
     }
     
     func addTicket(ticket: Ticket) -> Result<Void, DatabaseError> {
