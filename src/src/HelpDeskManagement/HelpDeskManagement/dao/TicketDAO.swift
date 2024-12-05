@@ -15,10 +15,10 @@ protocol TicketDAO
     func findAgentByTicketId(ticketId: Int) -> Result<Agent?, DatabaseError>
     func fetchAssignedTickets(agent: Agent) -> Result<[Ticket], DatabaseError>
     func getTicketById(ticketId: Int) -> Result<Ticket?, DatabaseError>
-    func getTicketByDate(date: Date) -> Result<[Ticket], DatabaseError>
+    func getTicketByDate(date: Date)throws -> Result<[Ticket], DatabaseError>
     func removeTicket(agentId : Int, ticketId : Int) -> Result<Void, DatabaseError>
-    func getAllTickets() -> Result<[Ticket], DatabaseError>
+    func getAllTickets() throws -> Result<[Ticket], DatabaseError>
     func updatePriority(ticketId: Int, newPriority: Int) -> Result<Void, DatabaseError>
-    func getLastCreatedTicketId() -> Result<Int, DatabaseError>
-    func getTicketsBetweendates(date1 : Date, date2 : Date) -> Result<[Ticket], DatabaseError>
+    func getLastCreatedTicketId() throws -> Result<Int, DatabaseError>
+    func getTicketsBetweendates(date1 : Date, date2 : Date)throws -> Result<[Ticket], DatabaseError>
 }

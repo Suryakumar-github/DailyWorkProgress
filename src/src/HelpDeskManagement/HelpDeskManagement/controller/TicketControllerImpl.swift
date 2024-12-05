@@ -13,11 +13,21 @@ class TicketControllerImpl: TicketController {
     private var agentController : AgentController?
     private var userController : UserController?
     private var knowleggeBaseController : KnowledgeBaseController?
+    private var logsEntryController : LogsEntryController?
+    private var dataBase : DataBase
+    private var ticketDao : TicketDAO
     lazy var userView = UserView()
-    private let ticketDao : TicketDAO = TicketDAOImpl()
+    init(dateBase : DataBase) {
+        self.dataBase = dateBase
+        self.ticketDao = TicketDAOImpl(dataBase: dateBase)
+    }
     
     func setAgentController(agentController: AgentController) {
         self.agentController = agentController
+    }
+    
+    func setLogsEntryController(logsEntryController: LogsEntryController) {
+        self.logsEntryController = logsEntryController
     }
     
     func setKnowledgeBaseController(knowledgeBaseController: KnowledgeBaseController) {
@@ -35,7 +45,7 @@ class TicketControllerImpl: TicketController {
     func createTicket(title ticketTitle: String, description ticketDescription: String, createdDate: Date, status: TicketStatus, userId: Int, issueType : IssueType) throws
     {
         let id : Int
-        let ticketId = ticketDao.getLastCreatedTicketId()
+        let ticketId = try ticketDao.getLastCreatedTicketId()
         switch ticketId {
         case .success(let newId) :
             id = newId + 1
@@ -49,7 +59,7 @@ class TicketControllerImpl: TicketController {
         let result = ticketDao.addTicket(ticket: ticket)
         switch result {
         case .success() :
-            try Logger.log(logType: LogType.info, message: "New Ticket Created with TicketId : \(ticket.getTicketId)", userId: ticket.getTicketId, data: ticket)
+            try logsEntryController?.log(logType: LogType.info, message: "New Ticket Created with TicketId : \(ticket.getTicketId)", userId: ticket.getTicketId, data: ticket)
         case .failure(let error) :
             throw error
         }
@@ -114,7 +124,7 @@ class TicketControllerImpl: TicketController {
         
         switch result {
         case .success() :
-            try Logger.log(logType: LogType.info, message: "Ticket status updated to \(status) for ticketId: \(ticketId) by agent.", userId: ticketId, data: ticket)
+            try logsEntryController?.log(logType: LogType.info, message: "Ticket status updated to \(status) for ticketId: \(ticketId) by agent.", userId: ticketId, data: ticket)
             return true
             
         case .failure(let error) :
@@ -139,7 +149,7 @@ class TicketControllerImpl: TicketController {
         
         if (try updateTicketStatus(agent: agent, ticketId: ticketId, status: TicketStatus.closed) ){
             try knowleggeBaseController?.addEntry(title: ticket.getTicketTitle, issueType: ticket.getIssueType, solution: solution, createdDate: Date(), lastUpdatedDate: Date(), userId: agent.getUserId)
-            try Logger.log(logType: LogType.info, message: "Ticket Closed for ticketId: \(ticketId) by AgentId : \(agent.getId)", userId: ticket.getUserId, data: ticket)
+            try logsEntryController?.log(logType: LogType.info, message: "Ticket Closed for ticketId: \(ticketId) by AgentId : \(agent.getId)", userId: ticket.getUserId, data: ticket)
             return true
         }
         
@@ -160,7 +170,7 @@ class TicketControllerImpl: TicketController {
         let result = ticketDao.updateTicketStatus(ticketId: ticketId, status: TicketStatus.cancelled)
         switch result {
             case .success() :
-                try Logger.log(logType: LogType.info, message: "Ticket cancelled for ticketId: \(ticketId) by UserId: \(user.getId)", userId: user.getId, data: ticket)
+            try logsEntryController?.log(logType: LogType.info, message: "Ticket cancelled for ticketId: \(ticketId) by UserId: \(user.getId)", userId: user.getId, data: ticket)
                 return true
             case .failure(let error) :
                 throw error
@@ -236,7 +246,7 @@ class TicketControllerImpl: TicketController {
         case .success():
             try agentController?.reAssignTicketToAgent(ticket: ticket, agent: newAgent)
             
-            try Logger.log(
+            try logsEntryController?.log(
                 logType: .info,
                 message: "Ticket reassigned from Agent ID: \(oldAgent.getAgentId) to Agent ID: \(newAgent.getAgentId)",
                 userId: oldAgent.getUserId,
@@ -260,7 +270,7 @@ class TicketControllerImpl: TicketController {
     }
     
     func getTicketByDate(date: Date) throws -> [Ticket] {
-        let result = ticketDao.getTicketByDate(date: date)
+        let result = try ticketDao.getTicketByDate(date: date)
         switch result {
         case .success(let ticket) :
             return ticket
@@ -270,7 +280,7 @@ class TicketControllerImpl: TicketController {
     }
     
     func getAllCreatedTickets()throws -> [Ticket] {
-        let result = ticketDao.getAllTickets()
+        let result = try ticketDao.getAllTickets()
         switch result {
         case .success(let tickets) :
             return tickets
@@ -280,7 +290,7 @@ class TicketControllerImpl: TicketController {
     }
     
     func getTicketsBetweendates(date1 : Date, date2 : Date) throws -> [Ticket] {
-        let result = ticketDao.getTicketsBetweendates(date1: date1, date2: date2)
+        let result = try ticketDao.getTicketsBetweendates(date1: date1, date2: date2)
             switch result {
             case .success(let tickets) :
                 return tickets
@@ -289,7 +299,4 @@ class TicketControllerImpl: TicketController {
         }
     }
     
-    deinit{
-        
-    }
 }

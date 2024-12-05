@@ -8,10 +8,17 @@
 import Foundation
 
 class UserControllerImpl : UserController {
-    
-    let userDao = UserDAOImpl()
+
     private weak var ticketController : TicketController?
     private var knowledgeBaseController : KnowledgeBaseController?
+    private var logsEntryController : LogsEntryController?
+    private var dataBase : DataBase
+    private var userDao : UserDAO
+    
+    init(dataBase : DataBase) {
+        self.dataBase = dataBase
+        self.userDao = UserDAOImpl(dataBase: dataBase)
+    }
     
     func setTicketController(ticketController: any TicketController) {
         self.ticketController = ticketController
@@ -21,9 +28,13 @@ class UserControllerImpl : UserController {
         self.knowledgeBaseController = knowledgeBaseController
     }
     
+    func setLogsEntryController(logsEntryController: LogsEntryController) {
+        self.logsEntryController = logsEntryController
+    }
+    
     func register(name : String, userRole : UserRole, userName : String, password : String)throws -> User? {
         let id : Int
-        let userId = userDao.getLastCreatedUserId()
+        let userId = try userDao.getLastCreatedUserId()
         switch userId {
         case .success(let newId) :
             id = newId + 1
@@ -35,7 +46,7 @@ class UserControllerImpl : UserController {
         switch result {
         case .success() :
             userDao.addUsersUserNamePassword(userName: userName, password: password, user: user)
-            try Logger.log(logType: LogType.info, message: "New User Registered", userId: user.getId, data: user)
+            try logsEntryController?.log(logType: LogType.info, message: "New User Registered", userId: user.getId, data: user)
             return user
         case .failure(let error) :
             throw error
@@ -165,7 +176,4 @@ class UserControllerImpl : UserController {
         return try knowledgeBaseController?.getAllKnowledgeBaseEntries() ?? []
     }
     
-    deinit{
-        
-    }
 }

@@ -8,7 +8,8 @@ import Foundation
 
 protocol KnowledgeBaseController : AnyObject{
     func search(word: String) throws -> [KnowledgeBase]
-    func addEntry(title: String, issueType : IssueType, solution: String, createdDate: Date, lastUpdatedDate: Date?, userId : Int)throws -> Bool
+    func addEntry(title: String, issueType : IssueType, solution: String, createdDate: Date, lastUpdatedDate: Date?, userId : Int)throws
     func updateEntry(id: Int, solution: String, lastUpdatedDate: Date?) throws
     func getAllKnowledgeBaseEntries() throws -> [KnowledgeBase]
+    func setLogsEntryController(logsEntryController: LogsEntryController)
 }

@@ -14,6 +14,7 @@ protocol AgentController : AnyObject{
     func getAgentById(agentId : Int)throws -> Agent?
     func setTicketController(ticketController : TicketController)
     func setKnowledgeBaseController(knowledgeBaseController : KnowledgeBaseController)
+    func setLogsEntryController(logsEntryController: LogsEntryController)
     func addAgent(name : String, department : String, userName : String, password : String)throws
     func changePassword(agent : Agent, newPassword: String, currentPassword: String)throws -> Bool
     func closeTicket(agent: Agent, ticketId: Int, solution : String) throws -> Bool

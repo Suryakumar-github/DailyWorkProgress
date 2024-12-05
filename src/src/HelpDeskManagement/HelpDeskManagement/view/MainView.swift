@@ -10,6 +10,7 @@ import Foundation
 class MainView {
     
     private var userController : UserController?
+    private var dataBase : DataBase
     private lazy var userView = UserView()
     private var adminView = AdminView()
     private var agentView = AgentView()
@@ -18,14 +19,18 @@ class MainView {
     private var knowledgeBaseController : KnowledgeBaseController?
     private var reportAndAnalyticsController : ReportAndAnalyticsController?
     private var adminController : AdminController?
+    private var logsEntryController : LogsEntryController?
     
-    init(userController : UserControllerImpl) {
+    init(userController : UserControllerImpl, dataBase : DataBase) {
+        self.dataBase = dataBase
         self.userController = userController
-        self.ticketController = TicketControllerImpl()
-        self.agentController = AgentControllerImpl()
-        self.knowledgeBaseController = KnowledgeBaseControllerImpl()
+        self.ticketController = TicketControllerImpl(dateBase: dataBase)
+        self.agentController = AgentControllerImpl(dateBase: dataBase)
+        self.knowledgeBaseController = KnowledgeBaseControllerImpl(dateBase: dataBase)
         self.reportAndAnalyticsController = ReportAndAnalyticsControllerImpl()
-        self.adminController = AdminControllerImpl()
+        self.adminController = AdminControllerImpl(dataBase: dataBase)
+        self.logsEntryController = LogsEntryControllerImpl(dataBase: dataBase)
+        
         
         setTicketController()
         setAgentController()
@@ -34,6 +39,13 @@ class MainView {
         setUserViewControllers()
         setAdminViewControllers()
         setAgentViewControllers()
+        setLogsEntryController()
+    }
+    func setLogsEntryController() {
+        agentController?.setLogsEntryController(logsEntryController: logsEntryController!)
+        ticketController?.setLogsEntryController(logsEntryController: logsEntryController!)
+        userController?.setLogsEntryController(logsEntryController: logsEntryController!)
+        knowledgeBaseController?.setLogsEntryController(logsEntryController: logsEntryController!)
     }
     
     func setTicketController() {
@@ -82,7 +94,8 @@ class MainView {
         print("3. Exit")
         print("----------------------------------------------------------------")
         print("Enter the choice")
-        let userChoice = Int(readLine()!)
+        let userInput = readLine()!
+        let userChoice = Int(userInput)
         
         switch userChoice {
         case 1 :
@@ -104,7 +117,7 @@ class MainView {
         }
     }
     
-    func login() {
+    private func login() {
         print("----------------------------------------------------------------")
         
         while true {
@@ -129,7 +142,7 @@ class MainView {
             }
             catch let error {
                 print("Error while searching User : \(error.localizedDescription)")
-                print("------------------------------------------------------------")
+                print("----------------------------------------------------------------")
                 print("Do you want to try again? (1 to retry, enter any number to exit)")
                 
                 guard let choice = Int(readLine()!),
@@ -142,7 +155,7 @@ class MainView {
         }
     }
     
-    func navigateToRoleView(actor: AnyObject) {
+    private func navigateToRoleView(actor: AnyObject) {
         if let admin = actor as? Admin {
             if admin.getRole == .admin {
                 adminView.setLoginedUser(user: admin)
@@ -154,7 +167,7 @@ class MainView {
                     }
                     catch let error {
                         print(error.localizedDescription)
-                        print("------------------------------------------------------------")
+                        print("----------------------------------------------------------------")
                         adminView.changePassword(user: admin as Admin)
                     }
                 }

@@ -60,7 +60,7 @@ struct AgentView {
         }
     }
     
-    func updateAgentAvailability(agent : Agent) {
+    private func updateAgentAvailability(agent : Agent) {
         print("---------------------------------------------------------------------------------")
         print("Enter Agent's Status (1 : for available, 2 : for busy, 3 : for leave, 4 : for offline) : ")
         let choice = Int(readLine()!)
@@ -100,7 +100,7 @@ struct AgentView {
         agentMenu()
     }
     
-    func changePassword(agent: Agent) {
+    private func changePassword(agent: Agent) {
         print("----------------------------------------------------------------")
         
         var currentPassword: String?
@@ -130,7 +130,7 @@ struct AgentView {
                 if Validation.validatePassword(input) {
                     newPassword = input
                 } else {
-                    print("Invalid Password. Password must meet the required criteria.")
+                    print("Invalid Password. Password must contain one Number and Special Character")
                 }
             } else {
                 print("Password cannot be empty. Please try again.")
@@ -157,7 +157,7 @@ struct AgentView {
     }
 
     
-    func closeTicket(agent: Agent) {
+    private func closeTicket(agent: Agent) {
         
         print("----------------------------------------------------------------")
         print()
@@ -225,7 +225,7 @@ struct AgentView {
         agentMenu()
     }
 
-    func viewAssignedTickets(loginedAgent : Agent) {
+    private func viewAssignedTickets(loginedAgent : Agent) {
         print("----------------------------------------------------------------")
         print()
         do {
@@ -258,7 +258,7 @@ struct AgentView {
         agentMenu()
     }
     
-    func resolveTicket(agent: Agent) {
+    private func resolveTicket(agent: Agent) {
         print("----------------------------------------------------------------")
         print()
         do {
@@ -308,7 +308,7 @@ struct AgentView {
         }
     }
     
-    func updateTicketStatus(agent: Agent) {
+    private func updateTicketStatus(agent: Agent) {
         print("----------------------------------------------------------------")
         print()
 
@@ -392,7 +392,7 @@ struct AgentView {
         }
     }
     
-    func searchKnowledgeBase() {
+    private func searchKnowledgeBase() {
         print("----------------------------------------------------------------")
         print("                 ==== KnowledgeBase Menu ===                    ")
         print("----------------------------------------------------------------")
@@ -461,7 +461,7 @@ struct AgentView {
         agentMenu()
     }
 
-    func addKnowledgeBaseEntry(agent : Agent) {
+    private func addKnowledgeBaseEntry(agent : Agent) {
         print("----------------------------------------------------------------")
         var title: String?
         var issueType: IssueType?

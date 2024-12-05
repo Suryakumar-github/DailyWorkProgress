@@ -54,7 +54,7 @@ struct UserView {
         }
     }
     
-    func changePassword(user: User) {
+    private func changePassword(user: User) {
         print("----------------------------------------------------------------")
         
         while true {
@@ -94,19 +94,21 @@ struct UserView {
                 if try controller.changePassword(user: user, password: newPassword, currentPassword: currentPassword) {
                     print("Password changed successfully.")
                     print("----------------------------------------------------------------")
-                    return
+                    userMenu()
                 } else {
                     print("New password cannot be the same as the current password.")
                     print("----------------------------------------------------------------")
+                    changePassword(user: user)
                 }
             } catch {
                 print("Error while changing password: \(error.localizedDescription)")
                 print("----------------------------------------------------------------")
+                userMenu()
             }
         }
     }
     
-    func createTicket(user: User) {
+    private func createTicket(user: User) {
         print("----------------------------------------------------------------")
         
         print("Enter the Ticket Title:")
@@ -159,7 +161,7 @@ struct UserView {
         userMenu()
     }
 
-    func cancelTicket(user: User) {
+    private func cancelTicket(user: User) {
         print("----------------------------------------------------------------")
         print("                      Available Tickets                         ")
         do {
@@ -218,7 +220,7 @@ struct UserView {
         }
     }
     
-    func viewMyTicket(user : User) {
+    private func viewMyTicket(user : User) {
         
         guard let userController = userController else {
             print("User controller not available.")
@@ -250,7 +252,7 @@ struct UserView {
         userMenu()
     }
 
-    func searchKnowledgeBase() {
+    private func searchKnowledgeBase() {
         print("----------------------------------------------------------------")
         print("                  === KnowledgeBase Menu ===                    ")
         print("----------------------------------------------------------------")

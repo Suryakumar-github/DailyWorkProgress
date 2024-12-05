@@ -12,6 +12,7 @@ enum DatabaseError: Error {
     case preparationFailed(String)
     case executionFailed(String)
     case noRecordFound(String)
+    case finalizationFailed(String)
 }
 
 extension DatabaseError: LocalizedError {
@@ -20,6 +21,7 @@ extension DatabaseError: LocalizedError {
         case .tableCreationFailed(let message),
              .preparationFailed(let message),
              .executionFailed(let message),
+             .finalizationFailed(let message),
              .noRecordFound(let message):
             return message
         }

@@ -7,13 +7,21 @@
 
 import Foundation
 
-class AdminControllerImpl : AdminController {
-    private var ticketController : TicketController?
-    private var reportGenerator : ReportAndAnalyticsController?
-    private var agentController : AgentController?
-    private let adminDao : AdminDAO = AdminDAOImpl()
-    private let logsEntryDao : LogsEntryDAO = LogsEntryDAOImpl()
+class AdminControllerImpl: AdminController {
     
+    private var ticketController: TicketController?
+    private var reportGenerator: ReportAndAnalyticsController?
+    private var agentController: AgentController?
+    private var dataBase: DataBase
+    private var adminDao: AdminDAO
+    private var logsEntryDao: LogsEntryDAO
+    
+    init(dataBase: DataBase) {
+        self.dataBase = dataBase
+        self.adminDao = AdminDAOImpl(dataBase: dataBase)
+        self.logsEntryDao = LogsEntryDAOImpl(dataBase: dataBase)
+    }
+
     func setTicketController(ticketController : TicketController) {
         self.ticketController = ticketController
     }
@@ -51,13 +59,31 @@ class AdminControllerImpl : AdminController {
         return false
     }
     
-    func updatePassword(user: Admin, password: String) throws -> Bool {
+    func updatePassword(user: Admin, newPassword: String, currentPassword : String) throws -> Bool {
         
-        let result = adminDao.updatePassword(user: user, password: password)
+        let result = adminDao.getUserNameAndPassword(userId: user.getId)
         switch result {
-        case .success():
-            return true
-        case .failure(let error):
+        case .success(let credentials) :
+             let storedPassword = credentials[1]
+
+            if storedPassword != currentPassword {
+                print("Current password is incorrect.")
+                return false
+            }
+
+            if storedPassword == newPassword {
+                return false
+            }
+            
+            let result = adminDao.updatePassword(user: user, password: newPassword)
+            switch result {
+            case .success():
+                return true
+            case .failure(let error):
+                throw error
+            }
+            
+        case .failure(let error) :
             throw error
         }
     }
@@ -75,7 +101,7 @@ class AdminControllerImpl : AdminController {
     }
     
     func getAllLogsEntry() throws -> [LogsEntry] {
-        let result = logsEntryDao.getAllLogsEntry()
+        let result = try logsEntryDao.getAllLogsEntry()
         switch result {
         case .success(let logsEntry) :
             return logsEntry
@@ -83,6 +109,7 @@ class AdminControllerImpl : AdminController {
             throw error
         }
     }
+    
     func formatDateForDisplay(_ date: Date) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
@@ -105,7 +132,7 @@ class AdminControllerImpl : AdminController {
     }
     
     func getLogsEntryByDate(date: Date)throws -> [LogsEntry] {
-        let result = logsEntryDao.getLogsEntryByDate(date: date)
+        let result = try logsEntryDao.getLogsEntryByDate(date: date)
         switch result {
         case .success(let logs) :
             return logs
@@ -116,7 +143,7 @@ class AdminControllerImpl : AdminController {
     }
     
     func getLogsEntryBetweenDates(date1: Date, date2: Date) throws -> [LogsEntry] {
-        let result = logsEntryDao.getLogsEntryBetweenDates(date1: date1, date2: date2)
+        let result = try logsEntryDao.getLogsEntryBetweenDates(date1: date1, date2: date2)
         switch result {
         case .success(let logs) :
             return logs

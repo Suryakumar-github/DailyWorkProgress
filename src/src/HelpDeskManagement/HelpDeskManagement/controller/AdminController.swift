@@ -12,7 +12,7 @@ protocol AdminController : AnyObject {
     func generateTicketReport(date: Date) throws -> [Ticket]
     func generateAgentreport(agentId : Int) throws -> Agent?
     func reassignTicket(ticketId: Int, agentId : Int) throws-> Bool
-    func updatePassword(user: Admin, password: String) throws -> Bool
+    func updatePassword(user: Admin, newPassword: String, currentPassword : String) throws -> Bool
     func setTicketController(ticketController : TicketController)
     func setAgentController(agentController : AgentController)
     func setReportAndAnalyticsController(reportAndAnalyticsController : ReportAndAnalyticsController)

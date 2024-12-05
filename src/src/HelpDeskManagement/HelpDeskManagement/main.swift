@@ -1,16 +1,6 @@
 import Foundation
 
-struct Main {
-    private var userController : UserController
-    private var agentController = AgentControllerImpl()
-    init() {
-        self.userController = UserControllerImpl()
-    }
-
-}
-
-let main = Main()
-
-var mainView = MainView( userController: UserControllerImpl())
+var dataBase : DataBase = DatabaseManager()
+var mainView = MainView( userController: UserControllerImpl(dataBase: dataBase), dataBase: dataBase)
 
 mainView.showLoginScreen()

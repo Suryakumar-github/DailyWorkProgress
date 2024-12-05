@@ -25,4 +25,5 @@ protocol TicketController : AnyObject{
     func getAllTheCreatedTickets(user: User)throws -> [Ticket]
     func getAllCreatedTickets()throws -> [Ticket]
     func getTicketsBetweendates(date1 : Date, date2 : Date) throws -> [Ticket]
+    func setLogsEntryController(logsEntryController: LogsEntryController)
 }

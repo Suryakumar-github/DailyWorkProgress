@@ -4,248 +4,301 @@
 //
 //  Created by incubation on 26/11/24.
 //
-import SQLite3
 import Foundation
 
 class UserDAOImpl: UserDAO {
-    let dbConnector = DatabaseManager.shared.db
 
-    init() {
-        do {
-            try createTable()
-        } catch let error {
-            print("Error during table creation: \(error)")
+    var dataBase : DataBase
+    init(dataBase : DataBase) {
+        self.dataBase = dataBase
+        do{
+            try dataBase.createTable(createTableQuery: Queries.createUserTable)
         }
-    }
-
-    internal func createTable() throws {
-        if sqlite3_exec(dbConnector, Queries.createUserTable, nil, nil, nil) != SQLITE_OK {
-            throw DatabaseError.tableCreationFailed("Users table creation failed. Error: \(String(cString: sqlite3_errmsg(dbConnector)))")
+        catch {
+            print("Error : \(error)")
         }
-       
     }
 
     func getUserById(userId: Int) -> Result<User, DatabaseError> {
-        let query = Queries.getUserById
-        var statement: OpaquePointer?
-
-        guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare SELECT statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
-
-        sqlite3_bind_int(statement, 1, Int32(userId))
-
-        if sqlite3_step(statement) == SQLITE_ROW {
-            let id = Int(sqlite3_column_int(statement, 0))
-            let name = String(cString: sqlite3_column_text(statement, 1))
-                     let roleRawValue = String(cString: sqlite3_column_text(statement, 2))
-                     sqlite3_finalize(statement)
+        let query = "SELECT * FROM Users WHERE user_id = ?"
+        let data: [Any] = [
+            userId
+        ]
+        
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            if let role = Role(rawValue: roleRawValue) {
-                return .success(User(id: id, name: name, role: role))
-            } else {
-                return .failure(.executionFailed("Invalid role value retrieved from database."))
+            let result = try dataBase.executeQueryData(query: finalQuery)
+            
+            switch result {
+            case .success(let usersData):
+                if let userDict = usersData.first,
+                   let id = userDict["user_id"] as? Int,
+                   let name = userDict["name"] as? String,
+                   let role = userDict["role"] as? String {
+                    return .success(User(id: id, name: name, role: Role(rawValue: role) ?? Role.user))
+                } else {
+                    return .failure(.executionFailed("Failed to extract user data."))
+                }
+                
+            case .failure(let error):
+                return .failure(error)
             }
-        } else {
-            sqlite3_finalize(statement)
-            return .failure(.noRecordFound("No user found with ID \(userId)."))
+            
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
         }
     }
 
-    func changePassword(user: User, newPassword: String) -> Result<Void, DatabaseError> {
-        let query = Queries.updatePassword
-        var statement: OpaquePointer?
-
-        guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare UPDATE statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
-
-        sqlite3_bind_text(statement, 1, (newPassword as NSString).utf8String, -1, nil)
-        sqlite3_bind_int(statement, 2, Int32(user.getId))
-
-        if sqlite3_step(statement) == SQLITE_DONE {
-            sqlite3_finalize(statement)
-            return .success(())
-        } else {
-            sqlite3_finalize(statement)
-            return .failure(.executionFailed("Failed to update password. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
+    func changePassword(user: User, newPassword password: String) -> Result<Void, DatabaseError>  {
+        let query = "UPDATE userNameAndPasswords SET password = ? where userId = ?;"
+        
+        let data: [Any] = [
+            password,
+            user.getId
+        ]
+        
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
+            return try dataBase.insertRecord(query: finalQuery)
+        } catch let error as DatabaseError {
+            return .failure(error)
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
         }
     }
 
     func addUser(user: User) -> Result<Void, DatabaseError> {
-        var statement: OpaquePointer?
-
-        guard sqlite3_prepare_v2(dbConnector, Queries.addUser, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare INSERT statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
-
-        sqlite3_bind_text(statement, 1, (user.getName as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(statement, 2, (user.getRole.rawValue as NSString).utf8String, -1, nil)
-
-        if sqlite3_step(statement) == SQLITE_DONE {
-            sqlite3_finalize(statement)
-            return .success(())
-        } else {
-            sqlite3_finalize(statement)
-            return .failure(.executionFailed("Failed to insert user. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
-    }
-
-    func getAllUsers() -> Result<[User], DatabaseError> {
-        let query = Queries.getAllUsers
-        var statement: OpaquePointer?
-        var users: [User] = []
-
-        guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare SELECT statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
-
-        while sqlite3_step(statement) == SQLITE_ROW {
-            let id = Int(sqlite3_column_int(statement, 0))
-            let name = String(cString: sqlite3_column_text(statement, 1))
-            let roleRawValue = String(cString: sqlite3_column_text(statement, 2))
-            if let role = Role(rawValue: roleRawValue) {
-                let user = User(id: id, name: name, role: role)
-                users.append(user)
-            }
-        }
-
-        sqlite3_finalize(statement)
-        return .success(users)
-    }
-    
-    func addUsersUserNamePassword(userName : String, password : String, user : User) -> Result<Void, DatabaseError> {
-        let query = Queries.addUserNameAndPassword
-        var statement: OpaquePointer?
+        let query = "INSERT INTO Users (name, role) VALUES (?, ?)"
         
-        guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare SELECT statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
+        let data: [Any] = [
+            user.getName,
+            user.getRole.rawValue
+        ]
         
-        sqlite3_bind_text(statement, 1, (userName as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(statement, 2, (password as NSString).utf8String, -1, nil)
-        sqlite3_bind_int(statement, 3, Int32(user.getId))
-
-        if sqlite3_step(statement) == SQLITE_DONE {
-            sqlite3_finalize(statement)
-            return .success(())
-        } else {
-            sqlite3_finalize(statement)
-            return .failure(.executionFailed("Failed to insert user. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
+            print("Query : \(finalQuery)")
+            return try dataBase.insertRecord(query: finalQuery)
+        } catch let error as DatabaseError {
+            return .failure(error)
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
         }
     }
-    
-    func getUserNameAndPassword (userId : Int) -> Result<[String], DatabaseError> {
-        let query = Queries.getUserNameAndPassword
-        var statement: OpaquePointer?
 
-        guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare SELECT statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
-        print("User Id : \(userId)")
-        sqlite3_bind_int(statement, 1, Int32(userId))
-        
-        if sqlite3_step(statement) == SQLITE_ROW {
-            let userName = String(cString: sqlite3_column_text(statement, 0))
-            let password = String(cString: sqlite3_column_text(statement, 1))
-            sqlite3_finalize(statement)
-            return .success([userName, password])
-        } else {
-            sqlite3_finalize(statement)
-            return .failure(.noRecordFound("No user found for user with ID \(userId)."))
-        }
-    }
-    
-    func getUserRole(userName: String, password: String) -> Result<(String, Int), DatabaseError> {
-        let query = Queries.getuserRole
-        var statement: OpaquePointer?
-
-        guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare SELECT statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
-
-        sqlite3_bind_text(statement, 1, (userName as NSString).utf8String, -1, nil)
-        sqlite3_bind_text(statement, 2, (password as NSString).utf8String, -1, nil)
-
-        if sqlite3_step(statement) == SQLITE_ROW {
+    func getAllUsers() throws -> Result<[User], DatabaseError> {
+        let query = "SELECT id, name, role FROM Users;"
             
-            guard let rolePointer = sqlite3_column_text(statement, 0) else {
-                sqlite3_finalize(statement)
-                return .failure(.executionFailed("Role column is NULL."))
+        let result = try dataBase.executeQueryData(query: query)
+        switch result {
+        case .success(let usersData):
+                
+            let users = usersData.compactMap { userDict -> User? in
+                guard let id = userDict["id"] as? Int,
+                        let name = userDict["name"] as? String,
+                        let role = userDict["role"] as? String else {
+                        return nil
+                }
+                return User(id: id, name: name, role: Role(rawValue: role) ?? Role.user)
             }
-            let role = String(cString: rolePointer)
-            let userId = Int(sqlite3_column_int(statement, 1))
-            sqlite3_finalize(statement)
-            return .success((role, userId))
-        } else {
-            sqlite3_finalize(statement)
-            return .failure(.noRecordFound("No user found for the provided username and password."))
+            return .success(users)
+                
+            case .failure(let error):
+                return .failure(error)
         }
     }
     
-    func getAgentByUserId(userId : Int) -> Result<Agent?, DatabaseError> {
-        let query = Queries.getAgentByUserId
-        var statement: OpaquePointer?
-
-        guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare SELECT statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
-
-        sqlite3_bind_int(statement, 1, Int32(userId))
+    func addUsersUserNamePassword(userName: String, password: String, user: User) -> Result<Void, DatabaseError> {
+        let query = "INSERT INTO userNameAndPasswords (userName, password, userId) values (?,?,?);"
+        let data: [Any] = [userName, password, user.getId]
         
-        if sqlite3_step(statement) == SQLITE_ROW {
-            let agentId = Int(sqlite3_column_int(statement, 0))
-            let department = String(cString: sqlite3_column_text(statement, 1))
-            let availabiltyStatus = String(cString: sqlite3_column_text(statement, 2))
-            let ticketResolvedCount = Int(sqlite3_column_int(statement, 3))
-            let userId = Int(sqlite3_column_int(statement, 4))
-            let name = String(cString: sqlite3_column_text(statement, 5))
-            sqlite3_finalize(statement)
-            return .success(Agent(id: agentId, name: name, department: department, status: AgentStatus(rawValue: availabiltyStatus) ?? AgentStatus.available, ticketResolved: ticketResolvedCount, userId: userId))
-        } else {
-            sqlite3_finalize(statement)
-            return .failure(.noRecordFound("No agent found for UserID \(userId)."))
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
+            
+            let result: Result<Void, DatabaseError> = try dataBase.insertRecord(query: finalQuery)
+            
+            switch result {
+            case .success:
+                return .success(())
+                
+            case .failure(let error):
+                return .failure(error)
+            }
+            
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
+        }
+    }
+
+    func getUserNameAndPassword(userId: Int) -> Result<[String], DatabaseError> {
+        let query = "SELECT userName, password FROM userNameAndPasswords WHERE userId = ?;"
+        let data: [Any] = [userId]
+        
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
+            
+            let result = try dataBase.executeQueryData(query: finalQuery)
+            
+            switch result {
+            case .success(let usersData):
+                let credentials = usersData.compactMap { userDict -> [String]? in
+                    guard let userName = userDict["userName"] as? String,
+                          let password = userDict["password"] as? String else {
+                        return nil
+                    }
+                    return [userName, password]
+                }
+                
+                return .success(credentials.flatMap { $0 })
+                
+            case .failure(let error):
+                return .failure(error)
+            }
+            
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
+        }
+    }
+
+    func getUserRole(userName: String, password: String) -> Result<(String, Int), DatabaseError> {
+        let query = """
+        SELECT Users.role, Users.user_id
+        FROM Users
+        JOIN userNameAndPasswords
+        ON Users.user_id = userNameAndPasswords.userId
+        WHERE userNameAndPasswords.userName = ?
+        AND userNameAndPasswords.password = ?;
+        """
+        let data: [Any] = [
+            userName,
+            password
+        ]
+        
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
+            
+            let result = try dataBase.executeQueryData(query: finalQuery)
+            
+            switch result {
+            case .success(let usersData):
+                
+                if let userDict = usersData.first,
+                   let role = userDict["role"] as? String,
+                   let userId = userDict["user_id"] as? Int {
+                    return .success((role, userId))
+                } else {
+                    return .failure(.executionFailed("Failed to extract role or user_id."))
+                }
+                
+            case .failure(let error):
+                return .failure(error)
+            }
+            
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
         }
     }
     
-    func getAdminByUserId(userId : Int) -> Result<Admin?, DatabaseError> {
-        let query = Queries.getAdminByUserId
-        var statement: OpaquePointer?
-
-        guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare SELECT statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
-
-        sqlite3_bind_int(statement, 1, Int32(userId))
+    func getAgentByUserId(userId: Int) -> Result<Agent, DatabaseError> {
+        let query = "SELECT * FROM Agents WHERE userId = ?;"
+        let data: [Any] = [userId]
         
-        if sqlite3_step(statement) == SQLITE_ROW {
-            let adminId = Int(sqlite3_column_int(statement, 0))
-            let hasDefaultPassword = sqlite3_column_int(statement, 1) != 0
-            let userId = Int(sqlite3_column_int(statement, 2))
-            let name = String(cString: sqlite3_column_text(statement, 3))
-            sqlite3_finalize(statement)
-            return .success(Admin(name: name, userRole: nil, role: Role.admin, userId: userId, hasDefaultPassword: hasDefaultPassword))
-        } else {
-            sqlite3_finalize(statement)
-            return .failure(.noRecordFound("No agent found for UserID \(userId)."))
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
+            
+            let result = try dataBase.executeQueryData(query: finalQuery)
+            
+            switch result {
+            case .success(let usersData):
+                guard let userDict = usersData.first else {
+                    
+                    return .failure(.noRecordFound("No agent found with userId \(userId)."))
+                }
+                
+                if let userDict = usersData.first,
+                   let id = userDict["agent_id"] as? Int,
+                   let department = userDict["department"] as? String,
+                   let availabilityStatus = userDict["availabilityStatus"] as? String,
+                   let ticketsResolvedCount = userDict["ticketsResolvedCount"] as? Int,
+                   let userId = userDict["userId"] as? Int,
+                   let name = userDict["name"] as? String
+                {
+                    return .success(Agent(
+                        id: id,
+                        name: name,
+                        department: department,
+                        status: AgentStatus(rawValue: availabilityStatus) ?? .available,
+                        ticketResolved: ticketsResolvedCount,
+                        userId: userId
+                    ))
+                } else {
+                    return .failure(.executionFailed("Failed to extract user data: \(userDict)"))
+                }
+                
+            case .failure(let error):
+                return .failure(error)
+            }
+            
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
         }
     }
     
-    func getLastCreatedUserId() -> Result<Int, DatabaseError> {
-        let query = Queries.getLastUserId
-        var statement: OpaquePointer?
-
-        guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare SELECT statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
-        if sqlite3_step(statement) == SQLITE_ROW {
-            let userId = Int(sqlite3_column_int(statement, 0))
-            return .success(userId)
-        }
-        else {
-            return .failure(.noRecordFound("No userId Found"))
-        }
+    func getAdminByUserId(userId: Int) -> Result<Admin?, DatabaseError> {
+        let query = "SELECT * FROM admin WHERE userId = ?;"
+        let data: [Any] = [userId]
         
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
+            
+            let result = try dataBase.executeQueryData(query: finalQuery)
+            
+            switch result {
+            case .success(let usersData):
+                if let userDict = usersData.first,
+                   let hasDefaultPasswordInt = userDict["hasDefaultPassword"] as? Int,
+                   let userId = userDict["userId"] as? Int,
+                   let name = userDict["name"] as? String {
+                    
+                    let hasDefaultPassword = (hasDefaultPasswordInt == 1)
+                    
+                    return .success(Admin(
+                        name: name,
+                        role: .admin,
+                        userId: userId,
+                        hasDefaultPassword: hasDefaultPassword
+                    ))
+                } else {
+                    return .failure(.executionFailed("Failed to extract user data: \(usersData)"))
+                }
+                
+            case .failure(let error):
+                return .failure(error)
+            }
+            
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
+        }
+    }
+    
+    func getLastCreatedUserId() throws -> Result<Int, DatabaseError> {
+        let query = "SELECT MAX(user_id) AS lastUserId FROM Users;"
+        
+        let result = try dataBase.executeQueryData(query: query)
+        
+        switch result {
+        case .success(let userIdData):
+            if let userDict = userIdData.first,
+               let lastUserId = userDict["lastUserId"] as? Int {
+                return .success(lastUserId)
+            } else {
+                return .failure(.executionFailed("Failed to extract the last created user ID."))
+            }
+            
+        case .failure(let error):
+            return .failure(error)
+        }
     }
 
 }

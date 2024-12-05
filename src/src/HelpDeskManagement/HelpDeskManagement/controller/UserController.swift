@@ -20,4 +20,5 @@ protocol UserController : AnyObject {
     func cancelTicket (user : User, ticketId : Int) throws-> Bool
     func search(word: String)throws -> [KnowledgeBase]
     func getAllKnowledgeBaseEntries() throws -> [KnowledgeBase]
+    func setLogsEntryController(logsEntryController: LogsEntryController)
 }

@@ -4,66 +4,83 @@
 //
 //  Created by incubation on 27/11/24.
 //
-import SQLite3
 import Foundation
 
 class AdminDAOImpl : AdminDAO {
     
-    let dbConnector = DatabaseManager.shared.db
-    
-    init() {
-        do {
-            try createTable()
-        } catch let error {
-            print("Error during table creation: \(error)")
+    var dataBase : DataBase
+    init(dataBase : DataBase) {
+        self.dataBase = dataBase
+        do{
+            try dataBase.createTable(createTableQuery: Queries.createAdminTable)
+        }
+        catch {
+            print("Error : \(error)")
         }
     }
-
-    internal func createTable() throws {
-        if sqlite3_exec(dbConnector, Queries.createAdminTable, nil, nil, nil) != SQLITE_OK {
-            throw DatabaseError.tableCreationFailed("Users table creation failed. Error: \(String(cString: sqlite3_errmsg(dbConnector)))")
+    
+    func getUserNameAndPassword(userId: Int) -> Result<[String], DatabaseError> {
+        let query = "SELECT userName, password FROM userNameAndPasswords WHERE userId = ?;"
+        let data: [Any] = [userId]
+        
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
+            
+            let result = try dataBase.executeQueryData(query: finalQuery)
+            
+            switch result {
+            case .success(let usersData):
+                let credentials = usersData.compactMap { userDict -> [String]? in
+                    guard let userName = userDict["userName"] as? String,
+                          let password = userDict["password"] as? String else {
+                        return nil
+                    }
+                    return [userName, password]
+                }
+                
+                return .success(credentials.flatMap { $0 })
+                
+            case .failure(let error):
+                return .failure(error)
+            }
+            
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
         }
     }
     
     func setDefaultpassword(passwordState: Bool, adminId: Int) -> Result<Void, DatabaseError> {
-        let query = Queries.updateDefaultPassword
-        var statement: OpaquePointer?
-
-        guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare UPDATE statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
+        let query = "UPDATE admin SET hasDefaultPassword = ? WHERE userId = ?"
+        let data: [Any] = [
+            adminId
+        ]
         
-        sqlite3_bind_int(statement, 1, passwordState ? 1 : 0)
-        sqlite3_bind_int(statement, 2, Int32(adminId))
-
-        if sqlite3_step(statement) == SQLITE_DONE {
-            sqlite3_finalize(statement)
-            return .success(())
-        } else {
-            sqlite3_finalize(statement)
-            return .failure(.executionFailed("Failed to update password state. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
+            return try dataBase.insertRecord(query: finalQuery)
+        } catch let error as DatabaseError {
+            return .failure(error)
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
         }
     }
     
     func updatePassword(user: Admin, password: String) -> Result<Void, DatabaseError>  {
-        let query = Queries.updatePassword
-        var statement: OpaquePointer?
-
-        guard sqlite3_prepare_v2(dbConnector, query, -1, &statement, nil) == SQLITE_OK else {
-            return .failure(.preparationFailed("Failed to prepare UPDATE statement. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
-        }
-
-        sqlite3_bind_text(statement, 1, (password as NSString).utf8String, -1, nil)
-        sqlite3_bind_int(statement, 2, Int32(user.getUserId))
-
-        if sqlite3_step(statement) == SQLITE_DONE {
-            sqlite3_finalize(statement)
-            return .success(())
-        } else {
-            sqlite3_finalize(statement)
-            return .failure(.executionFailed("Failed to update password. Error: \(String(cString: sqlite3_errmsg(dbConnector)))"))
+        let query = "UPDATE userNameAndPasswords SET password = ? where userId = ?;"
+        
+        let data: [Any] = [
+            password,
+            user.getUserId
+        ]
+        
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
+            return try dataBase.insertRecord(query: finalQuery)
+        } catch let error as DatabaseError {
+            return .failure(error)
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
         }
     }
-
     
 }
