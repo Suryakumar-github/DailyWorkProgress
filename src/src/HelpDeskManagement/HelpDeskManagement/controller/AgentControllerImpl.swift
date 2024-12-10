@@ -52,12 +52,13 @@ class AgentControllerImpl : AgentController {
         switch result {
         case .success() :
             try  logsEntryController?.log(logType: LogType.info, message: "Agent Availablity is Updated", userId: agent.getId, data: agent)
-            try  ticketController?.assignUnassignedTickets()
+            if status == AgentStatus.available {
+                try  ticketController?.assignUnassignedTickets()
+            }
             return true
         case .failure(let error) :
             throw error
         }
-        
     }
     
     func updateTicketStatus(agent : Agent, ticketId: Int, status: TicketStatus) throws -> Bool {
@@ -109,8 +110,33 @@ class AgentControllerImpl : AgentController {
         return tickets.filter { ticket in
             ticket.statusProperty != .cancelled && ticket.statusProperty != .closed
         }
+        
     }
-
+    
+    func getAllTickets(agent: Agent)  throws -> [Ticket] {
+        guard let tickets = try  ticketController?.fetchAssignedTickets(agent: agent) else {
+            return []
+        }
+        return tickets
+    }
+    
+    func getTicketByStatus(agent : Agent, status : TicketStatus) throws -> [Ticket] {
+        guard let tickets = try  ticketController?.getTicketByStatus(agent : agent, status : status) else {
+            return []
+        }
+        
+        return tickets
+    }
+    
+    func getAgentByStatus(status : AgentStatus) throws -> [Agent] {
+        let result = try agentDao.getAgentByStatus(status: status)
+        switch result {
+        case .success(let agents) :
+            return agents
+        case .failure(let error) :
+            throw error
+        }
+    }
     
     func getAgentById(agentId : Int) throws -> Agent? {
         

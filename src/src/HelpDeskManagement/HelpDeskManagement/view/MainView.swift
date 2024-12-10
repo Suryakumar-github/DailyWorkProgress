@@ -11,6 +11,7 @@ class MainView {
     
     private var userController : UserController?
     private var userView =   UserView()
+    
     init(userController : UserControllerImpl) {
         self.userController = userController
         setUserViewControllers()
@@ -44,6 +45,7 @@ class MainView {
               login()
             
         case 3 :
+            DatabaseConnector.closeDataBase()
             exit(0)
             
         default :
@@ -66,7 +68,7 @@ class MainView {
                   showLoginScreen()
             }
 
-            print("Enter Password:")
+            print("Enter Password (or enter 0 to go back) :")
             guard let password = readLine(), !password.isEmpty else {
                 print("Invalid Password. Please try again.")
                 continue

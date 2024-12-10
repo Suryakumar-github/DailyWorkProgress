@@ -18,29 +18,26 @@ class DatabaseConnector : DataBase {
     static func openDataBase() {
         database?.openDataBase()
     }
-    
-    
+        
     static func createTable(createTableQuery: String)  throws {
         guard let database = database else {
             throw DatabaseError.executionFailed("Database is not initialized. Call openDatabase() first.")
         }
-        try  database.createTable(createTableQuery: createTableQuery)
+        try database.createTable(createTableQuery: createTableQuery)
     }
-
-
+    
     static func insertRecord(query: String)  throws -> Result<Void, DatabaseError> {
         guard let database = database else {
             throw DatabaseError.executionFailed("Database is not initialized. Call openDatabase() first.")
         }
-        return try  database.insertRecord(query: query)
+        return try database.insertRecord(query: query)
     }
-
-    
+ 
     static func executeQueryData(query: String)  throws -> Result<[[String: Any]], DatabaseError> {
         guard let database = database else {
             throw DatabaseError.executionFailed("Database is not initialized. Call openDatabase() first.")
         }
-        return try  database.executeQueryData(query: query)
+        return try database.executeQueryData(query: query)
     }
     
     static func closeDataBase() {
@@ -48,9 +45,7 @@ class DatabaseConnector : DataBase {
             print("Database is already closed or not initialized.")
             return
         }
-        
         database.closeDataBase()
         self.database = nil
     }
 }
-

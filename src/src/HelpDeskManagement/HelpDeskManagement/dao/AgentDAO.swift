@@ -15,5 +15,6 @@ protocol AgentDAO {
     func addAgentUserNamePassword(userName : String, password : String, agent : Agent)  -> Result<Void, DatabaseError>
     func getUserNameAndPassword (userId : Int)  -> Result<[String], DatabaseError>
     func assignAgentToTicket(agentId: Int, ticketId: Int)  -> Result<Void, DatabaseError>
-    func updateTicketsResolvedCount(agentId: Int, newCount: Int)  -> Result<Void, DatabaseError> 
+    func updateTicketsResolvedCount(agentId: Int, newCount: Int)  -> Result<Void, DatabaseError>
+    func getAgentByStatus(status : AgentStatus) throws -> Result<[Agent], DatabaseError>
 }

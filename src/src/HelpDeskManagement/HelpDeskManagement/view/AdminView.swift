@@ -26,12 +26,12 @@ struct AdminView {
         self.loginedUser = user
     }
     
-    func adminMenu()   {
+    func adminMenu() {
         print("----------------------------------------------------------------")
         print("                    ==== Admin Dashboard ====                   ")
         print("----------------------------------------------------------------")
         print("1. Add Agent")
-        print("2. View All Agents")
+        print("2. View Agents")
         print("3. View Tickets")
         print("4. Generate Ticket Reports")
         print("5. Generate Agent Reports")
@@ -48,7 +48,7 @@ struct AdminView {
         case 1 :
               addAgent()
         case 2 :
-              viewAllAgents()
+              viewAgents()
         case 3 :
               viewTickets()
         case 4 :
@@ -66,6 +66,92 @@ struct AdminView {
         default :
             print("Invalid Option")
               adminMenu()
+        }
+    }
+    
+    private func viewAgents() {
+        print("----------------------------------------------------------------")
+        print("                    ==== Agent Menu ===                        ")
+        print("----------------------------------------------------------------")
+        print("1. View All Agents")
+        print("2. View Agents By Agent Status")
+        print("3. Go back")
+        print("----------------------------------------------------------------")
+        print("Choose an option:")
+        
+        let choice = Int(readLine()!)
+        switch choice {
+        case 1 :
+            viewAllAgents()
+        case 2 :
+            viewAgentByStatus()
+        case 3 :
+            print("Going Back to Admin Menu..")
+            adminMenu()
+        default :
+            print("Invalid Choice. Please try again.")
+            viewAgents()
+        }
+    }
+    
+    private func viewAgentByStatus() {
+        adminController?.setAgentController(agentController: agentController)
+        print("----------------------------------------------------------------")
+        print("Choose the Ticket Status to view Tickets : (1. available, 2. busy, 3. leave, 4. offline, (or type '0' to go back)")
+        var status : AgentStatus?
+        let choice = Int(readLine()!)
+        switch choice {
+        case 0 :
+            print("Going back to Agent Menu..")
+            viewAgents()
+        case 1 :
+            status = AgentStatus.available
+        case 2 :
+            status = AgentStatus.busy
+        case 3 :
+            status = AgentStatus.leave
+        case 4 :
+            status = AgentStatus.offline
+        default :
+            print("Invalid Choice. Please try again.")
+            viewAgentByStatus()
+        }
+        do {
+            guard let allAgents = try adminController?.getAgentByStatus(status: status ?? AgentStatus.available), !allAgents.isEmpty else {
+                print("   No agent found with status : \(String(describing: status?.rawValue))   ")
+                print("----------------------------------------------------------------")
+                print("Type 0 to return to the main menu or press any key to view another Agent by status :")
+                if let input = readLine(), input == "0" {
+                    print("----------------------------------------------------------------")
+                    viewAgents()
+                } else {
+                    viewAllAgents()
+                }
+                return
+            }
+
+            print("----------------------------------------------------------------")
+            print("                        Available Agents                        ")
+            
+            for (agent) in allAgents {
+                print("----------------------------------------------------------------")
+                print("Agent ID           : \(agent.getAgentId)")
+                print("Agent Name         : \(agent.getName)")
+                print("Agent Department   : \(agent.departmentProperty)")
+                print("Agent Availability : \(agent.statusProperty)")
+            }
+            print("----------------------------------------------------------------")
+              
+        } catch let error {
+            print("Error occurred while fetching agents: \(error.localizedDescription)")
+            print("----------------------------------------------------------------")
+        }
+        print("Type 0 to return to the main menu or press any key to view another Agent by status:")
+        if let input = readLine(), input == "0" {
+            print("----------------------------------------------------------------")
+            viewAgents()
+        } else {
+            viewAgentByStatus()
         }
     }
     
@@ -91,10 +177,17 @@ struct AdminView {
                 print("Agent Availability : \(agent.statusProperty)")
             }
             print("----------------------------------------------------------------")
-              adminMenu()
+              
         } catch let error {
             print("Error occurred while fetching agents: \(error.localizedDescription)")
             print("----------------------------------------------------------------")
+        }
+        print("Type 0 to return to the main menu or press any key to view all agents:")
+        if let input = readLine(), input == "0" {
+            print("----------------------------------------------------------------")
+            viewAgents()
+        } else {
+            viewAllAgents()
         }
     }
     
@@ -108,6 +201,7 @@ struct AdminView {
                 print("Invalid input. Current password cannot be empty.")
                 continue
             }
+            
             if currentPassword == "0" {
                 print("Going back to Main Menu..")
                   adminMenu()
@@ -118,6 +212,7 @@ struct AdminView {
                 print("Invalid input. New password cannot be empty.")
                 continue
             }
+            
             if newPassword == "0" {
                 print("Going back to Main Menu..")
                   adminMenu()
@@ -153,6 +248,7 @@ struct AdminView {
     }
     
     private func addAgent()   {
+        agentController.setLogsEntryController(logsEntryController: LogsEntryControllerImpl())
         adminController?.setAgentController(agentController: agentController)
         var agentName: String?
         var agentDepartment: String?
@@ -567,6 +663,7 @@ struct AdminView {
     }
     
     private func reassignTicket()   {
+        agentController.setLogsEntryController(logsEntryController: LogsEntryControllerImpl())
         adminController?.setAgentController(agentController: agentController)
         ticketController.setAgentController(agentController: agentController)
         agentController.setTicketController(ticketController: ticketController)

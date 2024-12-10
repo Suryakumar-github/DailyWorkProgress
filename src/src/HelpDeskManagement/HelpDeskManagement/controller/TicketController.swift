@@ -27,4 +27,5 @@ protocol TicketController : AnyObject{
     func getTicketsBetweendates(date1 : Date, date2 : Date)   throws -> [Ticket]
     func setLogsEntryController(logsEntryController: LogsEntryController)
     func assignUnassignedTickets()   throws
+    func getTicketByStatus(agent : Agent, status : TicketStatus) throws -> [Ticket]
 }

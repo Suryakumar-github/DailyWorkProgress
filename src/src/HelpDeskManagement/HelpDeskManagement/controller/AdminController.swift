@@ -27,4 +27,5 @@ protocol AdminController : AnyObject {
     func getLogsEntryBetweenDates(date1: Date, date2: Date)  throws -> [LogsEntry]
     func getTicketByDate(date: Date)  throws -> [Ticket]
     func getTicketsBetweendates(date1 : Date, date2 : Date)  throws -> [Ticket]
+    func getAgentByStatus(status : AgentStatus) throws -> [Agent]
 }

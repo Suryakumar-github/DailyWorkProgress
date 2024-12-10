@@ -25,4 +25,7 @@ protocol AgentController : AnyObject{
     func assignTicketToAgent(ticket: Ticket)  throws -> Bool
     func getAllAgents()  throws -> [Agent]
     func reAssignTicketToAgent(ticket: Ticket, agent : Agent)  throws
+    func getTicketByStatus(agent : Agent, status : TicketStatus) throws -> [Ticket]
+    func getAllTickets(agent: Agent)  throws -> [Ticket]
+    func getAgentByStatus(status : AgentStatus) throws -> [Agent]
 }

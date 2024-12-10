@@ -621,5 +621,66 @@ class TicketDAOImpl : TicketDAO {
             return .failure(error)
         }        
     }
+    
+    func getTicketByStatus(agent : Agent, status : TicketStatus) throws -> Result<[Ticket], DatabaseError> {
+        let query = "SELECT * FROM Tickets where status = '\(status.rawValue)';"
+        let result = try  DatabaseConnector.executeQueryData(query: query)
+        
+        switch result {
+        case .success(let tickets):
+            let ticketList = tickets.compactMap { row -> Ticket? in
+                guard let id = row["ticket_id"] as? Int,
+                      let title = row["title"] as? String,
+                      let description = row["description"] as? String,
+                      let userId = row["user_id"] as? Int,
+                      let priorityValue = row["priority"] as? Int,
+                      let statusRawValue = row["status"] as? String,
+                      let createdDateString = row["created_at"] as? String,
+                      let issueTypeRawValue = row["issueType"] as? String
+                else {
+                    return nil
+                }
+                let agentId = row["agent_id"] as? Int ?? 0
+                
+                let createdDate: Date
+                let dateFormatter = DateFormatter()
+                dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+
+                
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                let parsedDate = dateFormatter.date(from: createdDateString)
+                    
+                if parsedDate == dateFormatter.date(from: createdDateString) {
+                    
+                }  else {
+                    dateFormatter.dateFormat = "yyyy-MM-dd"
+                    if let parsedDate = dateFormatter.date(from: createdDateString) {
+                        createdDate = Calendar.current.startOfDay(for: parsedDate)
+                    } else {
+                        createdDate = Date()
+                    }
+                }
+                
+                guard let priority = Priority(rawValue: priorityValue) else {
+                    print("Invalid priority value: \(priorityValue)")
+                    return nil
+                }
+                
+                guard let status = TicketStatus(rawValue: statusRawValue) else {
+                    print("Invalid status value: \(statusRawValue)")
+                    return nil
+                }
+                
+                let issueType = IssueType(rawValue: issueTypeRawValue) ?? .software
+                
+                return Ticket(id: id, title: title, description: description, createdDate: parsedDate ?? Date(), status: status, userId: userId, agentId: agentId, issueType: issueType, priority: priority)
+            }
+            
+            return .success(ticketList)
+            
+        case .failure(let error):
+            return .failure(error)
+        }
+    }
 
 }

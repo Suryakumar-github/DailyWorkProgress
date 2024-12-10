@@ -115,6 +115,7 @@ struct UserView {
     
     private func createTicket(user: User)   {
         print("----------------------------------------------------------------")
+        ticketController.setLogsEntryController(logsEntryController: LogsEntryControllerImpl())
         userController?.setTicketController(ticketController: ticketController)
         let agentController =   AgentControllerImpl()
         ticketController.setDelagate(ticketAssignmentDelegate: agentController)
@@ -181,6 +182,7 @@ struct UserView {
     }
 
     private func cancelTicket(user: User)   {
+        ticketController.setLogsEntryController(logsEntryController: LogsEntryControllerImpl())
         userController?.setTicketController(ticketController: ticketController)
         print("----------------------------------------------------------------")
         print("                      Available Tickets                         ")
@@ -268,7 +270,6 @@ struct UserView {
             print("Error while fetching Tickets : \(error.localizedDescription)")
             print("----------------------------------------------------------------")
         }
-        
           userMenu()
     }
 
@@ -279,7 +280,7 @@ struct UserView {
         print("                  === KnowledgeBase Menu ===                    ")
         print("----------------------------------------------------------------")
         print("1. View All KnowledgeBase Entry")
-        print("2. Search Using Specific Field")
+        print("2. Search Using Specific Word")
         print("----------------------------------------------------------------")
         
         print("Please Choose an Option")
@@ -347,6 +348,7 @@ struct UserView {
     }
     
     func register()   -> User? {
+        userController?.setLogsEntryController(logsEntryController: LogsEntryControllerImpl())
         var name: String?
         var role: UserRole?
         var userName: String?
@@ -373,7 +375,7 @@ struct UserView {
             }
 
             if role == nil {
-                print("Choose the Subscription pack ( enter 1 : 50$/month -> VIP, 2 : 30$/month -> STANDARD, 3 : 20$/month -> GUEST, or enter 0 to Go back):")
+                print("Choose the Subscription pack ( enter 1 : 50$/month -> VIP, 2 : 30$/month -> STANDARD, 3 : 20$/month -> GUEST, (or enter 0 to go back)) : ")
                 if let roleString = readLine() {
                     if roleString == "0" {
                         print("Going back to Main Menu..")

@@ -167,4 +167,10 @@ class AdminControllerImpl: AdminController {
         }
         return tickets
     }
+    func getAgentByStatus(status : AgentStatus) throws -> [Agent] {
+        guard let tickets =  try agentController?.getAgentByStatus(status: status) else {
+            return []
+        }
+        return tickets
+    }
 }

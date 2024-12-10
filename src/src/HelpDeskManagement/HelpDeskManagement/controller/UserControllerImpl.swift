@@ -43,10 +43,9 @@ class UserControllerImpl : UserController {
         let result =   userDao.addUser(user: user)
         switch result {
         case .success() :
-            let resulkt =   userDao.addUsersUserNamePassword(userName: userName, password: password, user: user)
+            let result =   userDao.addUsersUserNamePassword(userName: userName, password: password, user: user)
             switch result {
             case .success() :
-                print("...............")
                 try   logsEntryController?.log(logType: LogType.info, message: "New User Registered", userId: user.getId, data: user)
                 return user
                 

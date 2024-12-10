@@ -22,4 +22,5 @@ protocol TicketDAO
     func getLastCreatedTicketId()  throws -> Result<Int, DatabaseError>
     func getTicketsBetweendates(date1 : Date, date2 : Date)  throws -> Result<[Ticket], DatabaseError>
     func getUnassignedTickets()  throws -> Result<[Ticket],DatabaseError>
+    func getTicketByStatus(agent : Agent, status : TicketStatus) throws-> Result<[Ticket], DatabaseError>
 }

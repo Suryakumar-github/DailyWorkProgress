@@ -170,7 +170,9 @@ class TicketControllerImpl: TicketController {
         }
         
         if   (try updateTicketStatus(agent: agent, ticketId: ticketId, status: TicketStatus.closed) ){
-            try   knowleggeBaseController?.addEntry(title: ticket.getTicketTitle, issueType: ticket.getIssueType, solution: solution, createdDate: Date(), lastUpdatedDate: Date(), userId: agent.getUserId)
+            if !solution.isEmpty {
+                try   knowleggeBaseController?.addEntry(title: ticket.getTicketTitle, issueType: ticket.getIssueType, solution: solution, createdDate: Date(), lastUpdatedDate: Date(), userId: agent.getUserId)
+            }
             try   logsEntryController?.log(logType: LogType.info, message: "Ticket Closed for ticketId: \(ticketId) by AgentId : \(agent.getId)", userId: ticket.getUserId, data: ticket)
             return true
         }
@@ -318,6 +320,16 @@ class TicketControllerImpl: TicketController {
                 return tickets
             case .failure(let error) :
                 throw error
+        }
+    }
+    func getTicketByStatus(agent : Agent, status : TicketStatus) throws -> [Ticket] {
+        let result = try ticketDao.getTicketByStatus(agent: agent, status : status)
+        switch result {
+        case .success(let tickets) :
+            return tickets
+            
+        case .failure(let error) :
+            throw error
         }
     }
     

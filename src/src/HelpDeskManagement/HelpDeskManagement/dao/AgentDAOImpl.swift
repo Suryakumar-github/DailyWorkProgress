@@ -226,5 +226,40 @@ class AgentDAOImpl : AgentDAO {
             return .failure(.executionFailed("Unexpected error: \(error)"))
         }
     }
-
+    
+    func getAgentByStatus(status : AgentStatus) throws -> Result<[Agent], DatabaseError> {
+        let query = "SELECT * FROM Agents where availabilityStatus = '\(status)' "
+        
+        let result = try  DatabaseConnector.executeQueryData(query: query)
+        switch result {
+        case .success(let usersData):
+            let agents = usersData.compactMap { userDict -> Agent? in
+                guard let agentId = userDict["agent_id"] as? Int,
+                      let department = userDict["department"] as? String,
+                      let availabilityStatusString = userDict["availabilityStatus"] as? String,
+                      let ticketResolvedCount = userDict["ticketsResolvedCount"] as? Int,
+                      let userId = userDict["userId"] as? Int,
+                      let name = userDict["name"] as? String,
+                      let status = AgentStatus(rawValue: availabilityStatusString)
+                else {
+                    print("Invalid row data: \(userDict)")
+                    return nil
+                }
+                return Agent(
+                    id: agentId,
+                    name: name,
+                    department: department,
+                    status: status,
+                    ticketResolved: ticketResolvedCount,
+                    userId: userId
+                )
+            }
+            
+            return .success(agents)
+            
+        case .failure(let error):
+            return .failure(error)
+        }
+    }
+    
 }

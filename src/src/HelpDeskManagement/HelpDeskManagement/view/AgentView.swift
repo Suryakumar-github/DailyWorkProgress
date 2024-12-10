@@ -11,10 +11,12 @@ struct AgentView {
     private var loginedAgent : Agent?
     private var ticketController : TicketControllerImpl
     private var knowledgeBaseController : KnowledgeBaseControllerImpl
+    private var logsEntryController : LogsEntryController
     
     init()   {
         ticketController =   TicketControllerImpl()
         knowledgeBaseController =   KnowledgeBaseControllerImpl()
+        logsEntryController = LogsEntryControllerImpl()
     }
     
     mutating func setAgentController(agentController : AgentControllerImpl) {
@@ -26,10 +28,11 @@ struct AgentView {
     }
     
     func agentMenu()   {
+        
         print("----------------------------------------------------------------")
         print("                    ==== Agent Dashboard ====                   ")
         print("----------------------------------------------------------------")
-        print("1. View Assigned Tickets")
+        print("1. View Tickets")
         print("2. Update Ticket Status")
         print("3. Search Knowledge Base")
         print("4. Add Entry In Knowledge Base")
@@ -44,7 +47,7 @@ struct AgentView {
         
         switch option {
         case 1 :
-              viewAssignedTickets(loginedAgent: loginedAgent!)
+              viewTickets(loginedAgent: loginedAgent!)
         case 2 :
               updateTicketStatus(agent : loginedAgent!)
         case 3 :
@@ -68,6 +71,7 @@ struct AgentView {
     }
     
     private func updateAgentAvailability(agent : Agent)   {
+        agentController?.setLogsEntryController(logsEntryController: logsEntryController)
         ticketController.setDelagate(ticketAssignmentDelegate: agentController!)
         print("---------------------------------------------------------------------------------")
         print("Agent's Current Status : \(agent.statusProperty)")
@@ -168,7 +172,9 @@ struct AgentView {
           agentMenu()
     }
     
-    private func closeTicket(agent: Agent)   {
+    private func closeTicket(agent: Agent) {
+        ticketController.setLogsEntryController(logsEntryController: logsEntryController)
+        ticketController.setDelagate(ticketAssignmentDelegate: agentController!)
         agentController?.setTicketController(ticketController: ticketController)
         print("----------------------------------------------------------------")
         do {
@@ -184,9 +190,10 @@ struct AgentView {
             
             for ticket in tickets {
                 print("----------------------------------------------------------------")
-                print("Ticket Id          : \(String(describing: ticket.getTicketId))")
-                print("Ticket Title       : \(String(describing: ticket.getTicketTitle))")
-                print("Ticket Description : \(String(describing: ticket.descriptionproperty))")
+                print("Ticket Id          : \(ticket.getTicketId)")
+                print("Ticket Title       : \(ticket.getTicketTitle)")
+                print("Ticket Description : \(ticket.descriptionproperty)")
+                print("Ticket Priority    : \(ticket.priorityProperty!)")
                 print("Ticket Status      : \(ticket.statusProperty)")
             }
             print("----------------------------------------------------------------")
@@ -204,14 +211,27 @@ struct AgentView {
                       agentMenu()
                     return
                 }
-        
-                print("Enter the solution for the Ticket's Issue (or type '0' to go back) : ")
-                 let solution = readLine()!
-                    if solution == "0" {
-                        print("Going Back to Agent Menu..")
-                          agentMenu()
-                        return
-                    }
+                print("------------------------------------------------------------------------------------")
+                print("1 . Like to provide the solution for the Ticket's Issue and Add to KnowledgeBase  ")
+                print("2 . Skip the Process ")
+                print("3 . to Go Back ")
+                print("------------------------------------------------------------------------------------")
+                print("Please Choose an Option")
+                var solution = ""
+                let choice = Int(readLine()!)
+                switch choice {
+                case 1 :
+                    print("Enter The Solution.")
+                    solution = readLine()!
+                case 2 :
+                    solution = ""
+                case 3 :
+                    print("Going Back To Agent Menu..")
+                    agentMenu()
+                default :
+                    print("Inavlid Choice Please try again.")
+                    closeTicket(agent: agent)      
+                }
                     
                 guard let controller = agentController else {
                     print("AgentController is nil. Cannot proceed.")
@@ -236,8 +256,34 @@ struct AgentView {
         }
           agentMenu()
     }
-
-    private func viewAssignedTickets(loginedAgent : Agent)   {
+    
+    private func viewTickets(loginedAgent : Agent) {
+        print("----------------------------------------------------------------")
+        print("                    ==== Ticket Menu ===                        ")
+        print("----------------------------------------------------------------")
+        print("1. View All Tickets")
+        print("2. View Tickets by Ticket Status")
+        print("3. Go Back")
+        print("----------------------------------------------------------------")
+        print("Choose an option:")
+        
+        if let choice = Int(readLine() ?? "") {
+            switch choice {
+            case 1:
+                  viewAllTicket(loginedAgent: loginedAgent)
+            case 2:
+                viewTicketBystatus(loginedAgent : loginedAgent)
+            case 3:
+                print("Exiting Tickets Viewer.!")
+                agentMenu()
+            default:
+                print("Invalid choice. Please try again.")
+                viewTickets(loginedAgent: loginedAgent)
+            }
+        }
+    }
+    
+    private func viewAllTicket(loginedAgent: Agent)    {
         agentController?.setTicketController(ticketController: ticketController)
         print("----------------------------------------------------------------")
         do {
@@ -245,14 +291,12 @@ struct AgentView {
                 print("Agent Controller is Nil..")
                 return
             }
-            let tickets = try   controller.fetchAssignedTickets(agent: loginedAgent)
+            let tickets = try controller.getAllTickets(agent: loginedAgent)
             
             if tickets.isEmpty {
-
-                    print("                No tickets Assigned For Agent                   ")
-                    print("----------------------------------------------------------------")
-                  agentMenu()
-                    
+                print("                No tickets Assigned For Agent                   ")
+                print("----------------------------------------------------------------")
+                agentMenu()
             }
                         
             print("----------------------------------------------------------------")
@@ -261,10 +305,10 @@ struct AgentView {
             for ticket in tickets {
                 
                 print("----------------------------------------------------------------")
-                print("Ticket Id          : \(String(describing: ticket.getTicketId))")
-                print("Ticket Title       : \(String(describing: ticket.getTicketTitle))")
-                print("Ticket Description : \(String(describing: ticket.descriptionproperty))")
-                print("Ticket Priority    : \(String(describing: ticket.priorityProperty!))")
+                print("Ticket Id          : \(ticket.getTicketId)")
+                print("Ticket Title       : \(ticket.getTicketTitle)")
+                print("Ticket Description : \(ticket.descriptionproperty)")
+                print("Ticket Priority    : \(ticket.priorityProperty!)")
                 print("Ticket Status      : \(ticket.statusProperty)")
             }
             print("----------------------------------------------------------------")
@@ -272,8 +316,89 @@ struct AgentView {
         catch let error {
             print("Error while fetching the tickets : \(error.localizedDescription)")
             print("----------------------------------------------------------------")
+            viewTickets(loginedAgent: loginedAgent)
         }
-          agentMenu()
+        print("Type 0 to return to the main menu or press any key to view allTickets :")
+        if let input = readLine(), input == "0" {
+            print("----------------------------------------------------------------")
+            viewTickets(loginedAgent: loginedAgent)
+        } else {
+            viewAllTicket(loginedAgent: loginedAgent)
+        }
+    }
+    
+    private func viewTicketBystatus(loginedAgent : Agent) {
+        agentController?.setTicketController(ticketController: ticketController)
+        print("----------------------------------------------------------------")
+        print("Choose the Ticket Status to view Tickets : (1. assigned, 2. onHold, 3. opened, 4. solved, 5. closed, (or type '0' to go back)")
+        var status : TicketStatus?
+        let choice = Int(readLine()!)
+        switch choice {
+        case 0 :
+            print("Going back to Ticket Menu..")
+            viewTickets(loginedAgent: loginedAgent)
+        case 1 :
+            status = TicketStatus.assigned
+        case 2 :
+            status = TicketStatus.onHold
+        case 3 :
+            status = TicketStatus.opened
+        case 4 :
+            status = TicketStatus.solved
+        case 5 :
+            status = TicketStatus.closed
+        default :
+            print("Invalid Choice. Please try again.")
+            viewTicketBystatus(loginedAgent: loginedAgent)
+        }
+        do {
+            guard let controller = agentController else {
+                print("Agent Controller is Nil..")
+                return
+            }
+            let tickets = try   controller.getTicketByStatus(agent: loginedAgent, status : status ?? TicketStatus.assigned)
+            
+            if tickets.isEmpty {
+
+                    print("          No Tickets availablr For The Provided Status          ")
+                    print("----------------------------------------------------------------")
+                print("Type 0 to return to the main menu or press any key to view Tickets for another Status : ")
+                if let input = readLine(), input == "0" {
+                    print("----------------------------------------------------------------")
+                    viewTickets(loginedAgent: loginedAgent)
+                } else {
+                    viewTicketBystatus(loginedAgent: loginedAgent)
+                }
+            }
+                        
+            print("----------------------------------------------------------------")
+            print("                      Assigned Tickets                          ")
+            
+            for ticket in tickets {
+                
+                print("----------------------------------------------------------------")
+                print("Ticket Id          : \(ticket.getTicketId)")
+                print("Ticket Title       : \(ticket.getTicketTitle)")
+                print("Ticket Description : \(ticket.descriptionproperty)")
+                print("Ticket Priority    : \(ticket.priorityProperty!)")
+                print("Ticket Status      : \(ticket.statusProperty)")
+            }
+            print("----------------------------------------------------------------")
+        }
+        catch let error {
+            print("Error while fetching the tickets : \(error.localizedDescription)")
+            print("----------------------------------------------------------------")
+            viewTickets(loginedAgent: loginedAgent)
+        }
+        
+        print("Type 0 to return to the main menu or press any key to view Tickets for another Status:")
+        if let input = readLine(), input == "0" {
+            print("----------------------------------------------------------------")
+            viewTickets(loginedAgent: loginedAgent)
+        } else {
+            viewTicketBystatus(loginedAgent: loginedAgent)
+        }
+          
     }
     
     private func resolveTicket(agent: Agent)   {
@@ -281,7 +406,7 @@ struct AgentView {
         print("----------------------------------------------------------------")
         do {
             guard let tickets = try   agentController?.fetchAssignedTickets(agent: agent), !tickets.isEmpty else {
-                print("             you don't have any Tickets to resolve              ")
+                print("             You Don't Have any Tickets to Solve              ")
                 print("----------------------------------------------------------------")
                   agentMenu()
                 return
@@ -293,11 +418,11 @@ struct AgentView {
             for ticket in tickets {
                 
                 print("----------------------------------------------------------------")
-                print("Ticket Id          : \(String(describing: ticket.getTicketId))")
-                print("Ticket Title       : \(String(describing: ticket.getTicketTitle))")
-                print("Ticket Description : \(String(describing: ticket.descriptionproperty))")
+                print("Ticket Id          : \(ticket.getTicketId)")
+                print("Ticket Title       : \(ticket.getTicketTitle)")
+                print("Ticket Description : \(ticket.descriptionproperty)")
+                print("Ticket Priority    : \(ticket.priorityProperty!)")
                 print("Ticket Status      : \(ticket.statusProperty)")
-                print("Ticket Priority    : \(String(describing: ticket.priorityProperty!))")
             }
             print("----------------------------------------------------------------")
         }
@@ -335,6 +460,7 @@ struct AgentView {
     }
     
     private func updateTicketStatus(agent: Agent)   {
+        ticketController.setLogsEntryController(logsEntryController: logsEntryController)
         agentController?.setTicketController(ticketController: ticketController)
         print("----------------------------------------------------------------")
 
@@ -501,6 +627,7 @@ struct AgentView {
     }
 
     private func addKnowledgeBaseEntry(agent : Agent)   {
+        knowledgeBaseController.setLogsEntryController(logsEntryController: logsEntryController)
         agentController?.setKnowledgeBaseController(knowledgeBaseController: knowledgeBaseController)
         print("----------------------------------------------------------------")
         var title: String?
