@@ -3,18 +3,17 @@ import Foundation
 
 class TicketDAOImpl : TicketDAO {
     
-    var dataBase : DataBase
-    init(dataBase : DataBase) {
-        self.dataBase = dataBase
+    init()  {
+        
         do{
-            try dataBase.createTable(createTableQuery: Queries.createTicketTable)
+            try  DatabaseConnector.createTable(createTableQuery: Queries.createTicketTable)
         }
         catch {
             print("Error : \(error)")
         }
     }
     
-    func addTicket(ticket: Ticket) -> Result<Void, DatabaseError> {
+    func addTicket(ticket: Ticket)  -> Result<Void, DatabaseError> {
         let baseQuery = "INSERT INTO Tickets (title, description, user_id, agent_id, priority, status, issueType) VALUES (?, ?, ?, ?, ?, ?, ?)"
         
         let data: [Any] = [
@@ -30,7 +29,7 @@ class TicketDAOImpl : TicketDAO {
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: baseQuery, data: data)
 
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -38,13 +37,13 @@ class TicketDAOImpl : TicketDAO {
         }
     }
     
-    func getTicketById(ticketId: Int) -> Result<Ticket?, DatabaseError> {
+    func getTicketById(ticketId: Int)  -> Result<Ticket?, DatabaseError> {
         let query = "SELECT * FROM Tickets WHERE ticket_id = ?"
         let data: [Any] = [ticketId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             
             switch result {
             case .success(let ticketsData):
@@ -73,14 +72,11 @@ class TicketDAOImpl : TicketDAO {
                 if parsedDate == dateFormatter.date(from: createdDateString) {
                     
                 }  else {
-                    print("Failed to parse date with format: yyyy-MM-dd HH:mm:ss. Trying alternative formats.")
-
                     
                     dateFormatter.dateFormat = "yyyy-MM-dd"
                     if let parsedDate = dateFormatter.date(from: createdDateString) {
                         createdDate = Calendar.current.startOfDay(for: parsedDate)
                     } else {
-                        print("All parsing attempts failed. Using current date as fallback.")
                         createdDate = Date()
                     }
                 }
@@ -117,7 +113,7 @@ class TicketDAOImpl : TicketDAO {
         }
     }
     
-    func getAllTheCreatedTickets(user: User) -> Result<[Ticket], DatabaseError> {
+    func getAllTheCreatedTickets(user: User)  -> Result<[Ticket], DatabaseError> {
         let query = "SELECT * FROM Tickets WHERE user_id = ?"
         let data: [Any] = [
             user.getId
@@ -125,7 +121,7 @@ class TicketDAOImpl : TicketDAO {
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             
             switch result {
             case .success(let tickets):
@@ -155,14 +151,11 @@ class TicketDAOImpl : TicketDAO {
                     if parsedDate == dateFormatter.date(from: createdDateString) {
                         
                     }  else {
-                        print("Failed to parse date with format: yyyy-MM-dd HH:mm:ss. Trying alternative formats.")
-
                         
                         dateFormatter.dateFormat = "yyyy-MM-dd"
                         if let parsedDate = dateFormatter.date(from: createdDateString) {
                             createdDate = Calendar.current.startOfDay(for: parsedDate)
                         } else {
-                            print("All parsing attempts failed. Using current date as fallback.")
                             createdDate = Date()
                         }
                     }
@@ -193,13 +186,13 @@ class TicketDAOImpl : TicketDAO {
         }
     }
 
-    func updateTicketStatus(ticketId: Int, status: TicketStatus) -> Result<Void, DatabaseError> {
+    func updateTicketStatus(ticketId: Int, status: TicketStatus)  -> Result<Void, DatabaseError> {
         let query = "UPDATE Tickets SET status = ? WHERE ticket_id = ?"
         let data : [Any] = [status.rawValue,ticketId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -207,13 +200,13 @@ class TicketDAOImpl : TicketDAO {
         }
     }
     
-    func findAgentByTicketId(ticketId: Int) -> Result<Agent?, DatabaseError> {
+    func findAgentByTicketId(ticketId: Int)  -> Result<Agent?, DatabaseError> {
         let query = "SELECT Agents.agent_id, Agents.department, Agents.availabilityStatus, Agents.ticketsResolvedCount, Agents.userId,Agents.name FROM Agents INNER JOIN Tickets ON Agents.userId = Tickets.agent_id WHERE Tickets.ticket_id = ?;"
         let data : [Any] = [ticketId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             switch result {
             case .success(let usersData):
                 if let userDict = usersData.first,
@@ -235,10 +228,9 @@ class TicketDAOImpl : TicketDAO {
         } catch {
             return .failure(.executionFailed("Unexpected error: \(error)"))
         }
-            
     }
     
-    func fetchAssignedTickets(agent: Agent) -> Result<[Ticket], DatabaseError> {
+    func fetchAssignedTickets(agent: Agent)  -> Result<[Ticket], DatabaseError> {
         let query = """
         SELECT T.ticket_id, T.title, T.description, T.user_id, T.agent_id, 
                T.priority, T.created_at, T.status, T.issueType
@@ -250,7 +242,7 @@ class TicketDAOImpl : TicketDAO {
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             
             switch result {
             case .success(let tickets):
@@ -280,14 +272,11 @@ class TicketDAOImpl : TicketDAO {
                     if parsedDate == dateFormatter.date(from: createdDateString) {
                         
                     }  else {
-                        print("Failed to parse date with format: yyyy-MM-dd HH:mm:ss. Trying alternative formats.")
-
                         
                         dateFormatter.dateFormat = "yyyy-MM-dd"
                         if let parsedDate = dateFormatter.date(from: createdDateString) {
                             createdDate = Calendar.current.startOfDay(for: parsedDate)
                         } else {
-                            print("All parsing attempts failed. Using current date as fallback.")
                             createdDate = Date()
                         }
                     }
@@ -318,172 +307,9 @@ class TicketDAOImpl : TicketDAO {
         }
     }
     
-    func getTicketByDate(date: Date) throws-> Result<[Ticket], DatabaseError> {
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let formattedDateString = dateFormatter.string(from: date)
-
-        let query = "SELECT * FROM Tickets WHERE DATE(created_at) = '\(formattedDateString)';"
-        
-        let result = try dataBase.executeQueryData(query: query)
-            
-            switch result {
-            case .success(let tickets):
-                let ticketList = tickets.compactMap { row -> Ticket? in
-                    guard let id = row["ticket_id"] as? Int,
-                          let title = row["title"] as? String,
-                          let description = row["description"] as? String,
-                          let userId = row["user_id"] as? Int,
-                          let priorityValue = row["priority"] as? Int,
-                          let statusRawValue = row["status"] as? String,
-                          let createdDateString = row["created_at"] as? String,
-                          let issueTypeRawValue = row["issueType"] as? String
-                    else {
-                        return nil
-                    }
-                    let agentId = row["agent_id"] as? Int ?? 0
-                    
-                    let createdDate: Date
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-
-                    
-                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                    let parsedDate = dateFormatter.date(from: createdDateString)
-                        
-                    if parsedDate == dateFormatter.date(from: createdDateString) {
-                        
-                    }  else {
-                        print("Failed to parse date with format: yyyy-MM-dd HH:mm:ss. Trying alternative formats.")
-
-                        
-                        dateFormatter.dateFormat = "yyyy-MM-dd"
-                        if let parsedDate = dateFormatter.date(from: createdDateString) {
-                            createdDate = Calendar.current.startOfDay(for: parsedDate)
-                        } else {
-                            print("All parsing attempts failed. Using current date as fallback.")
-                            createdDate = Date()
-                        }
-                    }
-                    
-                    guard let priority = Priority(rawValue: priorityValue) else {
-                        print("Invalid priority value: \(priorityValue)")
-                        return nil
-                    }
-                    
-                    guard let status = TicketStatus(rawValue: statusRawValue) else {
-                        print("Invalid status value: \(statusRawValue)")
-                        return nil
-                    }
-                    
-                    let issueType = IssueType(rawValue: issueTypeRawValue) ?? .software
-                    
-                    return Ticket(id: id, title: title, description: description, createdDate: parsedDate ?? Date(), status: status, userId: userId, agentId: agentId, issueType: issueType, priority: priority)
-                }
-                
-                return .success(ticketList)
-                
-            case .failure(let error):
-                return .failure(error)
-            }
-            
-    }
-    
-    func getTicketsBetweendates(date1 : Date, date2 : Date)throws -> Result<[Ticket], DatabaseError> {
-        let dateFormatter1 = DateFormatter()
-        dateFormatter1.dateFormat = "yyyy-MM-dd"
-        let formattedDateString1 = dateFormatter1.string(from: date1)
-        
-        let dateFormatter2 = DateFormatter()
-        dateFormatter2.dateFormat = "yyyy-MM-dd"
-        let formattedDateString2 = dateFormatter2.string(from: date2)
-
-        let query = "SELECT * FROM Tickets WHERE DATE(created_at) BETWEEN '\(formattedDateString1)' AND '\(formattedDateString2)';"
-            
-        let result = try dataBase.executeQueryData(query: query)
-            
-            switch result {
-            case .success(let tickets):
-                let ticketList = tickets.compactMap { row -> Ticket? in
-                    guard let id = row["ticket_id"] as? Int,
-                          let title = row["title"] as? String,
-                          let description = row["description"] as? String,
-                          let userId = row["user_id"] as? Int,
-                          let priorityValue = row["priority"] as? Int,
-                          let statusRawValue = row["status"] as? String,
-                          let createdDateString = row["created_at"] as? String,
-                          let issueTypeRawValue = row["issueType"] as? String
-                    else {
-                        return nil
-                    }
-                    let agentId = row["agent_id"] as? Int ?? 0
-                    
-                    let createdDate: Date
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-
-                    
-                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                    let parsedDate = dateFormatter.date(from: createdDateString)
-                        
-                    if parsedDate == dateFormatter.date(from: createdDateString) {
-                        
-                    }  else {
-                        print("Failed to parse date with format: yyyy-MM-dd HH:mm:ss. Trying alternative formats.")
-
-                        
-                        dateFormatter.dateFormat = "yyyy-MM-dd"
-                        if let parsedDate = dateFormatter.date(from: createdDateString) {
-                            createdDate = Calendar.current.startOfDay(for: parsedDate)
-                        } else {
-                            print("All parsing attempts failed. Using current date as fallback.")
-                            createdDate = Date()
-                        }
-                    }
-                    
-                    guard let priority = Priority(rawValue: priorityValue) else {
-                        print("Invalid priority value: \(priorityValue)")
-                        return nil
-                    }
-                    
-                    guard let status = TicketStatus(rawValue: statusRawValue) else {
-                        print("Invalid status value: \(statusRawValue)")
-                        return nil
-                    }
-                    
-                    let issueType = IssueType(rawValue: issueTypeRawValue) ?? .software
-                    
-                    return Ticket(id: id, title: title, description: description, createdDate: parsedDate ?? Date(), status: status, userId: userId, agentId: agentId, issueType: issueType, priority: priority)
-                }
-                
-                return .success(ticketList)
-                
-            case .failure(let error):
-                return .failure(error)
-            }
-    }
-
-    func removeTicket(agentId: Int, ticketId: Int) -> Result<Void, DatabaseError> {
-        let query = "DELETE FROM AssignedTickets WHERE ticketId = ? AND agentId = ?;"
-        let data: [Any] = [
-            ticketId, agentId
-        ]
-        
-        do {
-            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            
-            return try dataBase.insertRecord(query: finalQuery)
-        } catch let error as DatabaseError {
-            return .failure(error)
-        } catch {
-            return .failure(.executionFailed("Unexpected error: \(error)"))
-        }
-    }
-    
-    func getAllTickets() throws -> Result<[Ticket], DatabaseError> {
-        let query = "SELECT * FROM Tickets;"
-        let result = try dataBase.executeQueryData(query: query)
+    func getUnassignedTickets()  throws -> Result<[Ticket], DatabaseError> {
+        let query = " SELECT * from Tickets WHERE status = 'created' "
+        let result = try  DatabaseConnector.executeQueryData(query: query)
         
         switch result {
         case .success(let tickets):
@@ -512,14 +338,228 @@ class TicketDAOImpl : TicketDAO {
                 if parsedDate == dateFormatter.date(from: createdDateString) {
                     
                 }  else {
-                    print("Failed to parse date with format: yyyy-MM-dd HH:mm:ss. Trying alternative formats.")
-
-                    
                     dateFormatter.dateFormat = "yyyy-MM-dd"
                     if let parsedDate = dateFormatter.date(from: createdDateString) {
                         createdDate = Calendar.current.startOfDay(for: parsedDate)
                     } else {
-                        print("All parsing attempts failed. Using current date as fallback.")
+                        createdDate = Date()
+                    }
+                }
+                
+                guard let priority = Priority(rawValue: priorityValue) else {
+                    print("Invalid priority value: \(priorityValue)")
+                    return nil
+                }
+                
+                guard let status = TicketStatus(rawValue: statusRawValue) else {
+                    print("Invalid status value: \(statusRawValue)")
+                    return nil
+                }
+                
+                let issueType = IssueType(rawValue: issueTypeRawValue) ?? .software
+                
+                return Ticket(id: id, title: title, description: description, createdDate: parsedDate ?? Date(), status: status, userId: userId, agentId: agentId, issueType: issueType, priority: priority)
+            }
+            
+            return .success(ticketList)
+            
+        case .failure(let error):
+            return .failure(error)
+        }
+    }
+    
+    func getTicketByDate(date: Date)  throws-> Result<[Ticket], DatabaseError> {
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let formattedDateString = dateFormatter.string(from: date)
+
+        let query = "SELECT * FROM Tickets WHERE DATE(created_at) = '\(formattedDateString)';"
+        
+        let result = try  DatabaseConnector.executeQueryData(query: query)
+            
+            switch result {
+            case .success(let tickets):
+                let ticketList = tickets.compactMap { row -> Ticket? in
+                    guard let id = row["ticket_id"] as? Int,
+                          let title = row["title"] as? String,
+                          let description = row["description"] as? String,
+                          let userId = row["user_id"] as? Int,
+                          let priorityValue = row["priority"] as? Int,
+                          let statusRawValue = row["status"] as? String,
+                          let createdDateString = row["created_at"] as? String,
+                          let issueTypeRawValue = row["issueType"] as? String
+                    else {
+                        return nil
+                    }
+                    let agentId = row["agent_id"] as? Int ?? 0
+                    
+                    let createdDate: Date
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+
+                    
+                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                    let parsedDate = dateFormatter.date(from: createdDateString)
+                        
+                    if parsedDate == dateFormatter.date(from: createdDateString) {
+                        
+                    }  else {
+                        
+                        dateFormatter.dateFormat = "yyyy-MM-dd"
+                        if let parsedDate = dateFormatter.date(from: createdDateString) {
+                            createdDate = Calendar.current.startOfDay(for: parsedDate)
+                        } else {
+                            createdDate = Date()
+                        }
+                    }
+                    
+                    guard let priority = Priority(rawValue: priorityValue) else {
+                        print("Invalid priority value: \(priorityValue)")
+                        return nil
+                    }
+                    
+                    guard let status = TicketStatus(rawValue: statusRawValue) else {
+                        print("Invalid status value: \(statusRawValue)")
+                        return nil
+                    }
+                    
+                    let issueType = IssueType(rawValue: issueTypeRawValue) ?? .software
+                    
+                    return Ticket(id: id, title: title, description: description, createdDate: parsedDate ?? Date(), status: status, userId: userId, agentId: agentId, issueType: issueType, priority: priority)
+                }
+                
+                return .success(ticketList)
+                
+            case .failure(let error):
+                return .failure(error)
+            }
+        
+    }
+    
+    func getTicketsBetweendates(date1 : Date, date2 : Date) throws -> Result<[Ticket], DatabaseError> {
+        let dateFormatter1 = DateFormatter()
+        dateFormatter1.dateFormat = "yyyy-MM-dd"
+        let formattedDateString1 = dateFormatter1.string(from: date1)
+        
+        let dateFormatter2 = DateFormatter()
+        dateFormatter2.dateFormat = "yyyy-MM-dd"
+        let formattedDateString2 = dateFormatter2.string(from: date2)
+
+        let query = "SELECT * FROM Tickets WHERE DATE(created_at) BETWEEN '\(formattedDateString1)' AND '\(formattedDateString2)';"
+            
+        let result = try  DatabaseConnector.executeQueryData(query: query)
+            
+            switch result {
+            case .success(let tickets):
+                let ticketList = tickets.compactMap { row -> Ticket? in
+                    guard let id = row["ticket_id"] as? Int,
+                          let title = row["title"] as? String,
+                          let description = row["description"] as? String,
+                          let userId = row["user_id"] as? Int,
+                          let priorityValue = row["priority"] as? Int,
+                          let statusRawValue = row["status"] as? String,
+                          let createdDateString = row["created_at"] as? String,
+                          let issueTypeRawValue = row["issueType"] as? String
+                    else {
+                        return nil
+                    }
+                    let agentId = row["agent_id"] as? Int ?? 0
+                    
+                    let createdDate: Date
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+
+                    
+                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                    let parsedDate = dateFormatter.date(from: createdDateString)
+                        
+                    if parsedDate == dateFormatter.date(from: createdDateString) {
+                        
+                    }  else {
+                        
+                        dateFormatter.dateFormat = "yyyy-MM-dd"
+                        if let parsedDate = dateFormatter.date(from: createdDateString) {
+                            createdDate = Calendar.current.startOfDay(for: parsedDate)
+                        } else {
+                            createdDate = Date()
+                        }
+                    }
+                    
+                    guard let priority = Priority(rawValue: priorityValue) else {
+                        print("Invalid priority value: \(priorityValue)")
+                        return nil
+                    }
+                    
+                    guard let status = TicketStatus(rawValue: statusRawValue) else {
+                        print("Invalid status value: \(statusRawValue)")
+                        return nil
+                    }
+                    
+                    let issueType = IssueType(rawValue: issueTypeRawValue) ?? .software
+                    
+                    return Ticket(id: id, title: title, description: description, createdDate: parsedDate ?? Date(), status: status, userId: userId, agentId: agentId, issueType: issueType, priority: priority)
+                }
+                
+                return .success(ticketList)
+                
+            case .failure(let error):
+                return .failure(error)
+            }
+    }
+
+    func removeTicket(agentId: Int, ticketId: Int)  -> Result<Void, DatabaseError> {
+        let query = "DELETE FROM AssignedTickets WHERE ticketId = ? AND agentId = ?;"
+        let data: [Any] = [
+            ticketId, agentId
+        ]
+        
+        do {
+            let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
+            
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
+        } catch let error as DatabaseError {
+            return .failure(error)
+        } catch {
+            return .failure(.executionFailed("Unexpected error: \(error)"))
+        }
+    }
+    
+    func getAllTickets()  throws -> Result<[Ticket], DatabaseError> {
+        let query = "SELECT * FROM Tickets;"
+        let result = try  DatabaseConnector.executeQueryData(query: query)
+        
+        switch result {
+        case .success(let tickets):
+            let ticketList = tickets.compactMap { row -> Ticket? in
+                guard let id = row["ticket_id"] as? Int,
+                      let title = row["title"] as? String,
+                      let description = row["description"] as? String,
+                      let userId = row["user_id"] as? Int,
+                      let priorityValue = row["priority"] as? Int,
+                      let statusRawValue = row["status"] as? String,
+                      let createdDateString = row["created_at"] as? String,
+                      let issueTypeRawValue = row["issueType"] as? String
+                else {
+                    return nil
+                }
+                let agentId = row["agent_id"] as? Int ?? 0
+                
+                let createdDate: Date
+                let dateFormatter = DateFormatter()
+                dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+
+                
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                let parsedDate = dateFormatter.date(from: createdDateString)
+                    
+                if parsedDate == dateFormatter.date(from: createdDateString) {
+                    
+                }  else {
+                    dateFormatter.dateFormat = "yyyy-MM-dd"
+                    if let parsedDate = dateFormatter.date(from: createdDateString) {
+                        createdDate = Calendar.current.startOfDay(for: parsedDate)
+                    } else {
                         createdDate = Date()
                     }
                 }
@@ -546,7 +586,7 @@ class TicketDAOImpl : TicketDAO {
         }
     }
 
-    func updatePriority(ticketId: Int, newPriority: Int) -> Result<Void, DatabaseError> {
+    func updatePriority(ticketId: Int, newPriority: Int)  -> Result<Void, DatabaseError> {
         let query = "UPDATE  Tickets SET priority = ? WHERE ticket_id = ?"
         let data: [Any] = [
             newPriority, ticketId
@@ -555,7 +595,7 @@ class TicketDAOImpl : TicketDAO {
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -563,10 +603,10 @@ class TicketDAOImpl : TicketDAO {
         }
     }
     
-    func getLastCreatedTicketId() throws -> Result<Int, DatabaseError> {
+    func getLastCreatedTicketId()  throws -> Result<Int, DatabaseError> {
         let query = "SELECT MAX(ticket_id) AS lastTicketId FROM Tickets;"
         
-        let result = try dataBase.executeQueryData(query: query)
+        let result = try  DatabaseConnector.executeQueryData(query: query)
         
         switch result {
         case .success(let userIdData):

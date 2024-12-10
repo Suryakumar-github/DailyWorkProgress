@@ -6,6 +6,7 @@
 //
 
 enum TicketStatus: String {
+    case opened = "opened"
     case created = "created"
     case assigned = "assigned"
     case reassigned = "reassigned"

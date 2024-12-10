@@ -1,6 +1,8 @@
 import Foundation
 
-var dataBase : DataBase = DatabaseManager()
-var mainView = MainView( userController: UserControllerImpl(dataBase: dataBase), dataBase: dataBase)
+DatabaseConnector.setDataBase(dataBase: DatabaseManager.self)
+DatabaseConnector.openDataBase()
+var mainView = MainView( userController: UserControllerImpl())
 
 mainView.showLoginScreen()
+DatabaseConnector.closeDataBase()

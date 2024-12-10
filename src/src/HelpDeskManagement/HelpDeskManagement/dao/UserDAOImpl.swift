@@ -8,18 +8,17 @@ import Foundation
 
 class UserDAOImpl: UserDAO {
 
-    var dataBase : DataBase
-    init(dataBase : DataBase) {
-        self.dataBase = dataBase
+    init()  {
+        
         do{
-            try dataBase.createTable(createTableQuery: Queries.createUserTable)
+            try  DatabaseConnector.createTable(createTableQuery: Queries.createUserTable)
         }
         catch {
             print("Error : \(error)")
         }
     }
 
-    func getUserById(userId: Int) -> Result<User, DatabaseError> {
+    func getUserById(userId: Int)  -> Result<User, DatabaseError> {
         let query = "SELECT * FROM Users WHERE user_id = ?"
         let data: [Any] = [
             userId
@@ -28,7 +27,7 @@ class UserDAOImpl: UserDAO {
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             
             switch result {
             case .success(let usersData):
@@ -50,7 +49,7 @@ class UserDAOImpl: UserDAO {
         }
     }
 
-    func changePassword(user: User, newPassword password: String) -> Result<Void, DatabaseError>  {
+    func changePassword(user: User, newPassword password: String)  -> Result<Void, DatabaseError>  {
         let query = "UPDATE userNameAndPasswords SET password = ? where userId = ?;"
         
         let data: [Any] = [
@@ -60,7 +59,7 @@ class UserDAOImpl: UserDAO {
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -68,7 +67,7 @@ class UserDAOImpl: UserDAO {
         }
     }
 
-    func addUser(user: User) -> Result<Void, DatabaseError> {
+    func addUser(user: User)  -> Result<Void, DatabaseError> {
         let query = "INSERT INTO Users (name, role) VALUES (?, ?)"
         
         let data: [Any] = [
@@ -79,7 +78,7 @@ class UserDAOImpl: UserDAO {
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             print("Query : \(finalQuery)")
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -87,10 +86,10 @@ class UserDAOImpl: UserDAO {
         }
     }
 
-    func getAllUsers() throws -> Result<[User], DatabaseError> {
+    func getAllUsers()  throws -> Result<[User], DatabaseError> {
         let query = "SELECT id, name, role FROM Users;"
             
-        let result = try dataBase.executeQueryData(query: query)
+        let result = try  DatabaseConnector.executeQueryData(query: query)
         switch result {
         case .success(let usersData):
                 
@@ -109,14 +108,14 @@ class UserDAOImpl: UserDAO {
         }
     }
     
-    func addUsersUserNamePassword(userName: String, password: String, user: User) -> Result<Void, DatabaseError> {
+    func addUsersUserNamePassword(userName: String, password: String, user: User)  -> Result<Void, DatabaseError> {
         let query = "INSERT INTO userNameAndPasswords (userName, password, userId) values (?,?,?);"
         let data: [Any] = [userName, password, user.getId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            let result: Result<Void, DatabaseError> = try dataBase.insertRecord(query: finalQuery)
+            let result: Result<Void, DatabaseError> = try  DatabaseConnector.insertRecord(query: finalQuery)
             
             switch result {
             case .success:
@@ -131,14 +130,14 @@ class UserDAOImpl: UserDAO {
         }
     }
 
-    func getUserNameAndPassword(userId: Int) -> Result<[String], DatabaseError> {
+    func getUserNameAndPassword(userId: Int)  -> Result<[String], DatabaseError> {
         let query = "SELECT userName, password FROM userNameAndPasswords WHERE userId = ?;"
         let data: [Any] = [userId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             
             switch result {
             case .success(let usersData):
@@ -161,7 +160,7 @@ class UserDAOImpl: UserDAO {
         }
     }
 
-    func getUserRole(userName: String, password: String) -> Result<(String, Int), DatabaseError> {
+    func getUserRole(userName: String, password: String)  -> Result<(String, Int), DatabaseError> {
         let query = """
         SELECT Users.role, Users.user_id
         FROM Users
@@ -178,7 +177,7 @@ class UserDAOImpl: UserDAO {
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             
             switch result {
             case .success(let usersData):
@@ -200,14 +199,14 @@ class UserDAOImpl: UserDAO {
         }
     }
     
-    func getAgentByUserId(userId: Int) -> Result<Agent, DatabaseError> {
+    func getAgentByUserId(userId: Int)  -> Result<Agent, DatabaseError> {
         let query = "SELECT * FROM Agents WHERE userId = ?;"
         let data: [Any] = [userId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             
             switch result {
             case .success(let usersData):
@@ -245,14 +244,14 @@ class UserDAOImpl: UserDAO {
         }
     }
     
-    func getAdminByUserId(userId: Int) -> Result<Admin?, DatabaseError> {
+    func getAdminByUserId(userId: Int)  -> Result<Admin?, DatabaseError> {
         let query = "SELECT * FROM admin WHERE userId = ?;"
         let data: [Any] = [userId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             
             switch result {
             case .success(let usersData):
@@ -282,10 +281,10 @@ class UserDAOImpl: UserDAO {
         }
     }
     
-    func getLastCreatedUserId() throws -> Result<Int, DatabaseError> {
+    func getLastCreatedUserId()  throws -> Result<Int, DatabaseError> {
         let query = "SELECT MAX(user_id) AS lastUserId FROM Users;"
         
-        let result = try dataBase.executeQueryData(query: query)
+        let result = try  DatabaseConnector.executeQueryData(query: query)
         
         switch result {
         case .success(let userIdData):

@@ -9,18 +9,17 @@ import Foundation
 
 class KnowledgeBaseDAOImpl : KnowledgeBaseDAO {
     
-    var dataBase : DataBase
-    init(dataBase : DataBase) {
-        self.dataBase = dataBase
+    init()  {
+        
         do{
-            try dataBase.createTable(createTableQuery: Queries.createKnowledgeBadeTable)
+            try  DatabaseConnector.createTable(createTableQuery: Queries.createKnowledgeBadeTable)
         }
         catch {
             print("Error : \(error)")
         }
     }
     
-    func addEntry(entry: KnowledgeBase) -> Result<Void, DatabaseError> {
+    func addEntry(entry: KnowledgeBase)  -> Result<Void, DatabaseError> {
         let query = "INSERT INTO KnowledgeBase (title, issue,solution,userId) VALUES (?, ?, ?, ?); "
         
         let data: [Any] = [
@@ -33,7 +32,7 @@ class KnowledgeBaseDAOImpl : KnowledgeBaseDAO {
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -41,10 +40,10 @@ class KnowledgeBaseDAOImpl : KnowledgeBaseDAO {
         }
     }
     
-    func getAllEntries() throws-> Result<[KnowledgeBase], DatabaseError> {
+    func getAllEntries()  throws-> Result<[KnowledgeBase], DatabaseError> {
         let query = "SELECT * FROM KnowledgeBase;"
         
-        let result = try dataBase.executeQueryData(query: query)
+        let result = try  DatabaseConnector.executeQueryData(query: query)
         
         switch result {
         case .success(let logs):
@@ -76,7 +75,7 @@ class KnowledgeBaseDAOImpl : KnowledgeBaseDAO {
     }
 
     
-    func updateEntry(id: Int, solution: String, lastUpdatedDate: Date?) -> Result<Void, DatabaseError> {
+    func updateEntry(id: Int, solution: String, lastUpdatedDate: Date?)  -> Result<Void, DatabaseError> {
         let query = "UPDATE KnowledgeBase SET solution = ? , updated_at = ? where kb_id = ?"
         
         let data: [Any] = [
@@ -86,7 +85,7 @@ class KnowledgeBaseDAOImpl : KnowledgeBaseDAO {
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -95,13 +94,13 @@ class KnowledgeBaseDAOImpl : KnowledgeBaseDAO {
             
     }
     
-    func getKnowledgeBaseEntryById(id: Int) -> Result<KnowledgeBase, DatabaseError> {
+    func getKnowledgeBaseEntryById(id: Int)  -> Result<KnowledgeBase, DatabaseError> {
         let query = "SELECT * FROM KnowledgeBase where kb_id = ?"
         let data : [Any] = [id]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             switch result {
             case .success(let usersData):
                 if let row = usersData.first,

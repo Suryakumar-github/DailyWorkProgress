@@ -12,12 +12,10 @@ class UserControllerImpl : UserController {
     private weak var ticketController : TicketController?
     private var knowledgeBaseController : KnowledgeBaseController?
     private var logsEntryController : LogsEntryController?
-    private var dataBase : DataBase
     private var userDao : UserDAO
     
-    init(dataBase : DataBase) {
-        self.dataBase = dataBase
-        self.userDao = UserDAOImpl(dataBase: dataBase)
+    init()   {
+        self.userDao =   UserDAOImpl()
     }
     
     func setTicketController(ticketController: any TicketController) {
@@ -32,9 +30,9 @@ class UserControllerImpl : UserController {
         self.logsEntryController = logsEntryController
     }
     
-    func register(name : String, userRole : UserRole, userName : String, password : String)throws -> User? {
+    func register(name : String, userRole : UserRole, userName : String, password : String)  throws -> User? {
         let id : Int
-        let userId = try userDao.getLastCreatedUserId()
+        let userId = try   userDao.getLastCreatedUserId()
         switch userId {
         case .success(let newId) :
             id = newId + 1
@@ -42,42 +40,51 @@ class UserControllerImpl : UserController {
             throw error
         }
         let user = User(userId: id, name: name, userRole: userRole, role : Role.user)
-        let result = userDao.addUser(user: user)
+        let result =   userDao.addUser(user: user)
         switch result {
         case .success() :
-            userDao.addUsersUserNamePassword(userName: userName, password: password, user: user)
-            try logsEntryController?.log(logType: LogType.info, message: "New User Registered", userId: user.getId, data: user)
-            return user
+            let resulkt =   userDao.addUsersUserNamePassword(userName: userName, password: password, user: user)
+            switch result {
+            case .success() :
+                print("...............")
+                try   logsEntryController?.log(logType: LogType.info, message: "New User Registered", userId: user.getId, data: user)
+                return user
+                
+            case .failure(let error) :
+                throw error
+            }
+            
         case .failure(let error) :
             throw error
         }
     }
     
-    func createTicket (title : String, description : String, createdDate : Date, status : TicketStatus, userId : Int, issueType : IssueType)throws {
+    func createTicket (title : String, description : String, createdDate : Date, status : TicketStatus, userId : Int, issueType : IssueType)  throws {
         guard let controller = ticketController else {
+            print("TicketController is Nil..")
             return
         }
-        try controller.createTicket(title: title, description: description, createdDate: createdDate, status: status, userId: userId, issueType: issueType)
+        try   controller.createTicket(title: title, description: description, createdDate: createdDate, status: status, userId: userId, issueType: issueType)
     }
     
-    func search(word: String)throws -> [KnowledgeBase] {
-        return try knowledgeBaseController?.search(word: word) ?? []
+    func search(word: String)  throws -> [KnowledgeBase] {
+        return try   knowledgeBaseController?.search(word: word) ?? []
     }
     
-    func cancelTicket (user : User, ticketId : Int)throws -> Bool {
+    func cancelTicket (user : User, ticketId : Int)  throws -> Bool {
         guard let controller = ticketController else {
             print("Ticket Controller is Nil..")
             return false
         }
-        if (try controller.cancelTicket(user: user, ticketId: ticketId)) {
+        if   (try controller.cancelTicket(user: user, ticketId: ticketId)) {
             return true
         }
         return false
     }
     
-    func changePassword(user: User, password newPassword: String, currentPassword: String)throws -> Bool {
+    func changePassword(user: User, password newPassword: String, currentPassword: String)  throws -> Bool {
 
-        let result = userDao.getUserNameAndPassword(userId: user.getId)
+        let result =   userDao.getUserNameAndPassword(userId: user.getId)
         switch result {
         case .success(let credentials) :
              let storedPassword = credentials[1]
@@ -91,7 +98,7 @@ class UserControllerImpl : UserController {
                 return false
             }
             
-            let result = userDao.changePassword(user: user, newPassword: newPassword)
+            let result =   userDao.changePassword(user: user, newPassword: newPassword)
             switch result {
             case .success():
                 return true
@@ -104,13 +111,13 @@ class UserControllerImpl : UserController {
         }
     }
 
-    func viewTicketStatus(ticketid: Int) throws -> TicketStatus {
-        let ticket = try ticketController?.getTicketById(ticketId: ticketid)
+    func viewTicketStatus(ticketid: Int)   throws -> TicketStatus {
+        let ticket = try   ticketController?.getTicketById(ticketId: ticketid)
         return ticket!.statusProperty
     }
     
-    func getUserById(userId: Int) throws -> User? {
-        let result = userDao.getUserById(userId: userId)
+    func getUserById(userId: Int)   throws -> User? {
+        let result =   userDao.getUserById(userId: userId)
         switch result {
         case .success(let user) :
             return user
@@ -119,21 +126,21 @@ class UserControllerImpl : UserController {
         }
     }
 
-    func getAllTheCreatedTickets(user: User) throws -> [Ticket] {
-        return try ticketController?.getAllTheCreatedTickets(user: user) ?? []
+    func getAllTheCreatedTickets(user: User)   throws -> [Ticket] {
+        return try   ticketController?.getAllTheCreatedTickets(user: user) ?? []
     }
 
-    func authenticate(username: String, password: String) throws -> AnyObject? {
-        let result = userDao.getUserRole(userName: username, password: password)
+    func authenticate(username: String, password: String)   throws -> AnyObject? {
+        let result =   userDao.getUserRole(userName: username, password: password)
         switch result {
         case .success(let role):
             print("Role : \(role.0)")
             if role.0.lowercased() == Role.admin.rawValue.lowercased() {
-                return try getAdmin(userId: role.1)
+                return try   getAdmin(userId: role.1)
             } else if role.0.lowercased() == Role.agent.rawValue.lowercased() {
-                return try getAgent(userId: role.1)
+                return try   getAgent(userId: role.1)
             } else if role.0.lowercased() == Role.user.rawValue.lowercased() {
-                return try getUser(userId: role.1)
+                return try   getUser(userId: role.1)
             }
 
         case .failure(let error):
@@ -142,8 +149,8 @@ class UserControllerImpl : UserController {
         return nil
     }
 
-    func getAdmin(userId : Int) throws -> Admin? {
-        let result = userDao.getAdminByUserId(userId: userId)
+    func getAdmin(userId : Int)   throws -> Admin? {
+        let result =   userDao.getAdminByUserId(userId: userId)
         switch result {
         case .success(let admin) :
             return admin
@@ -152,8 +159,8 @@ class UserControllerImpl : UserController {
         }
     }
     
-    func getAgent(userId : Int) throws -> Agent? {
-        let result = userDao.getAgentByUserId(userId: userId)
+    func getAgent(userId : Int)   throws -> Agent? {
+        let result =   userDao.getAgentByUserId(userId: userId)
         switch result {
         case .success(let agent) :
             return agent
@@ -162,8 +169,8 @@ class UserControllerImpl : UserController {
         }
     }
     
-    func getUser(userId : Int) throws -> User? {
-        let result = userDao.getUserById(userId: userId)
+    func getUser(userId : Int)   throws -> User? {
+        let result =   userDao.getUserById(userId: userId)
         switch result {
         case .success(let user) :
             return user
@@ -172,8 +179,8 @@ class UserControllerImpl : UserController {
         }
     }
     
-    func getAllKnowledgeBaseEntries() throws -> [KnowledgeBase] {
-        return try knowledgeBaseController?.getAllKnowledgeBaseEntries() ?? []
+    func getAllKnowledgeBaseEntries()   throws -> [KnowledgeBase] {
+        return try   knowledgeBaseController?.getAllKnowledgeBaseEntries() ?? []
     }
     
 }

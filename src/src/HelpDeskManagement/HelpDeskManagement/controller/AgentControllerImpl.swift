@@ -8,18 +8,16 @@
 import Foundation
 
 class AgentControllerImpl : AgentController {
-   
+    
     private weak var ticketController : TicketController?
     private var knowledgeBaseController : KnowledgeBaseController?
     private var logsEntryController : LogsEntryController?
-    private var dataBase : DataBase
     private var agentDao : AgentDAO
     private var userDao : UserDAO
     
-    init(dateBase : DataBase) {
-        self.dataBase = dateBase
-        self.agentDao = AgentDAOImpl(dataBase: dateBase)
-        self.userDao = UserDAOImpl(dataBase: dataBase)
+    init()  {
+        self.agentDao =  AgentDAOImpl()
+        self.userDao =  UserDAOImpl()
     }
     func setTicketController(ticketController: TicketController) {
         self.ticketController = ticketController
@@ -32,28 +30,29 @@ class AgentControllerImpl : AgentController {
         self.knowledgeBaseController = knowledgeBaseController
     }
     
-    func closeTicket(agent: Agent, ticketId: Int, solution : String)throws -> Bool{
+    func closeTicket(agent: Agent, ticketId: Int, solution : String) throws -> Bool{
         guard let controller = ticketController else {
             return false
         }
-        if (try controller.closeTicket(agent: agent, ticketId: ticketId, solution: solution) ){
-            try assignAgentAvailability(agent: agent)
+        if  (try controller.closeTicket(agent: agent, ticketId: ticketId, solution: solution) ){
+            try  assignAgentAvailability(agent: agent)
             return true
         }
         return false
     }
     
-    func checkAgentAvailability(agentId: Int)throws -> AgentStatus {
-        let agent = try getAgentById(agentId : agentId)
+    func checkAgentAvailability(agentId: Int) throws -> AgentStatus {
+        let agent = try  getAgentById(agentId : agentId)
         return agent!.statusProperty
     }
     
-    func updateAgentAvailability(agent: Agent, status: AgentStatus) throws -> Bool {
+    func updateAgentAvailability(agent: Agent, status: AgentStatus)  throws -> Bool {
         agent.statusProperty = status
-        let result = agentDao.updateAgentAvailability(agent: agent, status: status)
+        let result =  agentDao.updateAgentAvailability(agent: agent, status: status)
         switch result {
         case .success() :
-            try logsEntryController?.log(logType: LogType.info, message: "Agent Availablity is Updated", userId: agent.getId, data: agent)
+            try  logsEntryController?.log(logType: LogType.info, message: "Agent Availablity is Updated", userId: agent.getId, data: agent)
+            try  ticketController?.assignUnassignedTickets()
             return true
         case .failure(let error) :
             throw error
@@ -61,20 +60,20 @@ class AgentControllerImpl : AgentController {
         
     }
     
-    func updateTicketStatus(agent : Agent, ticketId: Int, status: TicketStatus)throws -> Bool {
+    func updateTicketStatus(agent : Agent, ticketId: Int, status: TicketStatus) throws -> Bool {
         
         guard let controller = ticketController else {
             return false
         }
-        if (try controller.updateTicketStatus(agent: agent, ticketId: ticketId, status: status)) {
+        if  (try controller.updateTicketStatus(agent: agent, ticketId: ticketId, status: status)) {
             return true
         }
         return false
     }
 
-    func changePassword(agent : Agent, newPassword: String, currentPassword: String)throws -> Bool {
+    func changePassword(agent : Agent, newPassword: String, currentPassword: String) throws -> Bool {
 
-        let result = agentDao.getUserNameAndPassword(userId: agent.getUserId)
+        let result =  agentDao.getUserNameAndPassword(userId: agent.getUserId)
         switch result {
         case .success(let credentials) :
              let storedPassword = credentials[1]
@@ -89,7 +88,7 @@ class AgentControllerImpl : AgentController {
                 return false
             }
             
-            let result = agentDao.changePassword(agent: agent, newPassword: newPassword)
+            let result =  agentDao.changePassword(agent: agent, newPassword: newPassword)
             switch result {
             case .success():
                 return true
@@ -102,8 +101,8 @@ class AgentControllerImpl : AgentController {
         }
     }
     
-    func fetchAssignedTickets(agent: Agent) throws -> [Ticket] {
-        guard let tickets = try ticketController?.fetchAssignedTickets(agent: agent) else {
+    func fetchAssignedTickets(agent: Agent)  throws -> [Ticket] {
+        guard let tickets = try  ticketController?.fetchAssignedTickets(agent: agent) else {
             return [] 
         }
         
@@ -113,9 +112,9 @@ class AgentControllerImpl : AgentController {
     }
 
     
-    func getAgentById(agentId : Int)throws -> Agent? {
+    func getAgentById(agentId : Int) throws -> Agent? {
         
-        let result = agentDao.getAgentById(agentId: agentId)
+        let result =  agentDao.getAgentById(agentId: agentId)
         switch result {
         case .success(let agent):
             return agent
@@ -124,24 +123,24 @@ class AgentControllerImpl : AgentController {
         }
     }
     
-    func assignAgentAvailability(agent: Agent) throws {
-        let tickets = try fetchAssignedTickets(agent: agent)
+    func assignAgentAvailability(agent: Agent)  throws {
+        let tickets = try  fetchAssignedTickets(agent: agent)
         if tickets.isEmpty {
             print("No tickets assigned to the agent.")
             return
         }
         
-        let workload = try getAgentWorkLoad(agent: agent)
+        let workload = try  getAgentWorkLoad(agent: agent)
         
         if tickets.count > 5 && workload > 1 {
-            agent.statusProperty = .busy
+            try  updateAgentAvailability(agent: agent, status: AgentStatus.busy)
         } else if tickets.count <= 5 && workload < 2 {
-            agent.statusProperty = .available
+            try  updateAgentAvailability(agent: agent, status: AgentStatus.available)
         }
     }
 
-    func getAgentWorkLoad(agent: Agent) throws -> Int {
-        let tickets = try fetchAssignedTickets(agent: agent)
+    func getAgentWorkLoad(agent: Agent)  throws -> Int {
+        let tickets = try  fetchAssignedTickets(agent: agent)
         if tickets.isEmpty {
             return 0
         }
@@ -169,17 +168,17 @@ class AgentControllerImpl : AgentController {
         return 0
     }
     
-    func addEntry(title: String, issueType : IssueType, solution: String, createdDate: Date, lastUpdatedDate: Date?, userId : Int)throws {
-        try knowledgeBaseController?.addEntry(title: title, issueType: issueType, solution: solution, createdDate: createdDate, lastUpdatedDate: lastUpdatedDate, userId: userId)
+    func addEntry(title: String, issueType : IssueType, solution: String, createdDate: Date, lastUpdatedDate: Date?, userId : Int) throws {
+        try  knowledgeBaseController?.addEntry(title: title, issueType: issueType, solution: solution, createdDate: createdDate, lastUpdatedDate: lastUpdatedDate, userId: userId)
     }
     
-    func getAllKnowledgeBaseEntries() throws -> [KnowledgeBase] {
-        return try knowledgeBaseController?.getAllKnowledgeBaseEntries() ?? []
+    func getAllKnowledgeBaseEntries()  throws -> [KnowledgeBase] {
+        return try  knowledgeBaseController?.getAllKnowledgeBaseEntries() ?? []
     }
     
-    func addAgent(name : String, department : String, userName : String, password : String)throws {
+    func addAgent(name : String, department : String, userName : String, password : String) throws {
         let id : Int
-        let userId = try userDao.getLastCreatedUserId()
+        let userId = try  userDao.getLastCreatedUserId()
         switch userId {
         case .success(let newId) :
             id = newId + 1
@@ -189,23 +188,23 @@ class AgentControllerImpl : AgentController {
         //let hashedPassword = StringHasher.hash(password)
         let user = User(userId: id, name: name, userRole: UserRole.vip, role: Role.agent)
         let agent = Agent(name : name,deparment: department, userId: id)
-        userDao.addUser(user: user)
-        let result = agentDao.addAgent(agent: agent)
+         userDao.addUser(user: user)
+        let result =  agentDao.addAgent(agent: agent)
         switch result {
         case .success() :
-            agentDao.addAgentUserNamePassword(userName: userName, password: password, agent: agent)
-            try logsEntryController?.log(logType: LogType.info, message: "New Agent Added with AgentId : \(agent.getId)", userId: agent.getId, data: agent)
+             agentDao.addAgentUserNamePassword(userName: userName, password: password, agent: agent)
+            try  logsEntryController?.log(logType: LogType.info, message: "New Agent Added with AgentId : \(agent.getId)", userId: agent.getId, data: agent)
         case .failure(let error) :
             throw error
         }
     }
     
-    func search(word: String) throws -> [KnowledgeBase] {
-        return try knowledgeBaseController?.search(word: word) ?? []
+    func search(word: String)  throws -> [KnowledgeBase] {
+        return try  knowledgeBaseController?.search(word: word) ?? []
     }
     
-    func getAllAgents() throws -> [Agent] {
-        let result = try agentDao.getAllAgents()
+    func getAllAgents()  throws -> [Agent] {
+        let result = try  agentDao.getAllAgents()
         switch result {
         case .success(let agents) :
             return agents
@@ -214,18 +213,18 @@ class AgentControllerImpl : AgentController {
         }
     }
     
-    func reAssignTicketToAgent(ticket: Ticket, agent : Agent) throws {
-        let addTicketResult = agentDao.addTicketToAgent(agent: agent, ticket: ticket)
+    func reAssignTicketToAgent(ticket: Ticket, agent : Agent)  throws {
+        let addTicketResult =  agentDao.addTicketToAgent(agent: agent, ticket: ticket)
         
         switch addTicketResult {
         case .success():
-            let assignAgentResult = agentDao.assignAgentToTicket(agentId: agent.getAgentId, ticketId: ticket.getTicketId)
+            let assignAgentResult =  agentDao.assignAgentToTicket(agentId: agent.getAgentId, ticketId: ticket.getTicketId)
             
             switch assignAgentResult {
             case .success():
-                try assignAgentAvailability(agent: agent)
-                try updateTicketStatus(agent: agent, ticketId: ticket.getTicketId, status: TicketStatus.reassigned)
-                try logsEntryController?.log(
+                try  assignAgentAvailability(agent: agent)
+                try  updateTicketStatus(agent: agent, ticketId: ticket.getTicketId, status: TicketStatus.reassigned)
+                try  logsEntryController?.log(
                     logType: .info,
                     message: "Ticket successfully assigned to Agent, agentId: \(agent.getId)",
                     userId: agent.getUserId,
@@ -249,32 +248,33 @@ class AgentControllerImpl : AgentController {
 
 extension AgentControllerImpl : TicketAssignmentDelegate {
     
-    func resolveTicket(agent: Agent, ticketId: Int) throws {
+    func resolveTicket(agent: Agent, ticketId: Int)  throws -> Bool{
         
-        guard let userId = try ticketController?.getUserIdByTicketId(ticketId: ticketId) else {
+        guard let userId = try  ticketController?.getUserIdByTicketId(ticketId: ticketId) else {
             print("No User Found For Ticket ID: \(ticketId)")
             print("----------------------------------------------------------------")
-            return
+            return false
         }
         
-        guard (try fetchAssignedTickets(agent: agent).contains(where: { $0.getTicketId == ticketId })) else {
+        guard  (try fetchAssignedTickets(agent: agent).contains(where: { $0.getTicketId == ticketId })) else {
             print("Agent does not have this ticket assigned. Cannot resolve ticket.")
-            return
+            return false
         }
         
-        guard (try ticketController?.getTicketById(ticketId: ticketId)) != nil else {
+        guard  (try ticketController?.getTicketById(ticketId: ticketId)) != nil else {
             print("Ticket not found with ID: \(ticketId)")
-            return
+            return false
         }
         
-        try ticketController?.updateTicketStatus(agent: agent, ticketId: ticketId, status: TicketStatus.solved)
-        agentDao.updateTicketsResolvedCount(agentId: agent.getAgentId, newCount: agent.ticketResolvedProperty+1)
-        try logsEntryController?.log(logType: LogType.info, message: "Ticket with TicketId \(ticketId) resolved for user with UserId \(userId).", userId: agent.getId, data: agent)
+        try  ticketController?.updateTicketStatus(agent: agent, ticketId: ticketId, status: TicketStatus.solved)
+         agentDao.updateTicketsResolvedCount(agentId: agent.getAgentId, newCount: agent.ticketResolvedProperty+1)
+        try  logsEntryController?.log(logType: LogType.info, message: "Ticket with TicketId \(ticketId) resolved for user with UserId \(userId).", userId: agent.getId, data: agent)
+        return true
         
     }
     
-    func assignTicketToAgent(ticket: Ticket) throws -> Bool {
-        let result = try agentDao.getAllAgents()
+    func assignTicketToAgent(ticket: Ticket)  throws -> Bool {
+        let result = try  agentDao.getAllAgents()
         
         switch result {
         case .success(let agents):
@@ -282,17 +282,17 @@ extension AgentControllerImpl : TicketAssignmentDelegate {
                 if ticket.getIssueType.rawValue.lowercased() == agent.departmentProperty.lowercased() &&
                     agent.statusProperty == AgentStatus.available {
                     
-                    let addTicketResult = agentDao.addTicketToAgent(agent: agent, ticket: ticket)
+                    let addTicketResult =  agentDao.addTicketToAgent(agent: agent, ticket: ticket)
                     
                     switch addTicketResult {
                     case .success():
-                        let assignAgentResult = agentDao.assignAgentToTicket(agentId: agent.getAgentId, ticketId: ticket.getTicketId)
+                        let assignAgentResult =  agentDao.assignAgentToTicket(agentId: agent.getAgentId, ticketId: ticket.getTicketId)
                         
                         switch assignAgentResult {
                         case .success():
-                            try assignAgentAvailability(agent: agent)
+                            try  assignAgentAvailability(agent: agent)
                             
-                            try logsEntryController?.log(
+                            try  logsEntryController?.log(
                                 logType: .info,
                                 message: "Ticket successfully assigned to Agent, agentId: \(agent.getId)",
                                 userId: agent.getUserId,

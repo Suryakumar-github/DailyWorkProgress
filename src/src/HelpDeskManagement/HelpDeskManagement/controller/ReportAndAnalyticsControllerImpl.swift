@@ -19,7 +19,7 @@ class ReportAndAnalyticsControllerImpl : ReportAndAnalyticsController {
         self.agentController = agentController
     }
     
-    func generateTicketReport(date: Date)throws -> [Ticket]{
+    func generateTicketReport(date: Date) throws -> [Ticket]{
         guard let tickets = try ticketController?.getTicketByDate(date: date) else {
             print("No tickets found for the specified date.")
             return []

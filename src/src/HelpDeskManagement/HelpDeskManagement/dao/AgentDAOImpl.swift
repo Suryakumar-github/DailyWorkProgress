@@ -8,12 +8,10 @@ import Foundation
 
 class AgentDAOImpl : AgentDAO {
     
-    
-    var dataBase : DataBase
-    init(dataBase : DataBase) {
-        self.dataBase = dataBase
+    init()  {
+        
         do{
-            try dataBase.createTable(createTableQuery: Queries.createAgentTable)
+            try  DatabaseConnector.createTable(createTableQuery: Queries.createAgentTable)
         }
         catch {
             print("Error : \(error)")
@@ -21,7 +19,7 @@ class AgentDAOImpl : AgentDAO {
     }
 
     
-    func addAgent(agent: Agent) -> Result<Void, DatabaseError>{
+    func addAgent(agent: Agent)  -> Result<Void, DatabaseError>{
         let query = "INSERT INTO Agents (department, availabilityStatus, userId, name) values ( ?, ?, ?, ?)"
         let data : [Any] = [
             agent.departmentProperty,
@@ -32,7 +30,7 @@ class AgentDAOImpl : AgentDAO {
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -40,13 +38,13 @@ class AgentDAOImpl : AgentDAO {
         }
     }
     
-    func updateAgentAvailability(agent: Agent, status: AgentStatus) -> Result<Void, DatabaseError> {
+    func updateAgentAvailability(agent: Agent, status: AgentStatus)  -> Result<Void, DatabaseError> {
         let query = "UPDATE Agents SET availabilityStatus = ? where agent_id = ?"
         let data : [Any] = [status.rawValue,agent.getAgentId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -54,12 +52,12 @@ class AgentDAOImpl : AgentDAO {
         }
     }
     
-    func changePassword(agent: Agent, newPassword: String)-> Result<Void, DatabaseError> {
+    func changePassword(agent: Agent, newPassword: String) -> Result<Void, DatabaseError> {
         let query = "UPDATE userNameAndPasswords SET password = ? where userId = ?;"
         let data : [Any] = [newPassword,agent.getUserId]
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -67,12 +65,12 @@ class AgentDAOImpl : AgentDAO {
         }
     }
     
-    func getAgentById(agentId: Int) -> Result<Agent, DatabaseError> {
+    func getAgentById(agentId: Int)  -> Result<Agent, DatabaseError> {
         let query = "SELECT * from Agents WHERE agent_id = ?"
         let data : [Any] = [agentId]
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             switch result {
             case .success(let usersData):
                 if let userDict = usersData.first,
@@ -97,10 +95,10 @@ class AgentDAOImpl : AgentDAO {
         }
     }
     
-    func getAllAgents() throws -> Result<[Agent], DatabaseError> {
+    func getAllAgents()  throws -> Result<[Agent], DatabaseError> {
         let query = "SELECT * FROM Agents"
         
-        let result = try dataBase.executeQueryData(query: query)
+        let result = try  DatabaseConnector.executeQueryData(query: query)
         switch result {
         case .success(let usersData):
             let agents = usersData.compactMap { userDict -> Agent? in
@@ -132,7 +130,7 @@ class AgentDAOImpl : AgentDAO {
         }
     }
     
-    func addTicketToAgent(agent: Agent, ticket: Ticket) -> Result<Void, DatabaseError> {
+    func addTicketToAgent(agent: Agent, ticket: Ticket)  -> Result<Void, DatabaseError> {
         let query = "INSERT INTO AssignedTickets (ticketId, agentId) VALUES(?,?);"
         
         let data : [Any] = [
@@ -142,7 +140,7 @@ class AgentDAOImpl : AgentDAO {
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -150,13 +148,13 @@ class AgentDAOImpl : AgentDAO {
         }
     }
     
-    func assignAgentToTicket(agentId: Int, ticketId: Int) -> Result<Void, DatabaseError> {
+    func assignAgentToTicket(agentId: Int, ticketId: Int)  -> Result<Void, DatabaseError> {
         let query = "UPDATE Tickets SET agent_id = ? WHERE ticket_id = ?;"
         let data : [Any] = [agentId,ticketId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -164,14 +162,14 @@ class AgentDAOImpl : AgentDAO {
         }
     }
     
-    func addAgentUserNamePassword(userName : String, password : String, agent : Agent) -> Result<Void, DatabaseError>  {
+    func addAgentUserNamePassword(userName : String, password : String, agent : Agent)  -> Result<Void, DatabaseError>  {
         let query = "INSERT INTO userNameAndPasswords (userName, password, userId) values (?,?,?);"
         let data: [Any] = [userName, password, agent.getUserId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            let result: Result<Void, DatabaseError> = try dataBase.insertRecord(query: finalQuery)
+            let result: Result<Void, DatabaseError> = try  DatabaseConnector.insertRecord(query: finalQuery)
             
             switch result {
             case .success:
@@ -186,14 +184,14 @@ class AgentDAOImpl : AgentDAO {
         }
     }
     
-    func getUserNameAndPassword (userId : Int) -> Result<[String], DatabaseError> {
+    func getUserNameAndPassword (userId : Int)  -> Result<[String], DatabaseError> {
         let query = "SELECT userName, password FROM userNameAndPasswords WHERE userId = ?;"
         let data: [Any] = [userId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             
             switch result {
             case .success(let usersData):
@@ -216,12 +214,12 @@ class AgentDAOImpl : AgentDAO {
         }
     }
     
-    func updateTicketsResolvedCount(agentId: Int, newCount: Int) -> Result<Void, DatabaseError> {
+    func updateTicketsResolvedCount(agentId: Int, newCount: Int)  -> Result<Void, DatabaseError> {
         let query = "UPDATE Agents SET ticketsResolvedCount = ? WHERE agent_id = ?"
         let data : [Any] = [newCount,agentId]
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {

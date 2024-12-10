@@ -10,82 +10,17 @@ import Foundation
 class MainView {
     
     private var userController : UserController?
-    private var dataBase : DataBase
-    private lazy var userView = UserView()
-    private var adminView = AdminView()
-    private var agentView = AgentView()
-    private var ticketController : TicketController?
-    private var agentController : AgentController?
-    private var knowledgeBaseController : KnowledgeBaseController?
-    private var reportAndAnalyticsController : ReportAndAnalyticsController?
-    private var adminController : AdminController?
-    private var logsEntryController : LogsEntryController?
-    
-    init(userController : UserControllerImpl, dataBase : DataBase) {
-        self.dataBase = dataBase
+    private var userView =   UserView()
+    init(userController : UserControllerImpl) {
         self.userController = userController
-        self.ticketController = TicketControllerImpl(dateBase: dataBase)
-        self.agentController = AgentControllerImpl(dateBase: dataBase)
-        self.knowledgeBaseController = KnowledgeBaseControllerImpl(dateBase: dataBase)
-        self.reportAndAnalyticsController = ReportAndAnalyticsControllerImpl()
-        self.adminController = AdminControllerImpl(dataBase: dataBase)
-        self.logsEntryController = LogsEntryControllerImpl(dataBase: dataBase)
-        
-        
-        setTicketController()
-        setAgentController()
-        setUserController()
-        setKnowledgeBaseController()
         setUserViewControllers()
-        setAdminViewControllers()
-        setAgentViewControllers()
-        setLogsEntryController()
-    }
-    func setLogsEntryController() {
-        agentController?.setLogsEntryController(logsEntryController: logsEntryController!)
-        ticketController?.setLogsEntryController(logsEntryController: logsEntryController!)
-        userController?.setLogsEntryController(logsEntryController: logsEntryController!)
-        knowledgeBaseController?.setLogsEntryController(logsEntryController: logsEntryController!)
-    }
-    
-    func setTicketController() {
-        userController?.setTicketController(ticketController: ticketController!)
-        reportAndAnalyticsController?.setTicketController(ticketController: ticketController!)
-        agentController?.setTicketController(ticketController: ticketController!)
-        adminController?.setTicketController(ticketController: ticketController!)
-    }
-    
-    func setAgentController() {
-        ticketController?.setAgentController(agentController: agentController!)
-        reportAndAnalyticsController?.setAgentController(agentController: agentController!)
-        ticketController?.setDelagate(ticketAssignmentDelegate: agentController as! TicketAssignmentDelegate)
-        adminController?.setAgentController(agentController: agentController!)
-        adminController?.setReportAndAnalyticsController(reportAndAnalyticsController: reportAndAnalyticsController!)
-    }
-    
-    func setUserController() {
-        ticketController?.setUserController(userController: userController!)
-    }
-    
-    func setKnowledgeBaseController() {
-        agentController?.setKnowledgeBaseController(knowledgeBaseController: knowledgeBaseController!)
-        userController?.setKnowledgeBaseController(knowledgeBaseController: knowledgeBaseController as! KnowledgeBaseControllerImpl)
-        ticketController?.setKnowledgeBaseController(knowledgeBaseController: knowledgeBaseController!)
     }
     
     func setUserViewControllers() {
         userView.setUserController(userController : userController!)
     }
     
-    func setAdminViewControllers() {
-        adminView.setAdminController(adminController: adminController!)
-    }
-    
-    func setAgentViewControllers() {
-        agentView.setAgentController(agentController: agentController! as! AgentControllerImpl)
-    }
-    
-    func showLoginScreen() {
+    func showLoginScreen()   {
         print("----------------------------------------------------------------")
         print("             ==== Welcome to Help Desk System ====              ")
         print("----------------------------------------------------------------")
@@ -99,32 +34,36 @@ class MainView {
         
         switch userChoice {
         case 1 :
-            guard let user = userView.register() else {
-                showLoginScreen()
+            guard let user =   userView.register() else {
+                  showLoginScreen()
                 return
             }
             userView.setLoginedUser(user: user)
-            userView.userMenu()
+              userView.userMenu()
         case 2 :
-            login()
+              login()
             
         case 3 :
             exit(0)
             
         default :
             print("Invalid Choice")
-            showLoginScreen()
+              showLoginScreen()
         }
     }
     
-    private func login() {
+    private func login()   {
         print("----------------------------------------------------------------")
         
         while true {
-            print("Enter Username:")
+            print("Enter Username (or enter 0 to go back) :")
             guard let username = readLine(), !username.isEmpty else {
                 print("Invalid Username. Please try again.")
                 continue
+            }
+            if username == "0" {
+                print("Going Back to Main Menu..")
+                  showLoginScreen()
             }
 
             print("Enter Password:")
@@ -132,11 +71,15 @@ class MainView {
                 print("Invalid Password. Please try again.")
                 continue
             }
+            if password == "0" {
+                print("Going Back to Main Menu..")
+                  showLoginScreen()
+            }
             do {
-                if let actor = try userController?.authenticate(username: username, password: password) {
+                if let actor = try   userController?.authenticate(username: username, password: password) {
                     print("Login Successful for \(username)")
                     print("----------------------------------------------------------------")
-                    navigateToRoleView(actor: actor)
+                      navigateToRoleView(actor: actor)
                     return
                 }
             }
@@ -148,37 +91,43 @@ class MainView {
                 guard let choice = Int(readLine()!),
                       choice == 1 else {
                     print("Exiting login process...")
-                    showLoginScreen()
+                      showLoginScreen()
                     return
                 }
             }
         }
     }
     
-    private func navigateToRoleView(actor: AnyObject) {
+    private func navigateToRoleView(actor: AnyObject)   {
         if let admin = actor as? Admin {
             if admin.getRole == .admin {
+                var adminView =   AdminView()
+                let adminController =   AdminControllerImpl()
+                adminView.setAdminController(adminController: adminController)
                 adminView.setLoginedUser(user: admin)
                 if admin.isDefaultPassword {
                     print("Please change your default password.")
-                    adminView.changePassword(user: admin as Admin)
+                      adminView.changePassword(user: admin as Admin)
                     do {
-                        try adminView.setDefaultpassword(passwordState: false, adminId : admin.getUserId)
+                        try   adminView.setDefaultpassword(passwordState: false, adminId : admin.getUserId)
                     }
                     catch let error {
                         print(error.localizedDescription)
                         print("----------------------------------------------------------------")
-                        adminView.changePassword(user: admin as Admin)
+                          adminView.changePassword(user: admin as Admin)
                     }
                 }
-                adminView.adminMenu()
+                  adminView.adminMenu()
             }
         } else if let agent = actor as? Agent, agent.getRole == .agent {
+            let agentController =   AgentControllerImpl()
+            var agentView =   AgentView()
+            agentView.setAgentController(agentController: agentController)
             agentView.setLoginedUser(agent: agent as Agent)
-            agentView.agentMenu()
+              agentView.agentMenu()
         } else if let user = actor as? User, user.getRole == .user {
             userView.setLoginedUser(user: user as User)
-            userView.userMenu()
+              userView.userMenu()
         } else {
             print("Invalid actor type")
         }

@@ -8,25 +8,24 @@ import Foundation
 
 class AdminDAOImpl : AdminDAO {
     
-    var dataBase : DataBase
-    init(dataBase : DataBase) {
-        self.dataBase = dataBase
+    init()  {
+       
         do{
-            try dataBase.createTable(createTableQuery: Queries.createAdminTable)
+            try  DatabaseConnector.createTable(createTableQuery: Queries.createAdminTable)
         }
         catch {
             print("Error : \(error)")
         }
     }
     
-    func getUserNameAndPassword(userId: Int) -> Result<[String], DatabaseError> {
+    func getUserNameAndPassword(userId: Int)  -> Result<[String], DatabaseError> {
         let query = "SELECT userName, password FROM userNameAndPasswords WHERE userId = ?;"
         let data: [Any] = [userId]
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            let result = try dataBase.executeQueryData(query: finalQuery)
+            let result = try  DatabaseConnector.executeQueryData(query: finalQuery)
             
             switch result {
             case .success(let usersData):
@@ -49,7 +48,7 @@ class AdminDAOImpl : AdminDAO {
         }
     }
     
-    func setDefaultpassword(passwordState: Bool, adminId: Int) -> Result<Void, DatabaseError> {
+    func setDefaultpassword(passwordState: Bool, adminId: Int)  -> Result<Void, DatabaseError> {
         let query = "UPDATE admin SET hasDefaultPassword = ? WHERE userId = ?"
         let data: [Any] = [
             adminId
@@ -57,7 +56,7 @@ class AdminDAOImpl : AdminDAO {
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -65,7 +64,7 @@ class AdminDAOImpl : AdminDAO {
         }
     }
     
-    func updatePassword(user: Admin, password: String) -> Result<Void, DatabaseError>  {
+    func updatePassword(user: Admin, password: String)  -> Result<Void, DatabaseError>  {
         let query = "UPDATE userNameAndPasswords SET password = ? where userId = ?;"
         
         let data: [Any] = [
@@ -75,7 +74,7 @@ class AdminDAOImpl : AdminDAO {
         
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {

@@ -11,6 +11,11 @@ struct UserView {
     
     private var userController : UserController?
     private var loginedUser : User?
+    private var ticketController : TicketControllerImpl
+    
+    init()   {
+        ticketController =   TicketControllerImpl()
+    }
     
     mutating func setUserController(userController : UserController) {
         self.userController = userController
@@ -20,7 +25,7 @@ struct UserView {
         self.loginedUser = user
     }
     
-    func userMenu() {
+    func userMenu()   {
         print("----------------------------------------------------------------")
         print("                    ==== User Dashboard ====                    ")
         print("----------------------------------------------------------------")
@@ -36,25 +41,25 @@ struct UserView {
         
         switch option {
         case 1 :
-            createTicket(user : loginedUser!)
+              createTicket(user : loginedUser!)
         case 2 :
-            viewMyTicket(user : loginedUser!)
+              viewMyTicket(user : loginedUser!)
         case 3 :
-            searchKnowledgeBase()
+              searchKnowledgeBase()
         case 4 :
-            cancelTicket(user : loginedUser!)
+              cancelTicket(user : loginedUser!)
         case 5 :
-            changePassword(user : loginedUser!)
+              changePassword(user : loginedUser!)
         case 6:
             mainView.showLoginScreen()
             
         default :
             print("Invalid Option")
-            userMenu()
+              userMenu()
         }
     }
     
-    private func changePassword(user: User) {
+    private func changePassword(user: User)   {
         print("----------------------------------------------------------------")
         
         while true {
@@ -65,8 +70,8 @@ struct UserView {
                 continue
             }
             if currentPassword == "0" {
-                print("Exiting to User Menu..")
-                userMenu()
+                print("Going Back to User Menu..")
+                  userMenu()
             }
             
             print("Enter the New Password, or enter '0' to exit:")
@@ -75,8 +80,8 @@ struct UserView {
                 continue
             }
             if newPassword == "0" {
-                print("Exiting to User Menu..")
-                userMenu()
+                print("Going Back to User Menu..")
+                  userMenu()
             }
             
             if !Validation.validatePassword(newPassword) {
@@ -86,50 +91,64 @@ struct UserView {
             
             guard let controller = userController else {
                 print("Error: User controller is not available.")
-                userMenu()
+                  userMenu()
                 return
             }
             
             do {
-                if try controller.changePassword(user: user, password: newPassword, currentPassword: currentPassword) {
+                if try   controller.changePassword(user: user, password: newPassword, currentPassword: currentPassword) {
                     print("Password changed successfully.")
                     print("----------------------------------------------------------------")
-                    userMenu()
+                      userMenu()
                 } else {
                     print("New password cannot be the same as the current password.")
                     print("----------------------------------------------------------------")
-                    changePassword(user: user)
+                      changePassword(user: user)
                 }
             } catch {
                 print("Error while changing password: \(error.localizedDescription)")
                 print("----------------------------------------------------------------")
-                userMenu()
+                  userMenu()
             }
         }
     }
     
-    private func createTicket(user: User) {
+    private func createTicket(user: User)   {
         print("----------------------------------------------------------------")
-        
-        print("Enter the Ticket Title:")
+        userController?.setTicketController(ticketController: ticketController)
+        let agentController =   AgentControllerImpl()
+        ticketController.setDelagate(ticketAssignmentDelegate: agentController)
+        print("Enter the Ticket Title, or enter '0' to Go back ")
         guard let ticketTitle = readLine(), !ticketTitle.isEmpty else {
             print("Invalid Title")
-            createTicket(user: user)
+              createTicket(user: user)
             return
+        }
+        if ticketTitle == "0" {
+            print("Going Back to User Menu..")
+              userMenu()
         }
     
-        print("Enter the Description:")
+        print("Enter the Description, or enter '0' to Go back ")
         guard let ticketDescription = readLine(), !ticketDescription.isEmpty else {
             print("Invalid Ticket Description")
-            createTicket(user: user)
+              createTicket(user: user)
             return
         }
+        if ticketDescription == "0" {
+            print("Going Back to User Menu..")
+              userMenu()
+        }
         
-        print("Enter the issue type (1: software, 2: network, 3: hardware, 4: security):")
-        guard let input = readLine(), let choice = Int(input), choice >= 1, choice <= 4 else {
+        print("Enter the issue type (1: software, 2: network, 3: hardware, 4: security, or enter '0' to Go back ):")
+        guard let input = readLine(), let choice = Int(input), choice >= 0, choice <= 4 else {
             print("Invalid issue type. Please enter a valid issue type (1-4).")
-            createTicket(user: user)
+              createTicket(user: user)
             return
+        }
+        if input == "0" {
+            print("Going Back to User Menu..")
+              userMenu()
         }
         
         let issue: IssueType.RawValue
@@ -142,7 +161,7 @@ struct UserView {
             fatalError("Unexpected choice value.")
         }
         do {
-            try userController?.createTicket(
+            try   userController?.createTicket(
                 title: ticketTitle,
                 description: ticketDescription,
                 createdDate: Date(),
@@ -158,16 +177,17 @@ struct UserView {
             print("Error while Creating Ticket : \(error.localizedDescription)")
             print("----------------------------------------------------------------")
         }
-        userMenu()
+          userMenu()
     }
 
-    private func cancelTicket(user: User) {
+    private func cancelTicket(user: User)   {
+        userController?.setTicketController(ticketController: ticketController)
         print("----------------------------------------------------------------")
         print("                      Available Tickets                         ")
         do {
-            guard let tickets = try userController?.getAllTheCreatedTickets(user: user), !tickets.isEmpty else {
-                print("No tickets found for user with ID \(user.getId).")
-                userMenu()
+            guard let tickets = try   userController?.getAllTheCreatedTickets(user: user), !tickets.isEmpty else {
+                print("You don't have any Ticket to cancel).")
+                  userMenu()
                 return
             }
             for ticket in tickets {
@@ -180,7 +200,7 @@ struct UserView {
         catch {
             print("Error while fetching the Tickets : \(error.localizedDescription)")
             print("----------------------------------------------------------------")
-            userMenu()
+              userMenu()
         }
      
         print("----------------------------------------------------------------")
@@ -189,9 +209,9 @@ struct UserView {
             
             if let input = Int(readLine()!) {
                 if input == 0{
-                    print("Exiting to User Menu...")
+                    print("Goint Back to User Menu...")
                     print("----------------------------------------------------------------")
-                    userMenu()
+                      userMenu()
                     return
                 }
                 
@@ -200,12 +220,12 @@ struct UserView {
                     return
                 }
                 do {
-                    let isCancelled = try controller.cancelTicket(user: user, ticketId: input)
+                    let isCancelled = try   controller.cancelTicket(user: user, ticketId: input)
                     
                     if isCancelled {
                         print("Ticket \(input) successfully canceled.")
                         print("----------------------------------------------------------------")
-                        userMenu()
+                          userMenu()
                         return
                     } else {
                         print("User doesn't have a ticket with ticketId: \(input). Please try again.")
@@ -220,18 +240,18 @@ struct UserView {
         }
     }
     
-    private func viewMyTicket(user : User) {
-        
+    private func viewMyTicket(user : User)   {
+        userController?.setTicketController(ticketController: ticketController)
         guard let userController = userController else {
             print("User controller not available.")
-            userMenu()
+              userMenu()
             return
         }
         do {
-            let tickets = try userController.getAllTheCreatedTickets(user: user)
+            let tickets = try   userController.getAllTheCreatedTickets(user: user)
             if tickets.isEmpty {
                 print("No tickets found for user with ID \(user.getId).")
-                userMenu()
+                  userMenu()
                 return
             }
             print("----------------------------------------------------------------")
@@ -249,10 +269,12 @@ struct UserView {
             print("----------------------------------------------------------------")
         }
         
-        userMenu()
+          userMenu()
     }
 
-    private func searchKnowledgeBase() {
+    private func searchKnowledgeBase()   {
+        let knowledgeBaseController =   KnowledgeBaseControllerImpl()
+        userController?.setKnowledgeBaseController(knowledgeBaseController: knowledgeBaseController)
         print("----------------------------------------------------------------")
         print("                  === KnowledgeBase Menu ===                    ")
         print("----------------------------------------------------------------")
@@ -264,10 +286,10 @@ struct UserView {
         let choice = Int(readLine()!)
         if choice == 1 {
             do {
-                guard let entries = try userController?.getAllKnowledgeBaseEntries(), !entries.isEmpty else {
+                guard let entries = try   userController?.getAllKnowledgeBaseEntries(), !entries.isEmpty else {
                     print("                       No Entries Found                        ")
                     print("----------------------------------------------------------------")
-                    userMenu()
+                      userMenu()
                     return
                 }
                 print("--------------------- Available Entrie's ------------------------")
@@ -284,21 +306,22 @@ struct UserView {
                 print("Error while fetching the data : \(error.localizedDescription)")
                 print("----------------------------------------------------------------")
             }
-            userMenu()
+              userMenu()
         }
         else if choice == 2 {
             print("Enter the word to Search")
             guard let word = readLine(), !word.isEmpty else {
                 print("Invalid Word")
-                searchKnowledgeBase()
+                  searchKnowledgeBase()
                 return
             }
             do {
-                if let knowledgeBaseEntry = try userController?.search(word: word), !knowledgeBaseEntry.isEmpty {
+                if let knowledgeBaseEntry = try   userController?.search(word: word), !knowledgeBaseEntry.isEmpty {
                     print("--------------------- Available Entrie's ------------------------")
                     print("---------------------------------------------------------------- ")
                     for entry in knowledgeBaseEntry {
                         print("Title    : \(entry.titleproperty )")
+                        print("Issue    : \(entry.issueProperty)")
                         print("Solution : \(entry.solutionProperty )")
                         print("----------------------------------------------------------------")
                     }
@@ -306,7 +329,7 @@ struct UserView {
                 else {
                     print("                       No Entries Found                        ")
                     print("----------------------------------------------------------------")
-                    userMenu()
+                      userMenu()
 
                 }
             }
@@ -317,13 +340,13 @@ struct UserView {
         }
         else {
             print("Invalid Option")
-            searchKnowledgeBase()
+              searchKnowledgeBase()
         }
         
-        userMenu()
+          userMenu()
     }
     
-    func register() -> User? {
+    func register()   -> User? {
         var name: String?
         var role: UserRole?
         var userName: String?
@@ -335,10 +358,10 @@ struct UserView {
 
         while user == nil {
             if name == nil {
-                print("Enter the name (or enter 0 to exit):")
+                print("Enter the name (or enter 0 to go back):")
                 let inputName = readLine() ?? ""
                 if inputName == "0" {
-                    print("Exiting to Main Menu..")
+                    print("Going back to Main Menu..")
                     return nil
                 }
                 if Validation.validateName(inputName) {
@@ -350,10 +373,10 @@ struct UserView {
             }
 
             if role == nil {
-                print("Choose the Subscription pack ( enter 1 : 50$/month, 2 : 30$/month, 3 : 20$/month, or enter 0 to exit):")
+                print("Choose the Subscription pack ( enter 1 : 50$/month -> VIP, 2 : 30$/month -> STANDARD, 3 : 20$/month -> GUEST, or enter 0 to Go back):")
                 if let roleString = readLine() {
                     if roleString == "0" {
-                        print("Exiting to Main Menu..")
+                        print("Going back to Main Menu..")
                         
                         return nil
                     }
@@ -375,10 +398,10 @@ struct UserView {
             }
 
             if userName == nil {
-                print("Enter the username (or enter 0 to exit):")
+                print("Enter the username (or enter 0 to go back):")
                 let inputUsername = readLine() ?? ""
                 if inputUsername == "0" {
-                    print("Exiting to Main Menu..")
+                    print("Going back to Main Menu..")
                     
                     return nil
                 }
@@ -391,23 +414,27 @@ struct UserView {
             }
 
             if password == nil {
-                print("Enter the password (or enter 0 to exit):")
+                print("Enter the password (or enter 0 to go back):")
                 let inputPassword = readLine() ?? ""
                 if inputPassword == "0" {
-                    print("Exiting to Main Menu..")
+                    print("Going back to Main Menu..")
                     return nil
                 }
                 if Validation.validatePassword(inputPassword) {
                     password = inputPassword
                 } else {
-                    print("Please enter a valid password.")
+                    print("Please enter a valid password (that should contains length as atleast 5 Character's one Number, one Special Character and start's with Alphabet")
                     continue
                 }
             }
 
             if let validName = name, let validRole = role, let validUsername = userName, let validPassword = password {
                 do {
-                    if let registeredUser = try userController?.register(
+                    guard let controller = userController else {
+                        print("User Controller is nil")
+                        return nil
+                    }
+                    if let registeredUser = try   controller.register(
                         name: validName,
                         userRole: validRole,
                         userName: validUsername,

@@ -7,23 +7,21 @@
 import Foundation
 
 class KnowledgeBaseControllerImpl : KnowledgeBaseController {
-    private var dataBase : DataBase
     private var knowledgeBaseDao : KnowledgeBaseDAO
     private var logsEntryController : LogsEntryController?
     
-    init(dateBase : DataBase) {
-        self.dataBase = dateBase
-        self.knowledgeBaseDao = KnowledgeBaseDAOImpl(dataBase: dateBase)
+    init()  {
+        self.knowledgeBaseDao =  KnowledgeBaseDAOImpl()
     }
     
     func setLogsEntryController(logsEntryController: LogsEntryController) {
         self.logsEntryController = logsEntryController
     }
     
-    func search(word: String) throws -> [KnowledgeBase] {
+    func search(word: String)  throws -> [KnowledgeBase] {
         var knowledgeBaseEntries: [KnowledgeBase] = []
          
-        let result = try knowledgeBaseDao.getAllEntries()
+        let result = try  knowledgeBaseDao.getAllEntries()
         switch result {
             
         case .success(let entries) :
@@ -52,12 +50,12 @@ class KnowledgeBaseControllerImpl : KnowledgeBaseController {
         }
     }
   
-    func addEntry(title: String, issueType : IssueType, solution: String, createdDate: Date, lastUpdatedDate: Date?, userId : Int) throws{
+    func addEntry(title: String, issueType : IssueType, solution: String, createdDate: Date, lastUpdatedDate: Date?, userId : Int)  throws{
         let knowledgeBase = KnowledgeBase( title: title, issue: issueType, solution: solution, createdDate: createdDate, lastUpdatedDate: nil, userId: userId)
-        let result = knowledgeBaseDao.addEntry(entry: knowledgeBase)
+        let result =  knowledgeBaseDao.addEntry(entry: knowledgeBase)
         switch result {
         case .success() :
-            try logsEntryController?.log(logType: LogType.info, message: "New Knowledge Base Entry Added with Id : \(knowledgeBase.getId)", userId: knowledgeBase.getId, data: knowledgeBase)
+            try  logsEntryController?.log(logType: LogType.info, message: "New Knowledge Base Entry Added with Id : \(knowledgeBase.getId)", userId: knowledgeBase.getId, data: knowledgeBase)
             
         case .failure(let error) :
             throw error
@@ -65,15 +63,15 @@ class KnowledgeBaseControllerImpl : KnowledgeBaseController {
         
     }
     
-    func updateEntry(id: Int, solution: String, lastUpdatedDate: Date?) throws {
-        let knowledgeBase = try getKnowledgeBaseEntryById(id: id)
+    func updateEntry(id: Int, solution: String, lastUpdatedDate: Date?)  throws {
+        let knowledgeBase = try  getKnowledgeBaseEntryById(id: id)
         knowledgeBase.solutionProperty = solution
         knowledgeBase.lastUpdatedDateProperty = lastUpdatedDate
-        try logsEntryController?.log(logType: LogType.info, message: "Knowledge Base Entry Updated For id : \(id)", userId: knowledgeBase.getId, data: knowledgeBase)
+        try  logsEntryController?.log(logType: LogType.info, message: "Knowledge Base Entry Updated For id : \(id)", userId: knowledgeBase.getId, data: knowledgeBase)
     }
     
-    func getKnowledgeBaseEntryById(id : Int) throws -> KnowledgeBase {
-        let result = knowledgeBaseDao.getKnowledgeBaseEntryById(id: id)
+    func getKnowledgeBaseEntryById(id : Int)  throws -> KnowledgeBase {
+        let result =  knowledgeBaseDao.getKnowledgeBaseEntryById(id: id)
         switch result {
         case .success(let knowledgeBase) :
             return knowledgeBase
@@ -83,8 +81,8 @@ class KnowledgeBaseControllerImpl : KnowledgeBaseController {
         }
     }
     
-    func getAllKnowledgeBaseEntries() throws -> [KnowledgeBase] {
-        let result = try knowledgeBaseDao.getAllEntries()
+    func getAllKnowledgeBaseEntries()  throws -> [KnowledgeBase] {
+        let result = try  knowledgeBaseDao.getAllEntries()
         switch result {
         case .success(let entries) :
             return entries

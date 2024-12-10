@@ -1,11 +1,17 @@
+//
+//  DataBase.swift
+//  HelpDeskManagement
+//
+//  Created by incubation on 05/12/24.
+//
+
 import Foundation
 import SQLite3
 
+class DatabaseManager: DataBase {
+    private static var db: OpaquePointer?
 
-class DatabaseManager : DataBase{
-     var db: OpaquePointer?
-    
-    init() {
+    static func openDataBase()  {
         let fileManager = FileManager.default
         let documentDirectory = try? fileManager.url(
             for: .documentDirectory,
@@ -26,11 +32,10 @@ class DatabaseManager : DataBase{
         } else {
             db = nil
             print("Unable to open database at \(dbPath). Error: \(String(cString: sqlite3_errmsg(database)))")
-            return
         }
     }
-    
-    func createTable(createTableQuery: String) throws {
+
+    static func createTable(createTableQuery: String)  throws {
         var createTableStatement: OpaquePointer?
         
         guard sqlite3_prepare_v2(db, createTableQuery, -1, &createTableStatement, nil) == SQLITE_OK else {
@@ -44,13 +49,10 @@ class DatabaseManager : DataBase{
             throw DatabaseError.tableCreationFailed("Error executing create table statement: \(errorMsg)")
         }
         
-        guard sqlite3_finalize(createTableStatement) == SQLITE_OK else {
-            let errorMsg = String(cString: sqlite3_errmsg(db))
-            throw DatabaseError.finalizationFailed("Error finalizing create table statement: \(errorMsg)")
-        }
+        sqlite3_finalize(createTableStatement)
     }
-    
-    func insertRecord(query: String)throws -> Result<Void, DatabaseError> {
+
+    static func insertRecord(query: String)  throws -> Result<Void, DatabaseError> {
         var insertStatement: OpaquePointer?
         
         guard sqlite3_prepare_v2(db, query, -1, &insertStatement, nil) == SQLITE_OK else {
@@ -63,14 +65,11 @@ class DatabaseManager : DataBase{
             return .failure(.executionFailed("Error inserting record: \(errorMsg)"))
         }
         
-        guard sqlite3_finalize(insertStatement) == SQLITE_OK else {
-            let errorMsg = String(cString: sqlite3_errmsg(db))
-            return .failure(.finalizationFailed("Error finalizing insert statement: \(errorMsg)"))
-        }
+        sqlite3_finalize(insertStatement)
         return .success(())
     }
-    
-    func executeQueryData(query: String)throws -> Result< [[String: Any]], DatabaseError> {
+
+    static func executeQueryData(query: String)  throws -> Result<[[String: Any]], DatabaseError> {
         var result = [[String: Any]]()
         var queryStatement: OpaquePointer?
         
@@ -106,15 +105,11 @@ class DatabaseManager : DataBase{
             result.append(row)
         }
         
-        guard sqlite3_finalize(queryStatement) == SQLITE_OK else {
-            let errorMsg = String(cString: sqlite3_errmsg(db))
-            return .failure(.finalizationFailed("Error finalizing query: \(errorMsg)"))
-        }
-        
+        sqlite3_finalize(queryStatement)
         return .success(result)
     }
-    
-    deinit {
+
+    static func closeDataBase()  {
         if let database = db {
             if sqlite3_close(database) == SQLITE_OK {
                 print("Database closed successfully.")

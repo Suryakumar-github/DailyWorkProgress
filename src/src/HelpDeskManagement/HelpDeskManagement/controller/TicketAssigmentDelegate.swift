@@ -7,5 +7,5 @@
 
 protocol TicketAssignmentDelegate: AnyObject {
     func assignTicketToAgent(ticket: Ticket) throws -> Bool
-    func resolveTicket(agent : Agent, ticketId : Int)throws
+    func resolveTicket(agent: Agent, ticketId: Int) throws -> Bool
 }

@@ -8,21 +8,20 @@ import Foundation
 
 class LogsEntryDAOImpl : LogsEntryDAO {
     
-    var dataBase : DataBase
-    init(dataBase : DataBase) {
-        self.dataBase = dataBase
+    init()  {
+    
         do{
-            try dataBase.createTable(createTableQuery: Queries.createLogsEntryTable)
+            try  DatabaseConnector.createTable(createTableQuery: Queries.createLogsEntryTable)
         }
         catch {
             print("Error : \(error)")
         }
     }
     
-    func getAllLogsEntry()throws -> Result<[LogsEntry], DatabaseError> {
+    func getAllLogsEntry() throws -> Result<[LogsEntry], DatabaseError> {
         let query = "SELECT * FROM LogsEntry"
             
-        let result = try dataBase.executeQueryData(query: query)
+        let result = try  DatabaseConnector.executeQueryData(query: query)
             
             switch result {
             case .success(let logs):
@@ -47,14 +46,11 @@ class LogsEntryDAOImpl : LogsEntryDAO {
                     if parsedDate == dateFormatter.date(from: createdDateString) {
                         
                     }  else {
-                        print("Failed to parse date with format: yyyy-MM-dd HH:mm:ss. Trying alternative formats.")
-
                         
                         dateFormatter.dateFormat = "yyyy-MM-dd"
                         if let parsedDate = dateFormatter.date(from: createdDateString) {
                             createdDate = Calendar.current.startOfDay(for: parsedDate)
                         } else {
-                            print("All parsing attempts failed. Using current date as fallback.")
                             createdDate = Date()
                         }
                     }
@@ -70,7 +66,7 @@ class LogsEntryDAOImpl : LogsEntryDAO {
     }
     
     
-    func addLogsEntry(logsEntry: LogsEntry) -> Result<Void, DatabaseError> {
+    func addLogsEntry(logsEntry: LogsEntry)  -> Result<Void, DatabaseError> {
         let query = "INSERT INTO LogsEntry (user_id,message,logType) VALUES (?,?,?)"
         
         let data: [Any] = [
@@ -82,7 +78,7 @@ class LogsEntryDAOImpl : LogsEntryDAO {
         do {
             let finalQuery = try QueryGenerator.queryGenerator(baseQuery: query, data: data)
             
-            return try dataBase.insertRecord(query: finalQuery)
+            return try  DatabaseConnector.insertRecord(query: finalQuery)
         } catch let error as DatabaseError {
             return .failure(error)
         } catch {
@@ -91,14 +87,14 @@ class LogsEntryDAOImpl : LogsEntryDAO {
     }
     
 
-    func getLogsEntryByDate(date : Date)throws -> Result<[LogsEntry], DatabaseError> {
+    func getLogsEntryByDate(date : Date) throws -> Result<[LogsEntry], DatabaseError> {
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let formattedDateString = dateFormatter.string(from: date)
 
         let query = "SELECT * FROM LogsEntry WHERE DATE(timestamp) = '\(formattedDateString)';"
-        let result = try dataBase.executeQueryData(query: query)
+        let result = try  DatabaseConnector.executeQueryData(query: query)
         
         switch result {
         case .success(let logs):
@@ -123,14 +119,11 @@ class LogsEntryDAOImpl : LogsEntryDAO {
                 if parsedDate == dateFormatter.date(from: createdDateString) {
                     
                 }  else {
-                    print("Failed to parse date with format: yyyy-MM-dd HH:mm:ss. Trying alternative formats.")
-
                     
                     dateFormatter.dateFormat = "yyyy-MM-dd"
                     if let parsedDate = dateFormatter.date(from: createdDateString) {
                         createdDate = Calendar.current.startOfDay(for: parsedDate)
                     } else {
-                        print("All parsing attempts failed. Using current date as fallback.")
                         createdDate = Date()
                     }
                 }
@@ -145,7 +138,7 @@ class LogsEntryDAOImpl : LogsEntryDAO {
         }
     }
     
-    func getLogsEntryBetweenDates(date1 : Date, date2 : Date)throws -> Result<[LogsEntry], DatabaseError> {
+    func getLogsEntryBetweenDates(date1 : Date, date2 : Date) throws -> Result<[LogsEntry], DatabaseError> {
         
         let dateFormatter1 = DateFormatter()
         dateFormatter1.dateFormat = "yyyy-MM-dd"
@@ -157,7 +150,7 @@ class LogsEntryDAOImpl : LogsEntryDAO {
         
         let query = "SELECT * FROM LogsEntry WHERE DATE(timestamp) BETWEEN '\(formattedDateString1)' AND '\(formattedDateString2)';"
 
-        let result = try dataBase.executeQueryData(query: query)
+        let result = try  DatabaseConnector.executeQueryData(query: query)
         
         switch result {
         case .success(let logs):
@@ -182,14 +175,11 @@ class LogsEntryDAOImpl : LogsEntryDAO {
                 if parsedDate == dateFormatter.date(from: createdDateString) {
                     
                 }  else {
-                    print("Failed to parse date with format: yyyy-MM-dd HH:mm:ss. Trying alternative formats.")
-
                     
                     dateFormatter.dateFormat = "yyyy-MM-dd"
                     if let parsedDate = dateFormatter.date(from: createdDateString) {
                         createdDate = Calendar.current.startOfDay(for: parsedDate)
                     } else {
-                        print("All parsing attempts failed. Using current date as fallback.")
                         createdDate = Date()
                     }
                 }
